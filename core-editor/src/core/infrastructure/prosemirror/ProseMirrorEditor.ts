@@ -1,12 +1,13 @@
 import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
-import { inputRules, textblockTypeInputRule } from 'prosemirror-inputrules';
+import { inputRules } from 'prosemirror-inputrules';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { EditorChangeListener, PromptEditor } from '../../app/ports/PromptEditor';
 import { SystemPromptContent } from '../../domain/SystemPromptContent';
-import { fromProseMirrorDoc, toProseMirrorDoc } from './mappers';
+import { blockInputRules } from './blocks/registry';
+import { fromProseMirrorDoc, toProseMirrorDoc } from './document';
 import { promptSchema } from './schema';
 
 export class ProseMirrorEditor implements PromptEditor {
@@ -21,13 +22,7 @@ export class ProseMirrorEditor implements PromptEditor {
         history(),
         keymap({ 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }),
         keymap(baseKeymap),
-        inputRules({
-          rules: [
-            textblockTypeInputRule(/^#\s$/, promptSchema.nodes.heading, { level: 1 }),
-            textblockTypeInputRule(/^##\s$/, promptSchema.nodes.heading, { level: 2 }),
-            textblockTypeInputRule(/^###\s$/, promptSchema.nodes.heading, { level: 3 }),
-          ],
-        }),
+        inputRules({ rules: blockInputRules(promptSchema) }),
       ],
     });
 

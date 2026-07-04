@@ -1,24 +1,18 @@
-import { Schema } from 'prosemirror-model';
+import { NodeSpec, Schema } from 'prosemirror-model';
+import { blockDescriptors } from './blocks/registry';
 
-const HEADING_TAGS = ['h1', 'h2', 'h3'] as const;
+function buildPromptSchema(): Schema {
+  const blockNodes: Record<string, NodeSpec> = {};
+  for (const descriptor of blockDescriptors) {
+    blockNodes[descriptor.blockType] = descriptor.nodeSpec;
+  }
+  return new Schema({
+    nodes: {
+      doc: { content: 'block+' },
+      ...blockNodes,
+      text: { group: 'inline' },
+    },
+  });
+}
 
-export const promptSchema = new Schema({
-  nodes: {
-    doc: { content: 'block+' },
-    paragraph: {
-      group: 'block',
-      content: 'text*',
-      toDOM: () => ['p', 0] as const,
-      parseDOM: [{ tag: 'p' }],
-    },
-    heading: {
-      group: 'block',
-      content: 'text*',
-      attrs: { level: { default: 1 } },
-      defining: true,
-      toDOM: (node) => [HEADING_TAGS[node.attrs.level - 1], 0] as const,
-      parseDOM: HEADING_TAGS.map((tag, index) => ({ tag, attrs: { level: index + 1 } })),
-    },
-    text: { group: 'inline' },
-  },
-});
+export const promptSchema = buildPromptSchema();
