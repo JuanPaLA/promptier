@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/promptier.iml" filepath="$PROJECT_DIR$/promptier.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-editor/core-editor.iml" filepath="$PROJECT_DIR$/core-editor/core-editor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/react-sdk/react-sdk.iml" filepath="$PROJECT_DIR$/react-sdk/react-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/playground/playground.iml" filepath="$PROJECT_DIR$/playground/playground.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "playground-dev",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "playground", "dev"],
+      "port": 5173
+    }
+  ]
+}
