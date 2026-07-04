@@ -1,7 +1,7 @@
 import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
 import { keymap } from 'prosemirror-keymap';
-import { EditorState } from 'prosemirror-state';
+import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { EditorChangeListener, PromptEditor } from '../../app/ports/PromptEditor';
 import { SystemPromptContent } from '../../domain/SystemPromptContent';
@@ -25,7 +25,8 @@ export class ProseMirrorEditor implements PromptEditor {
 
     this.view = new EditorView(container, {
       state,
-      dispatchTransaction: (transaction) => {
+      dispatchTransaction: (transaction: Transaction) => {
+        console.log(transaction);
         if (!this.view) return;
         const newState = this.view.state.apply(transaction);
         this.view.updateState(newState);
