@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { emptySystemPromptContent, type SystemPromptContent } from 'core-editor';
+import { emptySystemPromptContent, toMarkdown, type SystemPromptContent } from 'core-editor';
 import { SystemPromptEditorField } from 'react-sdk';
 
 export function EditorPlayground() {
@@ -19,6 +19,12 @@ export function EditorPlayground() {
           style={{ background: '#f5f5f5', padding: '0.75rem', borderRadius: 4, minHeight: 200, overflow: 'auto' }}
         >
           {JSON.stringify(content, null, 2)}
+        </pre>
+        <h2>Markdown (what an agent would consume)</h2>
+        <pre
+          style={{ background: '#f5f5f5', padding: '0.75rem', borderRadius: 4, minHeight: 100, overflow: 'auto' }}
+        >
+          {toMarkdown(content)}
         </pre>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
+import { inputRules, textblockTypeInputRule } from 'prosemirror-inputrules';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
@@ -20,13 +21,19 @@ export class ProseMirrorEditor implements PromptEditor {
         history(),
         keymap({ 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }),
         keymap(baseKeymap),
+        inputRules({
+          rules: [
+            textblockTypeInputRule(/^#\s$/, promptSchema.nodes.heading, { level: 1 }),
+            textblockTypeInputRule(/^##\s$/, promptSchema.nodes.heading, { level: 2 }),
+            textblockTypeInputRule(/^###\s$/, promptSchema.nodes.heading, { level: 3 }),
+          ],
+        }),
       ],
     });
 
     this.view = new EditorView(container, {
       state,
       dispatchTransaction: (transaction: Transaction) => {
-        console.log(transaction);
         if (!this.view) return;
         const newState = this.view.state.apply(transaction);
         this.view.updateState(newState);

@@ -5,7 +5,13 @@ export {
 export {
   emptySystemPromptContent,
 } from './core/domain/SystemPromptContent';
+export {
+  toMarkdown,
+} from './core/domain/markdown';
 export type {
-  SystemPromptBlock,
+  Block,
+  BlockType,
+} from './core/domain/Block';
+export type {
   SystemPromptContent,
 } from './core/domain/SystemPromptContent';

@@ -1,21 +1,18 @@
 import { Node as ProseMirrorNode } from 'prosemirror-model';
+import { Block } from '../../domain/Block';
 import { SystemPromptContent } from '../../domain/SystemPromptContent';
+import { blockFromProseMirrorNode, blockToProseMirrorNode } from './blockMappers';
 import { promptSchema } from './schema';
 
 export function toProseMirrorDoc(content: SystemPromptContent): ProseMirrorNode {
-  const paragraphs = content.blocks.map((block) =>
-    promptSchema.nodes.paragraph.create(
-      null,
-      block.text ? promptSchema.text(block.text) : undefined,
-    ),
-  );
-  return promptSchema.nodes.doc.create(null, paragraphs);
+  const blockNodes = content.blocks.map(blockToProseMirrorNode);
+  return promptSchema.nodes.doc.create(null, blockNodes);
 }
 
 export function fromProseMirrorDoc(doc: ProseMirrorNode): SystemPromptContent {
-  const blocks: SystemPromptContent['blocks'] = [];
-  doc.forEach((paragraphNode) => {
-    blocks.push({ type: 'paragraph', text: paragraphNode.textContent });
+  const blocks: Block[] = [];
+  doc.forEach((blockNode) => {
+    blocks.push(blockFromProseMirrorNode(blockNode));
   });
   return { blocks };
 }

@@ -1,3 +1,4 @@
+import { toMarkdown } from './markdown';
 import { SystemPromptContent, emptySystemPromptContent } from './SystemPromptContent';
 
 export class SystemPrompt {
@@ -25,5 +26,9 @@ export class SystemPrompt {
 
   getPlainText(): string {
     return this.content.blocks.map((block) => block.text).join('\n');
+  }
+
+  toMarkdown(): string {
+    return toMarkdown(this.content);
   }
 }

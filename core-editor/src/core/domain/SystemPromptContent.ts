@@ -1,12 +1,11 @@
-export interface SystemPromptBlock {
-  type: 'paragraph';
-  text: string;
-}
+import { Block } from './Block';
+import { ParagraphBlock } from './blocks/paragraph';
 
 export interface SystemPromptContent {
-  blocks: SystemPromptBlock[];
+  blocks: Block[];
 }
 
 export function emptySystemPromptContent(): SystemPromptContent {
-  return { blocks: [{ type: 'paragraph', text: '' }] };
+  const paragraph: ParagraphBlock = { blockType: 'paragraph', text: '' };
+  return { blocks: [paragraph] };
 }
