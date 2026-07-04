@@ -1,7 +1,7 @@
 export {
   SystemPromptEditorElement,
   registerSystemPromptEditor,
-} from './core/infrastructure/prosemirror/SystemPromptEditorElement';
+} from './element/SystemPromptEditorElement';
 export {
   emptySystemPromptContent,
 } from './core/domain/SystemPromptContent';

@@ -11,7 +11,8 @@ A business-domain editor for system prompts, built on ProseMirror.
 ## Rules of thumb
 
 - `core-editor` must stay consumable without React (plain HTML, iframe, any framework). If a change forces a non-React consumer to need React, it's in the wrong workspace.
-- Only `core-editor/src/index.ts`'s exports are public. Everything under `core-editor/src/core/**` is internal.
+- Only `core-editor/src/index.ts`'s exports are public. `core-editor/src/core/**` is the clean-architecture engine (domain/app/infrastructure), fully internal. `core-editor/src/element/**` is the outer packaging layer (the Custom Element) that wires the engine up for consumption — it's what `index.ts` actually re-exports.
+- Naming stays domain-descriptive (`SystemPromptEditorElement`, not `PromptierElement`) — the product name belongs at the npm scope/package level, not in class or component names.
 - Dev loop is buildless across workspaces: package `main`/`types` point at TS source directly, so editing `core-editor` or `react-sdk` while `playground`'s dev server is running hot-reloads with no explicit build step.
 
 ## Commands

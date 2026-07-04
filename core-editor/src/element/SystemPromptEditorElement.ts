@@ -1,5 +1,5 @@
-import { emptySystemPromptContent, SystemPromptContent } from '../../domain/SystemPromptContent';
-import { ProseMirrorEditor } from './ProseMirrorEditor';
+import { emptySystemPromptContent, SystemPromptContent } from '../core/domain/SystemPromptContent';
+import { ProseMirrorEditor } from '../core/infrastructure/prosemirror/ProseMirrorEditor';
 
 const DEFAULT_TAG_NAME = 'system-prompt-editor';
 
