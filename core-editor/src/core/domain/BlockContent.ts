@@ -11,5 +11,3 @@ export interface FormatDefinition {
   readonly format: Format;
   wrap(inner: string): string;
 }
-
-export const richText = (text: string): BlockContent => (text ? [{ text }] : []);

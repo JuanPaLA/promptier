@@ -6,7 +6,7 @@ import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { EditorChangeListener, PromptEditor } from '../../app/PromptEditor';
 import { SystemPromptContent } from '../../domain/SystemPromptContent';
-import { blockInputRules } from './blocksDescriptors/descriptorRegistry';
+import { blockInputRules } from './blocksDescriptors/blockDescriptorRegistry';
 import { markInputRules, markKeymaps } from './marksDescriptors/markDescriptorRegistry';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './DocumentMapper';
 import { promptSchema } from './Schema';

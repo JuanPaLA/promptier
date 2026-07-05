@@ -14,9 +14,6 @@ export type {
   TextSegment,
   Format,
 } from './core/domain/BlockContent';
-export {
-  richText,
-} from './core/domain/BlockContent';
 export type {
   SystemPromptContent,
 } from './core/domain/SystemPromptContent';

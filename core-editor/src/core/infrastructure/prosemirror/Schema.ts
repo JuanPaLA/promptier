@@ -1,5 +1,5 @@
 import { NodeSpec, Schema } from 'prosemirror-model';
-import { blockDescriptors } from './blocksDescriptors/descriptorRegistry';
+import { blockDescriptors } from './blocksDescriptors/blockDescriptorRegistry';
 import { markSpecs } from './marksDescriptors/markDescriptorRegistry';
 
 function buildPromptSchema(): Schema {
