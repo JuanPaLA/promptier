@@ -4,11 +4,11 @@ import { inputRules } from 'prosemirror-inputrules';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import { EditorChangeListener, PromptEditor } from '../../app/ports/PromptEditor';
+import { EditorChangeListener, PromptEditor } from '../../app/PromptEditor';
 import { SystemPromptContent } from '../../domain/SystemPromptContent';
-import { blockInputRules } from './blocks/registry';
-import { fromProseMirrorDoc, toProseMirrorDoc } from './document';
-import { promptSchema } from './schema';
+import { blockInputRules } from './blocksDescriptors/descriptorRegistry';
+import { fromProseMirrorDoc, toProseMirrorDoc } from './DocumentMapper';
+import { promptSchema } from './Schema';
 
 export class ProseMirrorEditor implements PromptEditor {
   private view: EditorView | null = null;

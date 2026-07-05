@@ -1,8 +1,8 @@
 import { Node as ProseMirrorNode } from 'prosemirror-model';
 import { Block } from '../../domain/Block';
 import { SystemPromptContent } from '../../domain/SystemPromptContent';
-import { blockFromProseMirrorNode, blockToProseMirrorNode } from './blocks/registry';
-import { promptSchema } from './schema';
+import { blockFromProseMirrorNode, blockToProseMirrorNode } from './blocksDescriptors/descriptorRegistry';
+import { promptSchema } from './Schema';
 
 export function toProseMirrorDoc(content: SystemPromptContent): ProseMirrorNode {
   const blockNodes = content.blocks.map((block) => blockToProseMirrorNode(block, promptSchema));

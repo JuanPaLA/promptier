@@ -1,7 +1,7 @@
 import { textblockTypeInputRule } from 'prosemirror-inputrules';
 import { NodeSpec } from 'prosemirror-model';
-import { HeadingBlock } from '../../../domain/blocks/heading';
-import { ProseMirrorBlock } from './ProseMirrorBlock';
+import { HeadingBlock } from '../../../domain/blocks/HeadingBlock';
+import { BlockDescriptor } from './BlockDescriptor';
 
 const HEADING_TAGS = ['h1', 'h2', 'h3'] as const;
 
@@ -18,7 +18,7 @@ const nodeSpec: NodeSpec = {
   parseDOM: HEADING_TAGS.map((tag, index) => ({ tag, attrs: { level: index + 1 } })),
 };
 
-export const headingProseMirrorBlock: ProseMirrorBlock<HeadingBlock> = {
+export const headingProseMirrorBlock: BlockDescriptor<HeadingBlock> = {
   blockType: 'heading',
   nodeSpec,
   toProseMirrorNode: (block, schema) =>

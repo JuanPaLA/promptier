@@ -1,4 +1,4 @@
-import { SystemPromptContent } from '../../domain/SystemPromptContent';
+import { SystemPromptContent } from '../domain/SystemPromptContent';
 
 export type EditorChangeListener = (content: SystemPromptContent) => void;
 

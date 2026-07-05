@@ -1,5 +1,5 @@
 import { Block } from './Block';
-import { ParagraphBlock } from './blocks/paragraph';
+import { ParagraphBlock } from './blocks/ParagraphBlock';
 
 export interface SystemPromptContent {
   blocks: Block[];

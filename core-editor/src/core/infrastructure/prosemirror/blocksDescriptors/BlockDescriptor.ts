@@ -10,7 +10,7 @@ import { Block } from '../../../domain/Block';
  * The schema is passed in rather than imported, because the schema itself is
  * assembled from every block's `nodeSpec` — importing it here would be a cycle.
  */
-export interface ProseMirrorBlock<B extends Block = Block> {
+export interface BlockDescriptor<B extends Block = Block> {
   /** Doubles as the ProseMirror node name (schema key). */
   readonly blockType: B['blockType'];
   readonly nodeSpec: NodeSpec;

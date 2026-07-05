@@ -1,6 +1,6 @@
 import { NodeSpec } from 'prosemirror-model';
-import { ParagraphBlock } from '../../../domain/blocks/paragraph';
-import { ProseMirrorBlock } from './ProseMirrorBlock';
+import { ParagraphBlock } from '../../../domain/blocks/ParagraphBlock';
+import { BlockDescriptor } from './BlockDescriptor';
 
 const nodeSpec: NodeSpec = {
   group: 'block',
@@ -9,7 +9,7 @@ const nodeSpec: NodeSpec = {
   parseDOM: [{ tag: 'p' }],
 };
 
-export const paragraphProseMirrorBlock: ProseMirrorBlock<ParagraphBlock> = {
+export const paragraphProseMirrorBlock: BlockDescriptor<ParagraphBlock> = {
   blockType: 'paragraph',
   nodeSpec,
   toProseMirrorNode: (block, schema) =>

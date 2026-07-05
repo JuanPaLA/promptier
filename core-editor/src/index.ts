@@ -7,7 +7,7 @@ export {
 } from './core/domain/SystemPromptContent';
 export {
   toMarkdown,
-} from './core/domain/markdown';
+} from './core/domain/toMarkdown';
 export type {
   Block,
   BlockType,
