@@ -1,5 +1,6 @@
 import { NodeSpec, Schema } from 'prosemirror-model';
-import { blockDescriptors } from '././blocksDescriptors/descriptorRegistry';
+import { blockDescriptors } from './blocksDescriptors/descriptorRegistry';
+import { markSpecs } from './marksDescriptors/markDescriptorRegistry';
 
 function buildPromptSchema(): Schema {
   const blockNodes: Record<string, NodeSpec> = {};
@@ -12,6 +13,7 @@ function buildPromptSchema(): Schema {
       ...blockNodes,
       text: { group: 'inline' },
     },
+    marks: markSpecs(),
   });
 }
 

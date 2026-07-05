@@ -7,6 +7,7 @@ import { EditorView } from 'prosemirror-view';
 import { EditorChangeListener, PromptEditor } from '../../app/PromptEditor';
 import { SystemPromptContent } from '../../domain/SystemPromptContent';
 import { blockInputRules } from './blocksDescriptors/descriptorRegistry';
+import { markInputRules, markKeymaps } from './marksDescriptors/markDescriptorRegistry';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './DocumentMapper';
 import { promptSchema } from './Schema';
 
@@ -21,8 +22,9 @@ export class ProseMirrorEditor implements PromptEditor {
       plugins: [
         history(),
         keymap({ 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }),
+        keymap(markKeymaps(promptSchema)),
         keymap(baseKeymap),
-        inputRules({ rules: blockInputRules(promptSchema) }),
+        inputRules({ rules: [...blockInputRules(promptSchema), ...markInputRules(promptSchema)] }),
       ],
     });
 

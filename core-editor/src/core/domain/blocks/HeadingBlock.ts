@@ -1,4 +1,5 @@
 import { Block, BlockDefinition } from '../Block';
+import { richTextToMarkdown } from '../serialization/richTextToMarkdown';
 
 export interface HeadingBlock extends Block {
   readonly blockType: 'heading';
@@ -7,5 +8,5 @@ export interface HeadingBlock extends Block {
 
 export const headingDefinition: BlockDefinition<HeadingBlock> = {
   blockType: 'heading',
-  toMarkdown: (block) => `${'#'.repeat(block.level)} ${block.text}`,
+  toMarkdown: (block) => `${'#'.repeat(block.level)} ${richTextToMarkdown(block.content)}`,
 };

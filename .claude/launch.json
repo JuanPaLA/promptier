@@ -3,9 +3,10 @@
   "configurations": [
     {
       "name": "playground-dev",
-      "runtimeExecutable": "yarn",
-      "runtimeArgs": ["workspace", "playground", "dev"],
-      "port": 5173
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": ["yarn", "workspace", "playground", "dev"],
+      "port": 5173,
+      "autoPort": true
     }
   ]
 }

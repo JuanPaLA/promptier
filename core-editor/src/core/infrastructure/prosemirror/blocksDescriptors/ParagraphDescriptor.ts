@@ -1,5 +1,6 @@
 import { NodeSpec } from 'prosemirror-model';
 import { ParagraphBlock } from '../../../domain/blocks/ParagraphBlock';
+import { richTextFromNode, richTextToNodes } from '../BlockContentMapper';
 import { BlockDescriptor } from './BlockDescriptor';
 
 const nodeSpec: NodeSpec = {
@@ -13,6 +14,6 @@ export const paragraphProseMirrorBlock: BlockDescriptor<ParagraphBlock> = {
   blockType: 'paragraph',
   nodeSpec,
   toProseMirrorNode: (block, schema) =>
-    schema.nodes.paragraph.create(null, block.text ? schema.text(block.text) : undefined),
-  fromProseMirrorNode: (node) => ({ blockType: 'paragraph', text: node.textContent }),
+    schema.nodes.paragraph.create(null, richTextToNodes(block.content, schema)),
+  fromProseMirrorNode: (node) => ({ blockType: 'paragraph', content: richTextFromNode(node) }),
 };

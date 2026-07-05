@@ -1,6 +1,7 @@
 import { textblockTypeInputRule } from 'prosemirror-inputrules';
 import { NodeSpec } from 'prosemirror-model';
 import { HeadingBlock } from '../../../domain/blocks/HeadingBlock';
+import { richTextFromNode, richTextToNodes } from '../BlockContentMapper';
 import { BlockDescriptor } from './BlockDescriptor';
 
 const HEADING_TAGS = ['h1', 'h2', 'h3'] as const;
@@ -22,14 +23,11 @@ export const headingProseMirrorBlock: BlockDescriptor<HeadingBlock> = {
   blockType: 'heading',
   nodeSpec,
   toProseMirrorNode: (block, schema) =>
-    schema.nodes.heading.create(
-      { level: block.level },
-      block.text ? schema.text(block.text) : undefined,
-    ),
+    schema.nodes.heading.create({ level: block.level }, richTextToNodes(block.content, schema)),
   fromProseMirrorNode: (node) => ({
     blockType: 'heading',
     level: toHeadingLevel(node.attrs.level),
-    text: node.textContent,
+    content: richTextFromNode(node),
   }),
   inputRules: (schema) => [
     textblockTypeInputRule(/^#\s$/, schema.nodes.heading, { level: 1 }),
