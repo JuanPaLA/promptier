@@ -6,8 +6,3 @@ export interface TextSegment {
 }
 
 export type Format = 'bold' | 'code';
-
-export interface FormatDefinition {
-  readonly format: Format;
-  wrap(inner: string): string;
-}

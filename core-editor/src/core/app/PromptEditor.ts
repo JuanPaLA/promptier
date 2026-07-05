@@ -1,9 +1,9 @@
-import { SystemPromptContent } from '../domain/SystemPromptContent';
+import { PromptContent } from '../domain/PromptContent';
 
-export type EditorChangeListener = (content: SystemPromptContent) => void;
+export type EditorChangeListener = (content: PromptContent) => void;
 
 export interface PromptEditor {
-  getContent(): SystemPromptContent;
-  setContent(content: SystemPromptContent): void;
+  getContent(): PromptContent;
+  setContent(content: PromptContent): void;
   onChange(listener: EditorChangeListener): () => void;
 }

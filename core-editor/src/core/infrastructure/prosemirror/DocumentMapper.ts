@@ -1,10 +1,10 @@
 import { Node as ProseMirrorNode } from 'prosemirror-model';
 import { Block } from '../../domain/Block';
-import { SystemPromptContent } from '../../domain/SystemPromptContent';
+import { PromptContent } from '../../domain/PromptContent';
 import { blockFromProseMirrorNode, blockToProseMirrorNode } from './blocksDescriptors/blockDescriptorRegistry';
 import { promptSchema } from './Schema';
 
-export function toProseMirrorDoc(content: SystemPromptContent): ProseMirrorNode {
+export function toProseMirrorDoc(content: PromptContent): ProseMirrorNode {
   if (content.blocks.length === 0) {
     return promptSchema.nodes.doc.createAndFill()!;
   }
@@ -12,7 +12,7 @@ export function toProseMirrorDoc(content: SystemPromptContent): ProseMirrorNode 
   return promptSchema.nodes.doc.create(null, blockNodes);
 }
 
-export function fromProseMirrorDoc(doc: ProseMirrorNode): SystemPromptContent {
+export function fromProseMirrorDoc(doc: ProseMirrorNode): PromptContent {
   const blocks: Block[] = [];
   doc.forEach((blockNode) => {
     blocks.push(blockFromProseMirrorNode(blockNode));

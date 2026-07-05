@@ -4,7 +4,7 @@ export {
 } from './element/SystemPromptEditorElement';
 export {
   toMarkdown,
-} from './core/domain/serialization/toMarkdown';
+} from './core/app/rendering/toMarkdown';
 export type {
   Block,
   BlockType,
@@ -15,5 +15,5 @@ export type {
   Format,
 } from './core/domain/BlockContent';
 export type {
-  SystemPromptContent,
-} from './core/domain/SystemPromptContent';
+  PromptContent,
+} from './core/domain/PromptContent';

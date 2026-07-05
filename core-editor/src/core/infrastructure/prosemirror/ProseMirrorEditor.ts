@@ -5,7 +5,7 @@ import { keymap } from 'prosemirror-keymap';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { EditorChangeListener, PromptEditor } from '../../app/PromptEditor';
-import { SystemPromptContent } from '../../domain/SystemPromptContent';
+import { PromptContent } from '../../domain/PromptContent';
 import { blockInputRules } from './blocksDescriptors/blockDescriptorRegistry';
 import { markInputRules, markKeymaps } from './marksDescriptors/markDescriptorRegistry';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './DocumentMapper';
@@ -15,7 +15,7 @@ export class ProseMirrorEditor implements PromptEditor {
   private view: EditorView | null = null;
   private readonly listeners = new Set<EditorChangeListener>();
 
-  mount(container: HTMLElement, initialContent: SystemPromptContent): void {
+  mount(container: HTMLElement, initialContent: PromptContent): void {
     const state = EditorState.create({
       schema: promptSchema,
       doc: toProseMirrorDoc(initialContent),
@@ -42,12 +42,12 @@ export class ProseMirrorEditor implements PromptEditor {
     });
   }
 
-  getContent(): SystemPromptContent {
+  getContent(): PromptContent {
     if (!this.view) throw new Error('Editor not mounted');
     return fromProseMirrorDoc(this.view.state.doc);
   }
 
-  setContent(content: SystemPromptContent): void {
+  setContent(content: PromptContent): void {
     if (!this.view) throw new Error('Editor not mounted');
     const newDoc = toProseMirrorDoc(content);
     if (this.view.state.doc.eq(newDoc)) return;

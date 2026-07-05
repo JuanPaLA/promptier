@@ -1,5 +1,5 @@
 import { Block } from './Block';
 
-export interface SystemPromptContent {
+export interface PromptContent {
   blocks: Block[];
 }

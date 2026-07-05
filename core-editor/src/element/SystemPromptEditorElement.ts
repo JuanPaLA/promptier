@@ -1,19 +1,19 @@
-import { SystemPromptContent } from '../core/domain/SystemPromptContent';
+import { PromptContent } from '../core/domain/PromptContent';
 import { ProseMirrorEditor } from '../core/infrastructure/prosemirror/ProseMirrorEditor';
 
 const DEFAULT_TAG_NAME = 'system-prompt-editor';
 
 export class SystemPromptEditorElement extends HTMLElement {
   private readonly editor: ProseMirrorEditor = new ProseMirrorEditor();
-  private pendingContent: SystemPromptContent = { blocks: [] };
+  private pendingContent: PromptContent = { blocks: [] };
   private unsubscribe: (() => void) | null = null;
   private mounted: boolean = false;
 
-  get content(): SystemPromptContent {
+  get content(): PromptContent {
     return this.mounted ? this.editor.getContent() : this.pendingContent;
   }
 
-  set content(value: SystemPromptContent) {
+  set content(value: PromptContent) {
     this.pendingContent = value;
     if (this.mounted) {
       this.editor.setContent(value);
@@ -25,7 +25,7 @@ export class SystemPromptEditorElement extends HTMLElement {
     this.mounted = true;
     this.unsubscribe = this.editor.onChange((content) => {
       this.pendingContent = content;
-      this.dispatchEvent(new CustomEvent<SystemPromptContent>('change', { detail: content }));
+      this.dispatchEvent(new CustomEvent<PromptContent>('change', { detail: content }));
     });
   }
 
