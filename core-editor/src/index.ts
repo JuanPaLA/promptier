@@ -3,11 +3,8 @@ export {
   registerSystemPromptEditor,
 } from './element/SystemPromptEditorElement';
 export {
-  emptySystemPromptContent,
-} from './core/domain/SystemPromptContent';
-export {
   toMarkdown,
-} from './core/domain/toMarkdown';
+} from './core/domain/serialization/toMarkdown';
 export type {
   Block,
   BlockType,

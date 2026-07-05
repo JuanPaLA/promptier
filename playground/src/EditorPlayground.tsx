@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { emptySystemPromptContent, toMarkdown, type SystemPromptContent } from 'core-editor';
+import { toMarkdown, type SystemPromptContent } from 'core-editor';
 import { SystemPromptEditorField } from 'react-sdk';
 
 export function EditorPlayground() {
-  const [content, setContent] = useState<SystemPromptContent>(emptySystemPromptContent());
+  const [content, setContent] = useState<SystemPromptContent>({ blocks: [] });
 
   return (
     <div style={{ display: 'flex', gap: '1.5rem', padding: '1.5rem', fontFamily: 'sans-serif' }}>

@@ -5,7 +5,10 @@ import { blockFromProseMirrorNode, blockToProseMirrorNode } from './blocksDescri
 import { promptSchema } from './Schema';
 
 export function toProseMirrorDoc(content: SystemPromptContent): ProseMirrorNode {
-  const blockNodes = content.blocks.map((block) => blockToProseMirrorNode(block, promptSchema));
+  if (content.blocks.length === 0) {
+    return promptSchema.nodes.doc.createAndFill()!;
+  }
+  const blockNodes = content.blocks.map((b) => blockToProseMirrorNode(b, promptSchema));
   return promptSchema.nodes.doc.create(null, blockNodes);
 }
 

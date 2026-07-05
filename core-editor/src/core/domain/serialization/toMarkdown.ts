@@ -1,6 +1,6 @@
-import { SystemPromptContent } from './SystemPromptContent';
-import { Block, BlockDefinition } from './Block'
-import { blockDefinitions } from './blocks/blockRegistry'
+import { SystemPromptContent } from '../SystemPromptContent';
+import { Block, BlockDefinition } from '../Block'
+import { blockDefinitions } from '../blocks/blockRegistry'
 
 export function toMarkdown(content: SystemPromptContent): string {
   return content.blocks.map(blockToMarkdown).join('\n\n');
