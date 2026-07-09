@@ -2,6 +2,8 @@
 
 A business-domain editor for system prompts, built on ProseMirror.
 
+Architecture, the domain→ProseMirror descriptor seam, and the design decisions log live in [docs/architecture.md](docs/architecture.md).
+
 ## Workspaces (yarn workspaces)
 
 - `core-editor` — the editor itself. Framework-agnostic: no React here yet, until needed. Internally organized as clean architecture (`domain` / `app` / `infrastructure`). Its public surface (`src/index.ts`) exposes a Custom Element (`SystemPromptEditorElement` / `registerSystemPromptEditor`) plus plain domain data types. Nothing ProseMirror-specific is exported.
