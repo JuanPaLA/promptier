@@ -1,12 +1,12 @@
 /// <reference path="./custom-elements.d.ts" />
 import { useEffect, useRef } from 'react';
-import { registerSystemPromptEditor, type SystemPromptContent, type SystemPromptEditorElement } from 'core-editor';
+import { registerSystemPromptEditor, type PromptContent, type SystemPromptEditorElement } from 'core-editor';
 
 registerSystemPromptEditor();
 
 interface SystemPromptEditorFieldProps {
-  content: SystemPromptContent;
-  onChange: (content: SystemPromptContent) => void;
+  content: PromptContent;
+  onChange: (content: PromptContent) => void;
 }
 
 export function SystemPromptEditorField({ content, onChange }: SystemPromptEditorFieldProps) {
@@ -17,7 +17,7 @@ export function SystemPromptEditorField({ content, onChange }: SystemPromptEdito
     if (!element) return;
 
     const handleChange = (event: Event) => {
-      onChange((event as CustomEvent<SystemPromptContent>).detail);
+      onChange((event as CustomEvent<PromptContent>).detail);
     };
 
     element.addEventListener('change', handleChange);

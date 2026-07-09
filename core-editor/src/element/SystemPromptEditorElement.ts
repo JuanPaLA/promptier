@@ -1,11 +1,11 @@
-import { PromptContent } from '../core/domain/PromptContent';
+import { PROMPT_CONTENT_VERSION, PromptContent } from '../core/domain/PromptContent';
 import { ProseMirrorEditor } from '../core/infrastructure/prosemirror/ProseMirrorEditor';
 
 const DEFAULT_TAG_NAME = 'system-prompt-editor';
 
 export class SystemPromptEditorElement extends HTMLElement {
   private readonly editor: ProseMirrorEditor = new ProseMirrorEditor();
-  private pendingContent: PromptContent = { blocks: [] };
+  private pendingContent: PromptContent = { version: PROMPT_CONTENT_VERSION, blocks: [] };
   private unsubscribe: (() => void) | null = null;
   private mounted: boolean = false;
 

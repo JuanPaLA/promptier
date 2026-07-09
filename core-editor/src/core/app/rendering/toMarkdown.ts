@@ -1,17 +1,33 @@
 import { AnyBlock } from '../../domain/blocks/blockRegistry'
+import { Block } from '../../domain/Block'
 import { BlockContent, Format, TextSegment } from '../../domain/BlockContent'
 import { PromptContent } from '../../domain/PromptContent'
 
 export function toMarkdown(content: PromptContent): string {
-  return content.blocks.map((block) => blockToMarkdown(block as AnyBlock)).join('\n\n');
+  return blocksToMarkdown(content.blocks, 1);
 }
 
-function blockToMarkdown(block: AnyBlock): string {
+function blocksToMarkdown(blocks: Block[], depth: number): string {
+  return blocks
+    .map((block) => blockToMarkdown(block as AnyBlock, depth))
+    .filter((markdown) => markdown.length > 0)
+    .join('\n\n');
+}
+
+function blockToMarkdown(block: AnyBlock, depth: number): string {
   switch (block.blockType) {
     case 'paragraph':
       return blockContentToMarkdown(block.content);
     case 'heading':
       return `${'#'.repeat(block.level)} ${blockContentToMarkdown(block.content)}`;
+    case 'section': {
+      // The section's title is its heading; the level comes from nesting depth,
+      // so restructuring sections renumbers headings for free. The description
+      // is authoring metadata and is intentionally not rendered.
+      const heading = `${'#'.repeat(Math.min(depth, 6))} ${block.title}`.trimEnd();
+      const body = blocksToMarkdown(block.children, depth + 1);
+      return body.length > 0 ? `${heading}\n\n${body}` : heading;
+    }
     default: {
       return block;
     }

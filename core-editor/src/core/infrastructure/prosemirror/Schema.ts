@@ -6,6 +6,7 @@ function buildPromptSchema(): Schema {
   const blockNodes: Record<string, NodeSpec> = {};
   for (const descriptor of blockDescriptors) {
     blockNodes[descriptor.blockType] = descriptor.nodeSpec;
+    Object.assign(blockNodes, descriptor.extraNodes);
   }
   return new Schema({
     nodes: {

@@ -1,6 +1,6 @@
 import { Node as ProseMirrorNode } from 'prosemirror-model';
 import { Block } from '../../domain/Block';
-import { PromptContent } from '../../domain/PromptContent';
+import { PROMPT_CONTENT_VERSION, PromptContent } from '../../domain/PromptContent';
 import { blockFromProseMirrorNode, blockToProseMirrorNode } from './blocksDescriptors/blockDescriptorRegistry';
 import { promptSchema } from './Schema';
 
@@ -17,5 +17,5 @@ export function fromProseMirrorDoc(doc: ProseMirrorNode): PromptContent {
   doc.forEach((blockNode) => {
     blocks.push(blockFromProseMirrorNode(blockNode));
   });
-  return { blocks };
+  return { version: PROMPT_CONTENT_VERSION, blocks };
 }

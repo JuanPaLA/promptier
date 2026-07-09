@@ -6,9 +6,10 @@ import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { EditorChangeListener, PromptEditor } from '../../app/PromptEditor';
 import { PromptContent } from '../../domain/PromptContent';
-import { blockInputRules } from './blocksDescriptors/blockDescriptorRegistry';
+import { blockInputRules, blockKeymaps, blockNodeViews } from './blocksDescriptors/blockDescriptorRegistry';
 import { markInputRules, markKeymaps } from './marksDescriptors/markDescriptorRegistry';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './DocumentMapper';
+import { ensureEditorStyles } from './editorStyles';
 import { promptSchema } from './Schema';
 
 export class ProseMirrorEditor implements PromptEditor {
@@ -16,12 +17,14 @@ export class ProseMirrorEditor implements PromptEditor {
   private readonly listeners = new Set<EditorChangeListener>();
 
   mount(container: HTMLElement, initialContent: PromptContent): void {
+    ensureEditorStyles(container.ownerDocument);
     const state = EditorState.create({
       schema: promptSchema,
       doc: toProseMirrorDoc(initialContent),
       plugins: [
         history(),
         keymap({ 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }),
+        keymap(blockKeymaps(promptSchema)),
         keymap(markKeymaps(promptSchema)),
         keymap(baseKeymap),
         inputRules({ rules: [...blockInputRules(promptSchema), ...markInputRules(promptSchema)] }),
@@ -30,6 +33,7 @@ export class ProseMirrorEditor implements PromptEditor {
 
     this.view = new EditorView(container, {
       state,
+      nodeViews: blockNodeViews(),
       dispatchTransaction: (transaction: Transaction) => {
         if (!this.view) return;
         const newState = this.view.state.apply(transaction);
