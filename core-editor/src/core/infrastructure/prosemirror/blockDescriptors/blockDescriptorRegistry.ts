@@ -2,21 +2,20 @@ import { InputRule } from 'prosemirror-inputrules';
 import { Node as ProseMirrorNode, Schema } from 'prosemirror-model';
 import { Command } from 'prosemirror-state';
 import { NodeViewConstructor } from 'prosemirror-view';
-import { Block, BlockType } from '../../../domain/Block';
-import { AnyBlock } from '../../../domain/blocks/blockRegistry';
-import { headingProseMirrorBlock } from './HeadingDescriptor';
-import { paragraphProseMirrorBlock } from './ParagraphDescriptor';
-import { sectionProseMirrorBlock } from './SectionDescriptor';
+import type { Block, BlockType } from '../../../domain/Block';
+import { headingDescriptor } from './HeadingDescriptor';
+import { paragraphDescriptor } from './ParagraphDescriptor';
+import { sectionDescriptor } from './SectionDescriptor';
 import { BlockDescriptor } from './BlockDescriptor';
 
-type BlockProseMirrorRegistry = {
-  [K in BlockType]: BlockDescriptor<Extract<AnyBlock, { blockType: K }>>;
+type BlockDescriptorRegistry = {
+  [K in BlockType]: BlockDescriptor<Extract<Block, { blockType: K }>>;
 };
 
-const blockRegistry: BlockProseMirrorRegistry = {
-  paragraph: paragraphProseMirrorBlock,
-  heading: headingProseMirrorBlock,
-  section: sectionProseMirrorBlock,
+const blockRegistry: BlockDescriptorRegistry = {
+  paragraph: paragraphDescriptor,
+  heading: headingDescriptor,
+  section: sectionDescriptor,
 };
 
 /**

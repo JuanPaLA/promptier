@@ -15,21 +15,22 @@ container block.
 ## Checklist
 
 1. **Domain interface** — `core-editor/src/core/domain/blocks/<Name>Block.ts`:
-   `interface <Name>Block extends Block` with `blockType: '<name>'` and its
-   data. Leaf text blocks carry `content: BlockContent`; container blocks
-   carry `children: Block[]` instead. Everything must be plain and
-   JSON-serializable.
+   `interface <Name>Block` (it extends nothing — there is no base interface)
+   declaring `readonly blockType: '<name>'` plus its data. Leaf text blocks
+   carry `content: BlockContent`; container blocks carry `children: Block[]`
+   instead. Everything must be plain and JSON-serializable.
 
-2. **Union** — add it to `AnyBlock` in
-   `core-editor/src/core/domain/blocks/blockRegistry.ts` and to `BlockType` in
-   `core-editor/src/core/domain/Block.ts`.
+2. **Union** — add it to the `Block` union in
+   `core-editor/src/core/domain/Block.ts`. That's the single source of truth:
+   `BlockType` derives from it, and adding it here is what makes steps 4 and 5
+   fail to compile until you do them.
 
 3. **Descriptor** —
-   `core-editor/src/core/infrastructure/prosemirror/blocksDescriptors/<Name>Descriptor.ts`,
+   `core-editor/src/core/infrastructure/prosemirror/blockDescriptors/<Name>Descriptor.ts`,
    implementing `BlockDescriptor<<Name>Block>`:
    - `nodeSpec` with `group: 'block'` (unless intentionally non-top-level).
    - Both mapping directions. Delegate inline text to
-     `richTextToNodes`/`richTextFromNode` from `BlockContentMapper`.
+     `blockContentToNodes`/`blockContentFromNode` from `BlockContentMapper`.
    - Container blocks: map children through the injected `mapChild` callback —
      never import the registry from a descriptor (cycle).
    - Auxiliary nodes (like section's title) go in `extraNodes`.
@@ -38,7 +39,7 @@ container block.
      see `SectionNodeView`).
 
 4. **Register** — add the descriptor to `blockRegistry` in
-   `blocksDescriptors/blockDescriptorRegistry.ts`. Registry order matters:
+   `blockDescriptors/blockDescriptorRegistry.ts`. Registry order matters:
    paragraph stays first (it's the doc's default block).
 
 5. **Markdown** — add the `case '<name>':` to `blockToMarkdown` in

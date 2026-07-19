@@ -1,18 +1,18 @@
 import { InputRule } from 'prosemirror-inputrules';
 import { MarkSpec, Schema } from 'prosemirror-model';
 import { Command } from 'prosemirror-state';
-import { Format } from '../../../domain/BlockContent';
-import { boldMarkDescriptor } from './BoldDescriptor';
-import { codeMarkDescriptor } from './CodeDescriptor';
-import { MarkDescriptor } from './MarkDescriptor';
+import { boldDescriptor } from './BoldDescriptor';
+import { codeDescriptor } from './CodeDescriptor';
+import type { MarkDescriptor } from './MarkDescriptor';
+import type { Format } from '../../../domain/Format';
 
 type MarkDescriptorRegistry = {
   [K in Format]: MarkDescriptor;
 };
 
 const markRegistry: MarkDescriptorRegistry = {
-  bold: boldMarkDescriptor,
-  code: codeMarkDescriptor,
+  bold: boldDescriptor,
+  code: codeDescriptor,
 };
 
 export const markDescriptors = Object.values(markRegistry);

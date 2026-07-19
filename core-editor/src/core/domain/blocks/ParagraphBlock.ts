@@ -1,7 +1,6 @@
-import { Block } from '../Block';
-import { BlockContent } from '../BlockContent';
+import type { BlockContent } from '../BlockContent';
 
-export interface ParagraphBlock extends Block {
+export interface ParagraphBlock {
   readonly blockType: 'paragraph';
   readonly content: BlockContent;
 }

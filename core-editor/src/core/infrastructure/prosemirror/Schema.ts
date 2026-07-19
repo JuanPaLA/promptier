@@ -1,6 +1,6 @@
 import { NodeSpec, Schema } from 'prosemirror-model';
-import { blockDescriptors } from './blocksDescriptors/blockDescriptorRegistry';
-import { markSpecs } from './marksDescriptors/markDescriptorRegistry';
+import { blockDescriptors } from './blockDescriptors/blockDescriptorRegistry';
+import { markSpecs } from './markDescriptors/markDescriptorRegistry';
 
 function buildPromptSchema(): Schema {
   const blockNodes: Record<string, NodeSpec> = {};

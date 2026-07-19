@@ -1,7 +1,6 @@
-import { Block } from '../Block';
-import { BlockContent } from '../BlockContent';
+import type { BlockContent } from '../BlockContent';
 
-export interface HeadingBlock extends Block {
+export interface HeadingBlock {
   readonly blockType: 'heading';
   readonly level: 1 | 2 | 3;
   readonly content: BlockContent;

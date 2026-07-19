@@ -7,7 +7,7 @@ const markSpec: MarkSpec = {
   parseDOM: [{ tag: 'strong' }, { tag: 'b' }],
 };
 
-export const boldMarkDescriptor: MarkDescriptor = {
+export const boldDescriptor: MarkDescriptor = {
   format: 'bold',
   markSpec,
   keymap: (schema) => ({ 'Mod-b': toggleMark(schema.marks.bold) }),

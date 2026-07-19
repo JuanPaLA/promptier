@@ -1,7 +1,7 @@
 import { Node as ProseMirrorNode } from 'prosemirror-model';
-import { Block } from '../../domain/Block';
-import { PROMPT_CONTENT_VERSION, PromptContent } from '../../domain/PromptContent';
-import { blockFromProseMirrorNode, blockToProseMirrorNode } from './blocksDescriptors/blockDescriptorRegistry';
+import type { Block } from '../../domain/Block';
+import { PROMPT_CONTENT_VERSION, type PromptContent } from '../../domain/PromptContent';
+import { blockFromProseMirrorNode, blockToProseMirrorNode } from './blockDescriptors/blockDescriptorRegistry';
 import { promptSchema } from './Schema';
 
 export function toProseMirrorDoc(content: PromptContent): ProseMirrorNode {

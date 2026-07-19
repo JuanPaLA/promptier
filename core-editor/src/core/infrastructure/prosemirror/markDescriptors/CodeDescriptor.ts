@@ -7,7 +7,7 @@ const markSpec: MarkSpec = {
   parseDOM: [{ tag: 'code' }],
 };
 
-export const codeMarkDescriptor: MarkDescriptor = {
+export const codeDescriptor: MarkDescriptor = {
   format: 'code',
   markSpec,
   keymap: (schema) => ({ 'Mod-e': toggleMark(schema.marks.code) }),

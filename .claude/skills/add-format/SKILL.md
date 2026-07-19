@@ -12,18 +12,18 @@ format missing there exports wrong markdown without any type error.
 ## Checklist
 
 1. **Domain** — add the format name to the `Format` union in
-   `core-editor/src/core/domain/BlockContent.ts`. Formats are plain string
+   `core-editor/src/core/domain/Format.ts`. Formats are plain string
    literals carried on `TextSegment.formats`.
 
 2. **Descriptor** —
-   `core-editor/src/core/infrastructure/prosemirror/marksDescriptors/<Name>Descriptor.ts`,
+   `core-editor/src/core/infrastructure/prosemirror/markDescriptors/<Name>Descriptor.ts`,
    implementing `MarkDescriptor`: `format` (the `Format` string — it doubles
    as the mark's schema name, which is how `BlockContentMapper` maps marks
    back to formats), `markSpec` (`toDOM`/`parseDOM`), plus optional
    `inputRules` and `keymap` (follow `BoldDescriptor`'s pattern).
 
 3. **Register** — add it to `markRegistry` in
-   `marksDescriptors/markDescriptorRegistry.ts` (typecheck enforces this:
+   `markDescriptors/markDescriptorRegistry.ts` (typecheck enforces this:
    the registry is a mapped type over `Format`).
 
 4. **Markdown** — in `core-editor/src/core/app/rendering/toMarkdown.ts`:

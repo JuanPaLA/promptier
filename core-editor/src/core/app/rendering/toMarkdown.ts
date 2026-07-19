@@ -1,7 +1,7 @@
-import { AnyBlock } from '../../domain/blocks/blockRegistry'
-import { Block } from '../../domain/Block'
-import { BlockContent, Format, TextSegment } from '../../domain/BlockContent'
-import { PromptContent } from '../../domain/PromptContent'
+import type { Block } from '../../domain/Block';
+import type { BlockContent, TextSegment } from '../../domain/BlockContent';
+import type { Format } from '../../domain/Format';
+import type { PromptContent } from '../../domain/PromptContent';
 
 export function toMarkdown(content: PromptContent): string {
   return blocksToMarkdown(content.blocks, 1);
@@ -9,12 +9,12 @@ export function toMarkdown(content: PromptContent): string {
 
 function blocksToMarkdown(blocks: Block[], depth: number): string {
   return blocks
-    .map((block) => blockToMarkdown(block as AnyBlock, depth))
+    .map((block) => blockToMarkdown(block, depth))
     .filter((markdown) => markdown.length > 0)
     .join('\n\n');
 }
 
-function blockToMarkdown(block: AnyBlock, depth: number): string {
+function blockToMarkdown(block: Block, depth: number): string {
   switch (block.blockType) {
     case 'paragraph':
       return blockContentToMarkdown(block.content);
@@ -47,7 +47,6 @@ function segmentToMarkdown(segment: TextSegment): string {
 
 /** Nesting order for a multi-format segment, innermost first: code inside bold → **`text`**. */
 const FORMAT_ORDER: Format[] = ['code', 'bold'];
-
 
 const FORMAT_WRAP: Record<Format, (inner: string) => string> = {
   bold: (inner) => `**${inner}**`,

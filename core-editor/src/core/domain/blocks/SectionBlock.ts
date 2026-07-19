@@ -1,4 +1,4 @@
-import { Block } from '../Block';
+import type { Block } from '../Block';
 
 /**
  * A titled, recursive container of blocks. The title *is* the section's
@@ -6,7 +6,7 @@ import { Block } from '../Block';
  * manage heading levels by hand. `description` documents the section's intent
  * (for humans and future structure linting) — it is not rendered.
  */
-export interface SectionBlock extends Block {
+export interface SectionBlock {
   readonly blockType: 'section';
   /** Stable identity for outline navigation and future cross-references. */
   readonly id: string;

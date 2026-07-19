@@ -1,7 +1,8 @@
 import { InputRule } from 'prosemirror-inputrules';
 import { MarkSpec, Schema } from 'prosemirror-model';
 import { Command } from 'prosemirror-state';
-import { Format } from '../../../domain/BlockContent';
+
+import type { Format } from '../../../domain/Format';
 
 /**
  * Everything the ProseMirror infrastructure needs from a single format: its

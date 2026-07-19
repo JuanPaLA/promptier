@@ -2,7 +2,7 @@ import { InputRule } from 'prosemirror-inputrules';
 import { NodeSpec, Node as ProseMirrorNode, Schema } from 'prosemirror-model';
 import { Command } from 'prosemirror-state';
 import { NodeViewConstructor } from 'prosemirror-view';
-import { Block } from '../../../domain/Block';
+import type { Block } from '../../../domain/Block';
 
 /**
  * Everything the ProseMirror infrastructure needs from a single block type:

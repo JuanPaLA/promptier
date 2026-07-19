@@ -1,9 +1,9 @@
 import { InputRule } from 'prosemirror-inputrules';
 import { NodeSpec } from 'prosemirror-model';
 import { TextSelection } from 'prosemirror-state';
-import { Block } from '../../../domain/Block';
-import { newSectionId, SectionBlock } from '../../../domain/blocks/SectionBlock';
-import { BlockDescriptor } from './BlockDescriptor';
+import type { Block } from '../../../domain/Block';
+import { newSectionId, type SectionBlock } from '../../../domain/blocks/SectionBlock';
+import type { BlockDescriptor } from './BlockDescriptor';
 import { SectionNodeView } from './SectionNodeView';
 
 export const SECTION_TITLE_NODE = 'sectionTitle';
@@ -40,7 +40,7 @@ const nodeSpec: NodeSpec = {
   ],
 };
 
-export const sectionProseMirrorBlock: BlockDescriptor<SectionBlock> = {
+export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
   blockType: 'section',
   nodeSpec,
   extraNodes: { [SECTION_TITLE_NODE]: titleNodeSpec },
