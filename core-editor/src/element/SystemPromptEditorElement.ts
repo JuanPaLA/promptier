@@ -2,6 +2,7 @@ import { PROMPT_CONTENT_VERSION, type PromptContent } from '../core/domain/Promp
 import { ProseMirrorEditor } from '../core/infrastructure/prosemirror/ProseMirrorEditor';
 
 const DEFAULT_TAG_NAME = 'system-prompt-editor';
+const HOST_CLASS_NAME = 'system-prompt-editor-host';
 
 export class SystemPromptEditorElement extends HTMLElement {
   private readonly editor: ProseMirrorEditor = new ProseMirrorEditor();
@@ -21,6 +22,7 @@ export class SystemPromptEditorElement extends HTMLElement {
   }
 
   connectedCallback(): void {
+    this.classList.add(HOST_CLASS_NAME);
     this.editor.mount(this, this.pendingContent);
     this.mounted = true;
     this.unsubscribe = this.editor.onChange((content) => {

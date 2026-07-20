@@ -1,6 +1,18 @@
 const STYLE_ID = 'system-prompt-editor-styles';
 
 const CSS = `
+.system-prompt-editor-host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+.system-prompt-editor-host > .ProseMirror {
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+  outline: none;
+}
 .prompt-section {
   position: relative;
   margin: 0.75rem 0;

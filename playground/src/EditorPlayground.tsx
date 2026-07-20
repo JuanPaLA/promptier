@@ -67,8 +67,8 @@ function collectOutline(blocks: Block[], depth = 0): OutlineEntry[] {
 function Outline({ blocks }: { blocks: Block[] }) {
   const entries = collectOutline(blocks);
   return (
-    <nav>
-      <h2>Outline</h2>
+    <nav style={{ height: '100%', overflow: 'auto' }}>
+      <h2 style={{ margin: '0 0 0.75rem' }}>Arbol</h2>
       {entries.length === 0 && <p style={{ color: '#888' }}>Sin secciones todavía.</p>}
       {entries.map((entry) => (
         <div
@@ -91,30 +91,51 @@ export function EditorPlayground() {
   const [content, setContent] = useState<PromptContent>(initialContent);
 
   return (
-    <div style={{ display: 'flex', gap: '1.5rem', padding: '1.5rem', fontFamily: 'sans-serif' }}>
-      <div style={{ width: 200, flexShrink: 0 }}>
-        <Outline blocks={content.blocks} />
+    <div style={{ minHeight: '100vh', padding: '1.5rem', boxSizing: 'border-box', fontFamily: 'sans-serif' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 70vw) minmax(0, 1fr)',
+          gap: '1.5rem',
+          alignItems: 'start',
+        }}
+      >
+        <section style={{ minWidth: 0 }}>
+          <h2 style={{ margin: '0 0 0.75rem' }}>System Prompt Editor</h2>
+          <div
+            style={{
+              width: '70vw',
+              height: '70vh',
+              border: '1px solid #ccc',
+              borderRadius: 4,
+              padding: '0.75rem',
+              boxSizing: 'border-box',
+              overflow: 'hidden',
+            }}
+          >
+            <SystemPromptEditorField content={content} onChange={setContent} />
+          </div>
+        </section>
+        <aside style={{ height: '70vh', minWidth: 0, overflow: 'hidden' }}>
+          <Outline blocks={content.blocks} />
+        </aside>
       </div>
-      <div style={{ flex: 1 }}>
-        <h2>System Prompt Editor</h2>
-        <div style={{ border: '1px solid #ccc', borderRadius: 4, minHeight: 200, padding: '0.75rem' }}>
-          <SystemPromptEditorField content={content} onChange={setContent} />
-        </div>
-      </div>
-      <div style={{ flex: 1 }}>
-        <h2>Live Domain State (PromptContent)</h2>
+      <section style={{ marginTop: '1.5rem' }}>
+        <h2 style={{ margin: '0 0 0.75rem' }}>Markdown</h2>
         <pre
-          style={{ background: '#f5f5f5', padding: '0.75rem', borderRadius: 4, minHeight: 200, overflow: 'auto' }}
-        >
-          {JSON.stringify(content, null, 2)}
-        </pre>
-        <h2>Markdown (what an agent would consume)</h2>
-        <pre
-          style={{ background: '#f5f5f5', padding: '0.75rem', borderRadius: 4, minHeight: 100, overflow: 'auto' }}
+          style={{
+            margin: 0,
+            background: '#f5f5f5',
+            padding: '0.75rem',
+            borderRadius: 4,
+            minHeight: 160,
+            overflow: 'auto',
+            whiteSpace: 'pre-wrap',
+          }}
         >
           {toMarkdown(content)}
         </pre>
-      </div>
+      </section>
     </div>
   );
 }
