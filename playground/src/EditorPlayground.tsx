@@ -34,6 +34,11 @@ const initialContent: PromptContent = {
               { text: 'markdown', formats: ['bold'] },
               { text: ', sin encabezados de nivel 1.' },
             ] },
+            { blockType: 'orderedList', items: [
+              [{ text: 'Saluda con cortesía.' }],
+              [{ text: 'Identifica el problema del usuario.' }],
+              [{ text: 'Propón una solución en ' }, { text: 'pasos concretos', formats: ['bold'] }, { text: '.' }],
+            ] },
           ],
         },
         {

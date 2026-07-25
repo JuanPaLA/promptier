@@ -31,6 +31,10 @@ function blockToXml(block: Block): string {
       return blockContentToMarkdown(block.content);
     case 'heading':
       return `${'#'.repeat(block.level)} ${blockContentToMarkdown(block.content)}`;
+    case 'orderedList':
+      return block.items
+        .map((item, index) => `${index + 1}. ${blockContentToMarkdown(item)}`)
+        .join('\n');
     case 'section': {
       const tag = sectionTagName(block.title);
       const body = blocksToXml(block.children);

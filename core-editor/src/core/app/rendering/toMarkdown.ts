@@ -20,6 +20,10 @@ function blockToMarkdown(block: Block, depth: number): string {
       return blockContentToMarkdown(block.content);
     case 'heading':
       return `${'#'.repeat(block.level)} ${blockContentToMarkdown(block.content)}`;
+    case 'orderedList':
+      return block.items
+        .map((item, index) => `${index + 1}. ${blockContentToMarkdown(item)}`)
+        .join('\n');
     case 'section': {
       // The section's title is its heading; the level comes from nesting depth,
       // so restructuring sections renumbers headings for free. The description

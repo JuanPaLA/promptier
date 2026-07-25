@@ -19,6 +19,9 @@ export type {
   HeadingBlock,
 } from './core/domain/blocks/HeadingBlock';
 export type {
+  OrderedListBlock,
+} from './core/domain/blocks/OrderedListBlock';
+export type {
   SectionBlock,
 } from './core/domain/blocks/SectionBlock';
 export { newSectionId, sectionTagName } from './core/domain/blocks/SectionBlock';

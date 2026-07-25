@@ -33,6 +33,13 @@ const CSS = `
   line-height: 1;
   color: #57606a;
 }
+.prompt-ordered-list {
+  margin: 0.5rem 0;
+  padding-left: 1.6rem;
+}
+.prompt-ordered-list > li {
+  margin: 0.15rem 0;
+}
 .prompt-section-title {
   min-height: 1.2em;
   margin-bottom: 0.25rem;
