@@ -120,21 +120,47 @@ export function EditorPlayground() {
           <Outline blocks={content.blocks} />
         </aside>
       </div>
-      <section style={{ marginTop: '1.5rem' }}>
-        <h2 style={{ margin: '0 0 0.75rem' }}>Markdown</h2>
-        <pre
-          style={{
-            margin: 0,
-            background: '#f5f5f5',
-            padding: '0.75rem',
-            borderRadius: 4,
-            minHeight: 160,
-            overflow: 'auto',
-            whiteSpace: 'pre-wrap',
-          }}
-        >
-          {toMarkdown(content)}
-        </pre>
+      <section
+        style={{
+          marginTop: '1.5rem',
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+          gap: '1.5rem',
+          alignItems: 'start',
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <h2 style={{ margin: '0 0 0.75rem' }}>Markdown</h2>
+          <pre
+            style={{
+              margin: 0,
+              background: '#f5f5f5',
+              padding: '0.75rem',
+              borderRadius: 4,
+              minHeight: 160,
+              overflow: 'auto',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            {toMarkdown(content)}
+          </pre>
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <h2 style={{ margin: '0 0 0.75rem' }}>Prompt JSON</h2>
+          <pre
+            style={{
+              margin: 0,
+              background: '#f5f5f5',
+              padding: '0.75rem',
+              borderRadius: 4,
+              minHeight: 160,
+              overflow: 'auto',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            {JSON.stringify(content, null, 2)}
+          </pre>
+        </div>
       </section>
     </div>
   );
