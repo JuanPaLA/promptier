@@ -22,6 +22,9 @@ export type {
   OrderedListBlock,
 } from './core/domain/blocks/OrderedListBlock';
 export type {
+  UnorderedListBlock,
+} from './core/domain/blocks/UnorderedListBlock';
+export type {
   SectionBlock,
 } from './core/domain/blocks/SectionBlock';
 export { newSectionId, sectionTagName } from './core/domain/blocks/SectionBlock';

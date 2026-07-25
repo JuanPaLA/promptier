@@ -47,6 +47,10 @@ const initialContent: PromptContent = {
           title: 'Reglas de estilo',
           children: [
             { blockType: 'paragraph', content: [{ text: 'Tono cordial y directo.' }] },
+            { blockType: 'unorderedList', items: [
+              [{ text: 'Evita jerga técnica innecesaria.' }],
+              [{ text: 'Usa frases ' }, { text: 'cortas', formats: ['bold'] }, { text: '.' }],
+            ] },
           ],
         },
       ],
