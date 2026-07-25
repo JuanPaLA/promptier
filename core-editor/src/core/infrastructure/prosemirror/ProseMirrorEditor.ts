@@ -10,6 +10,7 @@ import { blockInputRules, blockKeymaps, blockNodeViews } from './blockDescriptor
 import { markInputRules, markKeymaps } from './markDescriptors/markDescriptorRegistry';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './DocumentMapper';
 import { ensureEditorStyles } from './editorStyles';
+import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
 import { promptSchema } from './Schema';
 
 export class ProseMirrorEditor implements PromptEditor {
@@ -28,6 +29,7 @@ export class ProseMirrorEditor implements PromptEditor {
         keymap(markKeymaps(promptSchema)),
         keymap(baseKeymap),
         inputRules({ rules: [...blockInputRules(promptSchema), ...markInputRules(promptSchema)] }),
+        appendTrailingParagraph(),
       ],
     });
 
