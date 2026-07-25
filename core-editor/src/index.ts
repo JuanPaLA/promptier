@@ -5,6 +5,9 @@ export {
 export {
   toMarkdown,
 } from './core/app/rendering/toMarkdown';
+export {
+  toXml,
+} from './core/app/rendering/toXml';
 export type {
   Block,
   BlockType,
@@ -18,7 +21,7 @@ export type {
 export type {
   SectionBlock,
 } from './core/domain/blocks/SectionBlock';
-export { newSectionId } from './core/domain/blocks/SectionBlock';
+export { newSectionId, sectionTagName } from './core/domain/blocks/SectionBlock';
 export type {
   BlockContent,
   TextSegment,

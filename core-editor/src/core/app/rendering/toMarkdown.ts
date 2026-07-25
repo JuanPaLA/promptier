@@ -34,7 +34,7 @@ function blockToMarkdown(block: Block, depth: number): string {
   }
 }
 
-function blockContentToMarkdown(content: BlockContent): string {
+export function blockContentToMarkdown(content: BlockContent): string {
   return content.map(segmentToMarkdown).join('');
 }
 

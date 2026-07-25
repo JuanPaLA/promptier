@@ -12,6 +12,8 @@ const CSS = `
   box-sizing: border-box;
   overflow: auto;
   outline: none;
+  padding-bottom: 2rem;
+  cursor: text;
 }
 .prompt-section {
   position: relative;
@@ -36,6 +38,19 @@ const CSS = `
   margin-bottom: 0.25rem;
   font-weight: 600;
   font-size: 1.05em;
+}
+.prompt-section-tag {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.4rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.7rem;
+  color: #8c959f;
+  user-select: none;
+  pointer-events: none;
+}
+.prompt-section-collapsed > .prompt-section-tag {
+  color: #afb8c1;
 }
 .prompt-section-collapsed > .prompt-section-content > :not(.prompt-section-title) {
   display: none;

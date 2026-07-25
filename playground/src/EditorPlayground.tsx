@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { toMarkdown, type Block, type PromptContent, type SectionBlock } from 'core-editor';
+import { toMarkdown, toXml, type Block, type PromptContent, type SectionBlock } from 'core-editor';
 import { SystemPromptEditorField } from 'react-sdk';
 
 const initialContent: PromptContent = {
@@ -124,7 +124,7 @@ export function EditorPlayground() {
         style={{
           marginTop: '1.5rem',
           display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
           gap: '1.5rem',
           alignItems: 'start',
         }}
@@ -143,6 +143,22 @@ export function EditorPlayground() {
             }}
           >
             {toMarkdown(content)}
+          </pre>
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <h2 style={{ margin: '0 0 0.75rem' }}>XML</h2>
+          <pre
+            style={{
+              margin: 0,
+              background: '#f5f5f5',
+              padding: '0.75rem',
+              borderRadius: 4,
+              minHeight: 160,
+              overflow: 'auto',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            {toXml(content)}
           </pre>
         </div>
         <div style={{ minWidth: 0 }}>
