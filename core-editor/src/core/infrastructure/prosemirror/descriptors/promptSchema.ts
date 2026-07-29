@@ -1,6 +1,9 @@
 import { NodeSpec, Schema } from 'prosemirror-model';
-import { blockDescriptors } from './blockDescriptors/blockDescriptorRegistry';
-import { markSpecs } from './markDescriptors/markDescriptorRegistry';
+import { blockDescriptors } from './blocks/blockDescriptorRegistry';
+import { markSpecs } from './marks/markDescriptorRegistry';
+
+/** The editor's grammar, assembled from every descriptor's spec. */
+export const promptSchema = buildPromptSchema();
 
 function buildPromptSchema(): Schema {
   const blockNodes: Record<string, NodeSpec> = {};
@@ -17,5 +20,3 @@ function buildPromptSchema(): Schema {
     marks: markSpecs(),
   });
 }
-
-export const promptSchema = buildPromptSchema();

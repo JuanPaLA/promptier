@@ -1,6 +1,6 @@
 import { Node as ProseMirrorNode } from 'prosemirror-model';
 import { NodeView, ViewMutationRecord } from 'prosemirror-view';
-import { sectionTagName } from '../../../domain/blocks/SectionBlock';
+import { sectionTagName } from '../../../../app/rendering/sectionTagName';
 
 const COLLAPSED_CLASS = 'prompt-section-collapsed';
 

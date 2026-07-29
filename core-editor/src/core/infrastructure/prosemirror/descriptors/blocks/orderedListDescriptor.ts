@@ -1,4 +1,4 @@
-import type { OrderedListBlock } from '../../../domain/blocks/OrderedListBlock';
+import type { OrderedListBlock } from '../../../../domain/blocks/OrderedListBlock';
 import { createListDescriptor } from './listDescriptor';
 
 export const orderedListDescriptor = createListDescriptor<OrderedListBlock>({

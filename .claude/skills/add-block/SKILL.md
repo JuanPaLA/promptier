@@ -26,32 +26,40 @@ container block.
    fail to compile until you do them.
 
 3. **Descriptor** —
-   `core-editor/src/core/infrastructure/prosemirror/blockDescriptors/<Name>Descriptor.ts`,
-   implementing `BlockDescriptor<<Name>Block>`:
+   `core-editor/src/core/infrastructure/prosemirror/descriptors/blocks/<name>Descriptor.ts`
+   (camelCase file: it exports a value), implementing `BlockDescriptor<<Name>Block>`:
    - `nodeSpec` with `group: 'block'` (unless intentionally non-top-level).
+     Build it in a `function <name>NodeSpec()` declared *below* the descriptor —
+     public surface first (see AGENTS.md, Conventions).
    - Both mapping directions. Delegate inline text to
-     `blockContentToNodes`/`blockContentFromNode` from `BlockContentMapper`.
+     `blockContentToNodes`/`blockContentFromNode` from `mapping/blockContentMapper`.
+     Keep both directions pure — never mint ids or read the clock while mapping.
    - Container blocks: map children through the injected `mapChild` callback —
      never import the registry from a descriptor (cycle).
    - Auxiliary nodes (like section's title) go in `extraNodes`.
    - Optional: `inputRules` (typing shortcut), `keymaps`, `nodeView`
      (custom DOM/behavior; keep presentation state out of the document —
      see `SectionNodeView`).
+   - For anything that moves the caret or replaces a block, use the named
+     operations in `editing/blockTransactions.ts` instead of computing
+     positions.
 
-4. **Register** — add the descriptor to `blockRegistry` in
-   `blockDescriptors/blockDescriptorRegistry.ts`. Registry order matters:
+4. **Register** — add the descriptor to `blockRegistry()` in
+   `descriptors/blocks/blockDescriptorRegistry.ts`. Registry order matters:
    paragraph stays first (it's the doc's default block).
 
-5. **Markdown** — add the `case '<name>':` to `blockToMarkdown` in
-   `core-editor/src/core/app/rendering/toMarkdown.ts`. Container blocks
-   recurse via `blocksToMarkdown(children, depth + 1)`. The `default` branch
-   is an exhaustiveness check — typecheck fails until the case exists.
+5. **Renderers** — add the `case '<name>':` to `blockToMarkdown` in
+   `core-editor/src/core/app/rendering/toMarkdown.ts` **and** to `blockToXml` in
+   `toXml.ts`. Container blocks recurse (`blocksToMarkdown(children, depth + 1)`
+   / `blocksToXml(children)`). Both `default` branches are exhaustiveness checks
+   — typecheck fails until the cases exist.
 
 6. **Public surface** — export the block's type from
    `core-editor/src/index.ts`.
 
 7. **Styles** — if the block needs structural CSS, add it to the injected
-   sheet in `core-editor/src/core/infrastructure/prosemirror/editorStyles.ts`.
+   sheet in
+   `core-editor/src/core/infrastructure/prosemirror/styles/editorStyles.ts`.
 
 8. **Demo** — add an instance to the initial content in
    `playground/src/EditorPlayground.tsx` so the walking skeleton shows it.

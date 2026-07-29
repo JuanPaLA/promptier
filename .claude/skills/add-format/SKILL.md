@@ -16,14 +16,16 @@ format missing there exports wrong markdown without any type error.
    literals carried on `TextSegment.formats`.
 
 2. **Descriptor** —
-   `core-editor/src/core/infrastructure/prosemirror/markDescriptors/<Name>Descriptor.ts`,
-   implementing `MarkDescriptor`: `format` (the `Format` string — it doubles
-   as the mark's schema name, which is how `BlockContentMapper` maps marks
-   back to formats), `markSpec` (`toDOM`/`parseDOM`), plus optional
-   `inputRules` and `keymap` (follow `BoldDescriptor`'s pattern).
+   `core-editor/src/core/infrastructure/prosemirror/descriptors/marks/<name>Descriptor.ts`
+   (camelCase file: it exports a value), implementing `MarkDescriptor`: `format`
+   (the `Format` string — it doubles as the mark's schema name, which is how
+   `blockContentMapper` maps marks back to formats), `markSpec`
+   (`toDOM`/`parseDOM`, built in a `function <name>MarkSpec()` declared below the
+   descriptor), plus optional `inputRules` and `keymap` (follow
+   `boldDescriptor`'s pattern).
 
-3. **Register** — add it to `markRegistry` in
-   `markDescriptors/markDescriptorRegistry.ts` (typecheck enforces this:
+3. **Register** — add it to `markRegistry()` in
+   `descriptors/marks/markDescriptorRegistry.ts` (typecheck enforces this:
    the registry is a mapped type over `Format`).
 
 4. **Markdown** — in `core-editor/src/core/app/rendering/toMarkdown.ts`:

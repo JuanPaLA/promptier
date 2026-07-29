@@ -1,5 +1,5 @@
 import { Plugin } from 'prosemirror-state';
-import { TextSelection } from 'prosemirror-state';
+import { caretInLastBlock, insertBlockAt } from '../editing/blockTransactions';
 
 /**
  * Notion-style end-click: clicking the empty area below the last block drops
@@ -18,20 +18,16 @@ export function appendTrailingParagraph(): Plugin {
         if (event.target !== view.dom) return false;
 
         const { state, dispatch } = view;
-        const end = state.doc.content.size;
         const last = state.doc.lastChild;
 
         // Already an empty trailing paragraph — just focus it, don't stack empties.
         if (last?.type.name === 'paragraph' && last.content.size === 0) {
-          const selection = TextSelection.near(state.doc.resolve(end - 1));
-          dispatch(state.tr.setSelection(selection).scrollIntoView());
+          dispatch(caretInLastBlock(state.tr));
           return true;
         }
 
         const paragraph = state.schema.nodes.paragraph.create();
-        const tr = state.tr.insert(end, paragraph);
-        tr.setSelection(TextSelection.near(tr.doc.resolve(end + 1)));
-        dispatch(tr.scrollIntoView());
+        dispatch(insertBlockAt(state.tr, state.doc.content.size, paragraph));
         return true;
       },
     },

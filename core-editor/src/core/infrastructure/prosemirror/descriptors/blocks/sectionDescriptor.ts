@@ -1,49 +1,17 @@
 import { InputRule } from 'prosemirror-inputrules';
 import { NodeSpec } from 'prosemirror-model';
-import { TextSelection } from 'prosemirror-state';
-import type { Block } from '../../../domain/Block';
-import { newSectionId, type SectionBlock } from '../../../domain/blocks/SectionBlock';
+import type { Block } from '../../../../domain/Block';
+import { newSectionId, type SectionBlock } from '../../../../domain/blocks/SectionBlock';
+import { caretAfterNode, replaceRangeWithBlock } from '../../editing/blockTransactions';
 import type { BlockDescriptor } from './BlockDescriptor';
 import { SectionNodeView } from './SectionNodeView';
 
 export const SECTION_TITLE_NODE = 'sectionTitle';
 
-/**
- * The section's title line. Not in the `block` group, so it can only exist
- * where the section's content expression places it: first child of a section.
- * Plain text only — a section title is an identifier, not rich content.
- */
-const titleNodeSpec: NodeSpec = {
-  content: 'text*',
-  marks: '',
-  defining: true,
-  selectable: false,
-  toDOM: () => ['div', { class: 'prompt-section-title' }, 0] as const,
-  parseDOM: [{ tag: 'div.prompt-section-title' }],
-};
-
-const nodeSpec: NodeSpec = {
-  group: 'block',
-  content: `${SECTION_TITLE_NODE} block+`,
-  attrs: {
-    id: { default: '' },
-    description: { default: null },
-  },
-  defining: true,
-  toDOM: (node) =>
-    ['section', { class: 'prompt-section', 'data-section-id': node.attrs.id }, 0] as const,
-  parseDOM: [
-    {
-      tag: 'section.prompt-section',
-      getAttrs: (dom) => ({ id: (dom as HTMLElement).getAttribute('data-section-id') ?? '' }),
-    },
-  ],
-};
-
 export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
   blockType: 'section',
-  nodeSpec,
-  extraNodes: { [SECTION_TITLE_NODE]: titleNodeSpec },
+  nodeSpec: sectionNodeSpec(),
+  extraNodes: { [SECTION_TITLE_NODE]: titleNodeSpec() },
 
   toProseMirrorNode: (block, schema, mapChild) => {
     const title = schema.nodes[SECTION_TITLE_NODE].create(
@@ -55,7 +23,7 @@ export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
         ? block.children.map(mapChild)
         : [schema.nodes.paragraph.createAndFill()!];
     return schema.nodes.section.create(
-      { id: block.id || newSectionId(), description: block.description ?? null },
+      { id: block.id, description: block.description ?? null },
       [title, ...children],
     );
   },
@@ -81,7 +49,6 @@ export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
   },
 
   inputRules: (schema) => [
-    // Typing "/section " on an otherwise empty paragraph turns it into a fresh section.
     new InputRule(/^\/section\s$/, (state, _match, start) => {
       const $start = state.doc.resolve(start);
       if ($start.parent.type !== schema.nodes.paragraph) return null;
@@ -90,24 +57,54 @@ export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
         schema.nodes[SECTION_TITLE_NODE].create(),
         schema.nodes.paragraph.create(),
       ]);
-      const tr = state.tr.replaceRangeWith($start.before(), $start.after(), section);
-      // +2: into the section, then into its title.
-      return tr.setSelection(TextSelection.create(tr.doc, $start.before() + 2));
+      return replaceRangeWithBlock(state.tr, $start.before(), $start.after(), section);
     }),
   ],
 
   keymaps: (schema) => ({
-    // Enter on the title jumps into the section body instead of splitting.
     Enter: (state, dispatch) => {
       const { $from } = state.selection;
       if ($from.parent.type !== schema.nodes[SECTION_TITLE_NODE]) return false;
-      if (dispatch) {
-        const bodyStart = state.doc.resolve($from.after());
-        dispatch(state.tr.setSelection(TextSelection.near(bodyStart, 1)).scrollIntoView());
-      }
+      dispatch?.(caretAfterNode(state.tr, $from));
       return true;
     },
   }),
 
   nodeView: (node) => new SectionNodeView(node),
 };
+
+function sectionNodeSpec(): NodeSpec {
+  return {
+    group: 'block',
+    content: `${SECTION_TITLE_NODE} block+`,
+    attrs: {
+      id: { default: '' },
+      description: { default: null },
+    },
+    defining: true,
+    toDOM: (node) =>
+      ['section', { class: 'prompt-section', 'data-section-id': node.attrs.id }, 0] as const,
+    parseDOM: [
+      {
+        tag: 'section.prompt-section',
+        getAttrs: (dom) => ({ id: (dom as HTMLElement).getAttribute('data-section-id') ?? '' }),
+      },
+    ],
+  };
+}
+
+/**
+ * The section's title line. Not in the `block` group, so it can only exist
+ * where the section's content expression places it: first child of a section.
+ * Plain text only — a section title is an identifier, not rich content.
+ */
+function titleNodeSpec(): NodeSpec {
+  return {
+    content: 'text*',
+    marks: '',
+    defining: true,
+    selectable: false,
+    toDOM: () => ['div', { class: 'prompt-section-title' }, 0] as const,
+    parseDOM: [{ tag: 'div.prompt-section-title' }],
+  };
+}

@@ -1,13 +1,22 @@
-const STYLE_ID = 'system-prompt-editor-styles';
+/** Injects the editor's structural styles once per document. */
+export function ensureEditorStyles(doc: Document): void {
+  if (doc.getElementById(STYLE_ID)) return;
+  const style = doc.createElement('style');
+  style.id = STYLE_ID;
+  style.textContent = CSS;
+  doc.head.appendChild(style);
+}
+
+const STYLE_ID = 'prompt-editor-styles';
 
 const CSS = `
-.system-prompt-editor-host {
+.prompt-editor-host {
   display: block;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
 }
-.system-prompt-editor-host > .ProseMirror {
+.prompt-editor-host > .ProseMirror {
   height: 100%;
   box-sizing: border-box;
   overflow: auto;
@@ -65,12 +74,3 @@ const CSS = `
   display: none;
 }
 `;
-
-/** Injects the editor's structural styles once per document. */
-export function ensureEditorStyles(doc: Document): void {
-  if (doc.getElementById(STYLE_ID)) return;
-  const style = doc.createElement('style');
-  style.id = STYLE_ID;
-  style.textContent = CSS;
-  doc.head.appendChild(style);
-}

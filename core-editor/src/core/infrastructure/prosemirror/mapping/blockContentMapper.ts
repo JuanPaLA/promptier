@@ -1,10 +1,10 @@
 import type { Mark, Node as ProseMirrorNode, Schema } from 'prosemirror-model';
-import type { BlockContent, TextSegment } from '../../domain/BlockContent';
-import type { Format } from '../../domain/Format';
+import type { BlockContent, TextSegment } from '../../../domain/BlockContent';
+import type { Format } from '../../../domain/Format';
 
 /**
- * Domain BlockContent ⇄ ProseMirror inline nodes. This is the inline analog of
- * DocumentMapper: block descriptors delegate their text mapping here so the
+ * Domain BlockContent ⇄ ProseMirror inline nodes — the inline analog of
+ * documentMapper. Block descriptors delegate text mapping here so the
  * marks ⇄ formats translation lives in one place instead of per block.
  */
 

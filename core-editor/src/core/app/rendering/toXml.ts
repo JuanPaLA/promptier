@@ -1,7 +1,7 @@
 import type { Block } from '../../domain/Block';
 import type { PromptContent } from '../../domain/PromptContent';
-import { sectionTagName } from '../../domain/blocks/SectionBlock';
 import { blockContentToMarkdown } from './toMarkdown';
+import { sectionTagName } from './sectionTagName';
 
 /**
  * Renders a document as XML-wrapped sections: each section becomes a

@@ -1,7 +1,4 @@
-export {
-  SystemPromptEditorElement,
-  registerSystemPromptEditor,
-} from './element/SystemPromptEditorElement';
+export { PromptEditorElement, registerPromptEditor } from './element/PromptEditorElement';
 export {
   toMarkdown,
 } from './core/app/rendering/toMarkdown';
@@ -27,7 +24,8 @@ export type {
 export type {
   SectionBlock,
 } from './core/domain/blocks/SectionBlock';
-export { newSectionId, sectionTagName } from './core/domain/blocks/SectionBlock';
+export { newSectionId } from './core/domain/blocks/SectionBlock';
+export { sectionTagName } from './core/app/rendering/sectionTagName';
 export type {
   BlockContent,
   TextSegment,
@@ -37,3 +35,8 @@ export type {
   PromptContent,
 } from './core/domain/PromptContent';
 export type { Format } from './core/domain/Format';
+export type { EditorCommand, CommandId } from './core/app/commands/EditorCommand';
+export type {
+  EditorSelectionState,
+  CommandState,
+} from './core/app/commands/EditorSelectionState';

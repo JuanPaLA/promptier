@@ -3,44 +3,32 @@ import { InputRule } from 'prosemirror-inputrules';
 import { Node as ProseMirrorNode, Schema } from 'prosemirror-model';
 import { Command } from 'prosemirror-state';
 import { NodeViewConstructor } from 'prosemirror-view';
-import type { Block, BlockType } from '../../../domain/Block';
-import { headingDescriptor } from './HeadingDescriptor';
-import { orderedListDescriptor } from './OrderedListDescriptor';
-import { paragraphDescriptor } from './ParagraphDescriptor';
-import { sectionDescriptor } from './SectionDescriptor';
-import { unorderedListDescriptor } from './UnorderedListDescriptor';
+import type { Block, BlockType } from '../../../../domain/Block';
 import { BlockDescriptor } from './BlockDescriptor';
-
-type BlockDescriptorRegistry = {
-  [K in BlockType]: BlockDescriptor<Extract<Block, { blockType: K }>>;
-};
-
-const blockRegistry: BlockDescriptorRegistry = {
-  paragraph: paragraphDescriptor,
-  heading: headingDescriptor,
-  orderedList: orderedListDescriptor,
-  unorderedList: unorderedListDescriptor,
-  section: sectionDescriptor,
-};
+import { headingDescriptor } from './headingDescriptor';
+import { orderedListDescriptor } from './orderedListDescriptor';
+import { paragraphDescriptor } from './paragraphDescriptor';
+import { sectionDescriptor } from './sectionDescriptor';
+import { unorderedListDescriptor } from './unorderedListDescriptor';
 
 /**
  * Ordered list of every block's descriptor. Order defines schema node order —
  * the first block-group node becomes the doc's default block, so paragraph
  * (declared first in the registry) stays the default.
  */
-export const blockDescriptors = Object.values(blockRegistry);
+export const blockDescriptors = Object.values(blockRegistry());
 
 export function blockToProseMirrorNode(block: Block, schema: Schema): ProseMirrorNode {
-  const descriptor = blockRegistry[block.blockType] as BlockDescriptor<Block>;
-  return descriptor.toProseMirrorNode(block, schema, (child) =>
+  return descriptorFor(block.blockType).toProseMirrorNode(block, schema, (child) =>
     blockToProseMirrorNode(child, schema),
   );
 }
 
 export function blockFromProseMirrorNode(node: ProseMirrorNode): Block {
-  const descriptor = (blockRegistry[node.type.name as BlockType] ??
-    blockRegistry.paragraph) as BlockDescriptor<Block>;
-  return descriptor.fromProseMirrorNode(node, blockFromProseMirrorNode);
+  return descriptorFor(node.type.name as BlockType).fromProseMirrorNode(
+    node,
+    blockFromProseMirrorNode,
+  );
 }
 
 export function blockInputRules(schema: Schema): InputRule[] {
@@ -72,3 +60,25 @@ export function blockNodeViews(): Record<string, NodeViewConstructor> {
   }
   return views;
 }
+
+function descriptorFor(blockType: BlockType): BlockDescriptor<Block> {
+  return (registry[blockType] ?? registry.paragraph) as BlockDescriptor<Block>;
+}
+
+function blockRegistry(): BlockDescriptorRegistry {
+  return {
+    paragraph: paragraphDescriptor,
+    heading: headingDescriptor,
+    orderedList: orderedListDescriptor,
+    unorderedList: unorderedListDescriptor,
+    section: sectionDescriptor,
+  };
+}
+
+type BlockDescriptorRegistry = {
+  [K in BlockType]: BlockDescriptor<Extract<Block, { blockType: K }>>;
+};
+
+// Read only from descriptorFor (call time), so declaring it after the public
+// surface is safe — the TDZ only applies during module evaluation.
+const registry = blockRegistry();

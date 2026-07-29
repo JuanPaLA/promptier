@@ -4,24 +4,36 @@ import { inputRules } from 'prosemirror-inputrules';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import type { EditorChangeListener, PromptEditor } from '../../app/PromptEditor';
+import type {
+  EditorChangeListener,
+  MountablePromptEditor,
+  SelectionChangeListener,
+} from '../../app/PromptEditor';
+import type { EditorCommand } from '../../app/commands/EditorCommand';
+import type { EditorSelectionState } from '../../app/commands/EditorSelectionState';
 import type { PromptContent } from '../../domain/PromptContent';
-import { blockInputRules, blockKeymaps, blockNodeViews } from './blockDescriptors/blockDescriptorRegistry';
-import { markInputRules, markKeymaps } from './markDescriptors/markDescriptorRegistry';
-import { fromProseMirrorDoc, toProseMirrorDoc } from './DocumentMapper';
-import { ensureEditorStyles } from './editorStyles';
+import { runCommand, selectionStateFromEditorState } from './commands/commandRegistry';
+import {
+  blockInputRules,
+  blockKeymaps,
+  blockNodeViews,
+} from './descriptors/blocks/blockDescriptorRegistry';
+import { markInputRules, markKeymaps } from './descriptors/marks/markDescriptorRegistry';
+import { promptSchema } from './descriptors/promptSchema';
+import { fromProseMirrorDoc, toProseMirrorDoc } from './mapping/documentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
-import { promptSchema } from './Schema';
+import { ensureEditorStyles } from './styles/editorStyles';
 
-export class ProseMirrorEditor implements PromptEditor {
+export class ProseMirrorEditor implements MountablePromptEditor {
   private view: EditorView | null = null;
   private readonly listeners = new Set<EditorChangeListener>();
+  private readonly selectionListeners = new Set<SelectionChangeListener>();
 
   mount(container: HTMLElement, initialContent: PromptContent): void {
     ensureEditorStyles(container.ownerDocument);
     const state = EditorState.create({
       schema: promptSchema,
-      doc: toProseMirrorDoc(initialContent),
+      doc: toProseMirrorDoc(initialContent, promptSchema),
       plugins: [
         history(),
         keymap({ 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }),
@@ -44,6 +56,9 @@ export class ProseMirrorEditor implements PromptEditor {
           const content = fromProseMirrorDoc(newState.doc);
           this.listeners.forEach((listener) => listener(content));
         }
+        // Every transaction, not just docChanged: cursor moves change the snapshot.
+        const selectionState = selectionStateFromEditorState(newState);
+        this.selectionListeners.forEach((listener) => listener(selectionState));
       },
     });
   }
@@ -55,7 +70,7 @@ export class ProseMirrorEditor implements PromptEditor {
 
   setContent(content: PromptContent): void {
     if (!this.view) throw new Error('Editor not mounted');
-    const newDoc = toProseMirrorDoc(content);
+    const newDoc = toProseMirrorDoc(content, promptSchema);
     if (this.view.state.doc.eq(newDoc)) return;
     const newState = EditorState.create({
       schema: promptSchema,
@@ -70,9 +85,25 @@ export class ProseMirrorEditor implements PromptEditor {
     return () => this.listeners.delete(listener);
   }
 
+  run(command: EditorCommand): void {
+    if (!this.view) throw new Error('Editor not mounted');
+    runCommand(this.view, command);
+  }
+
+  getSelectionState(): EditorSelectionState {
+    if (!this.view) throw new Error('Editor not mounted');
+    return selectionStateFromEditorState(this.view.state);
+  }
+
+  onSelectionChange(listener: SelectionChangeListener): () => void {
+    this.selectionListeners.add(listener);
+    return () => this.selectionListeners.delete(listener);
+  }
+
   destroy(): void {
     this.view?.destroy();
     this.view = null;
     this.listeners.clear();
+    this.selectionListeners.clear();
   }
 }

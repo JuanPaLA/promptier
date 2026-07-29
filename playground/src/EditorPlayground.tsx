@@ -1,6 +1,14 @@
 import { useState } from 'react';
-import { toMarkdown, toXml, type Block, type PromptContent, type SectionBlock } from 'core-editor';
-import { SystemPromptEditorField } from 'react-sdk';
+import {
+  toMarkdown,
+  toXml,
+  type Block,
+  type EditorCommand,
+  type EditorSelectionState,
+  type PromptContent,
+  type SectionBlock,
+} from 'core-editor';
+import { PromptEditorSurface, usePromptEditor } from 'react-sdk';
 
 const initialContent: PromptContent = {
   version: 1,
@@ -96,8 +104,60 @@ function Outline({ blocks }: { blocks: Block[] }) {
   );
 }
 
+interface FormatButton {
+  label: string;
+  command: EditorCommand;
+}
+
+const FORMAT_BUTTONS: FormatButton[] = [
+  { label: 'B', command: { id: 'format.bold' } },
+  { label: '</>', command: { id: 'format.code' } },
+];
+
+function FormatToolbar({
+  selection,
+  onRun,
+}: {
+  selection: EditorSelectionState | null;
+  onRun: (command: EditorCommand) => void;
+}) {
+  return (
+    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+      {FORMAT_BUTTONS.map(({ label, command }) => {
+        const state = selection?.commands[command.id];
+        const active = state?.active ?? false;
+        return (
+          <button
+            key={command.id}
+            type="button"
+            // Keep the editor selection alive: a plain click would blur the
+            // editor before run() fires.
+            onMouseDown={(event) => {
+              event.preventDefault();
+              onRun(command);
+            }}
+            disabled={selection ? !state?.enabled : false}
+            style={{
+              minWidth: 32,
+              padding: '0.25rem 0.5rem',
+              border: '1px solid #ccc',
+              borderRadius: 4,
+              background: active ? '#dfe3ff' : '#fff',
+              fontWeight: active ? 700 : 400,
+              cursor: 'pointer',
+            }}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function EditorPlayground() {
   const [content, setContent] = useState<PromptContent>(initialContent);
+  const { elementRef, run, selection } = usePromptEditor({ content, onChange: setContent });
 
   return (
     <div style={{ minHeight: '100vh', padding: '1.5rem', boxSizing: 'border-box', fontFamily: 'sans-serif' }}>
@@ -111,6 +171,7 @@ export function EditorPlayground() {
       >
         <section style={{ minWidth: 0 }}>
           <h2 style={{ margin: '0 0 0.75rem' }}>System Prompt Editor</h2>
+          <FormatToolbar selection={selection} onRun={run} />
           <div
             style={{
               width: '70vw',
@@ -122,7 +183,7 @@ export function EditorPlayground() {
               overflow: 'hidden',
             }}
           >
-            <SystemPromptEditorField content={content} onChange={setContent} />
+            <PromptEditorSurface ref={elementRef} />
           </div>
         </section>
         <aside style={{ height: '70vh', minWidth: 0, overflow: 'hidden' }}>
