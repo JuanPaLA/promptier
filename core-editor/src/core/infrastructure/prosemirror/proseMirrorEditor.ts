@@ -6,7 +6,7 @@ import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import type {
   EditorChangeListener,
-  MountablePromptEditor,
+  PromptEditor,
   SelectionChangeListener,
 } from '../../app/PromptEditor';
 import type { EditorCommand } from '../../app/commands/EditorCommand';
@@ -23,13 +23,26 @@ import { promptSchema } from './descriptors/promptSchema';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './mapping/documentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
 import { ensureEditorStyles } from './styles/editorStyles';
+import { EditorSession } from '../../app/EditorSession'
 
-export class ProseMirrorEditor implements MountablePromptEditor {
-  private view: EditorView | null = null;
+/**
+ * Starts an editor in `container`. The class itself stays unexported so
+ * `destroy` is reachable only through the session — no cast gets you there.
+ */
+export function createProseMirrorEditor(
+  container: HTMLElement,
+  initialContent: PromptContent,
+): EditorSession {
+  const editor = new ProseMirrorEditor(container, initialContent);
+  return { editor, destroy: () => editor.destroy() };
+}
+
+class ProseMirrorEditor implements PromptEditor {
+  private readonly view: EditorView;
   private readonly listeners = new Set<EditorChangeListener>();
   private readonly selectionListeners = new Set<SelectionChangeListener>();
 
-  mount(container: HTMLElement, initialContent: PromptContent): void {
+  constructor(container: HTMLElement, initialContent: PromptContent) {
     ensureEditorStyles(container.ownerDocument);
     const state = EditorState.create({
       schema: promptSchema,
@@ -48,28 +61,18 @@ export class ProseMirrorEditor implements MountablePromptEditor {
     this.view = new EditorView(container, {
       state,
       nodeViews: blockNodeViews(),
-      dispatchTransaction: (transaction: Transaction) => {
-        if (!this.view) return;
-        const newState = this.view.state.apply(transaction);
-        this.view.updateState(newState);
-        if (transaction.docChanged) {
-          const content = fromProseMirrorDoc(newState.doc);
-          this.listeners.forEach((listener) => listener(content));
-        }
-        // Every transaction, not just docChanged: cursor moves change the snapshot.
-        const selectionState = selectionStateFromEditorState(newState);
-        this.selectionListeners.forEach((listener) => listener(selectionState));
-      },
+      // Reads `this.view`, which is assigned below — safe because nothing
+      // dispatches while `new EditorView` runs: node views only build DOM and
+      // plugins only act on events.
+      dispatchTransaction: (transaction: Transaction) => this.apply(transaction),
     });
   }
 
   getContent(): PromptContent {
-    if (!this.view) throw new Error('Editor not mounted');
     return fromProseMirrorDoc(this.view.state.doc);
   }
 
   setContent(content: PromptContent): void {
-    if (!this.view) throw new Error('Editor not mounted');
     const newDoc = toProseMirrorDoc(content, promptSchema);
     if (this.view.state.doc.eq(newDoc)) return;
     const newState = EditorState.create({
@@ -86,12 +89,10 @@ export class ProseMirrorEditor implements MountablePromptEditor {
   }
 
   run(command: EditorCommand): void {
-    if (!this.view) throw new Error('Editor not mounted');
     runCommand(this.view, command);
   }
 
   getSelectionState(): EditorSelectionState {
-    if (!this.view) throw new Error('Editor not mounted');
     return selectionStateFromEditorState(this.view.state);
   }
 
@@ -101,9 +102,20 @@ export class ProseMirrorEditor implements MountablePromptEditor {
   }
 
   destroy(): void {
-    this.view?.destroy();
-    this.view = null;
+    this.view.destroy();
     this.listeners.clear();
     this.selectionListeners.clear();
+  }
+
+  private apply(transaction: Transaction): void {
+    const newState = this.view.state.apply(transaction);
+    this.view.updateState(newState);
+    if (transaction.docChanged) {
+      const content = fromProseMirrorDoc(newState.doc);
+      this.listeners.forEach((listener) => listener(content));
+    }
+    // Every transaction, not just docChanged: cursor moves change the snapshot.
+    const selectionState = selectionStateFromEditorState(newState);
+    this.selectionListeners.forEach((listener) => listener(selectionState));
   }
 }

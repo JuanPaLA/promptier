@@ -26,7 +26,7 @@ plays, so a reader can tell ProseMirror-only code from translation code:
 
 ```
 infrastructure/prosemirror/
-├─ ProseMirrorEditor.ts     the adapter — implements the port; the only root file
+├─ proseMirrorEditor.ts     the adapter — implements the port; the only root file
 ├─ descriptors/             the engine definition: what can exist, how it behaves
 │  ├─ promptSchema.ts       assembled from every descriptor's spec
 │  ├─ blocks/               BlockDescriptor + its registry + one file per block
@@ -44,9 +44,10 @@ their *derived product*, not a peer input.
 **The swap unit is `PromptEditor`, not `BlockDescriptor`.** `nodeSpec`, content
 expressions, node views and input rules aren't incidental to ProseMirror — they
 *are* its model, so descriptors speak ProseMirror on purpose and are not
-portable. Migrating engines means writing a new adapter (`XEditor implements
-MountablePromptEditor`) plus a new set of descriptors; the port, the domain and
-the renderers survive untouched. Descriptors are the adapter's internals.
+portable. Migrating engines means writing a new adapter (a `createXEditor`
+factory returning an `EditorSession`) plus a new set of descriptors; the port,
+the domain and the renderers survive untouched. Descriptors are the adapter's
+internals.
 
 ## Domain model
 
@@ -195,14 +196,33 @@ Decided and implemented:
   jumps the caret. Ids are minted only where a section is created. A host
   authoring content by hand calls `newSectionId()` itself; a section left with
   an empty id simply isn't outline-navigable.
-- **The port carries the lifecycle, and the element depends on the port.**
-  `PromptEditor` is the platform-free surface (read, write, run, observe);
-  `MountablePromptEditor` extends it with `mount`/`destroy` so `HTMLElement`
-  reaches only consumers that own a DOM lifecycle. `PromptEditorElement` holds a
-  `MountablePromptEditor` and builds it in a `protected createEditor()` — a
-  custom element can't take constructor arguments (hosts create it through the
-  tag), so an overridable factory is the only real seam. Without this the port
-  existed but nothing depended on it: all of the cost, none of the benefit.
+- **The port is a capability; the element is the lifecycle owner; hosts know
+  neither.** `PromptEditor` says only what you can do with a *live* editor (read,
+  write, run, observe). Creating one is `createProseMirrorEditor(container,
+  initialContent)`, which returns an `EditorSession` — the editor plus the
+  authority to end it. There is no `mount`: an `EditorView` without a container
+  isn't a dormant editor, it's nothing, so having a container is a precondition
+  of *existing*, not a later call. This is what retired the earlier
+  `PromptEditor`/`MountablePromptEditor` split, which tried to express a
+  *phase* boundary ("not valid yet") with a *capability* boundary — so the
+  narrow half was exactly the six methods that threw before `mount`, and no
+  consumer ever depended on it.
+  - The element owns the lifecycle because it is the only party the browser
+    tells about attachment: it creates in `connectedCallback`, destroys in
+    `disconnectedCallback`, and holds the document in `pendingContent` across
+    the gap. One nullable `session` field replaced a non-null editor plus a
+    parallel `mounted` flag — nullness *is* mountedness, so they cannot desync.
+  - `destroy` sits on `EditorSession`, not on `PromptEditor`, so anything handed
+    an editor can drive it but not end it. The concrete class is unexported, so
+    the module boundary enforces that, not just the type.
+  - **Hosts never see any of it.** `createProseMirrorEditor`, `EditorSession`
+    and `destroy` stay out of `index.ts`. Removing the element from the DOM
+    *is* destroy — the custom element turns lifecycle into the browser's job,
+    which is the main reason it's the public surface.
+  - `protected createEditor(container, initialContent)` remains the engine seam
+    (a custom element can't take constructor arguments); only its signature and
+    call site moved. A consequence worth keeping: an element created and never
+    connected now builds no engine at all.
 - **The domain is plain serializable data, never classes.** It crosses storage,
   the network and React state; it is versioned for migration; and every
   operation on it (`toMarkdown`, `toXml`, a future `validate`, token counting) is
