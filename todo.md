@@ -8,7 +8,7 @@
 
 ## DOMAIN
 [] formats: italic, underline, 
-[] blocks: quote, 
+[] blocks: quote, sublists
 [] references: tools, tags, variables, sections as <role>
 [] think of defined domain elements such as "chain of thought"
 [] section: rethink // The section's title is its heading; the level comes from nesting depth,

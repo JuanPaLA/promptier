@@ -1,3 +1,4 @@
+import type { CodeBlock } from './blocks/CodeBlock';
 import type { HeadingBlock } from './blocks/HeadingBlock';
 import type { OrderedListBlock } from './blocks/OrderedListBlock';
 import type { ParagraphBlock } from './blocks/ParagraphBlock';
@@ -12,6 +13,7 @@ import type { UnorderedListBlock } from './blocks/UnorderedListBlock';
 export type Block =
   | ParagraphBlock
   | HeadingBlock
+  | CodeBlock
   | OrderedListBlock
   | UnorderedListBlock
   | SectionBlock;

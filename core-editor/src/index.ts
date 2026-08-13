@@ -1,10 +1,6 @@
 export { PromptEditorElement, registerPromptEditor } from './element/PromptEditorElement';
-export {
-  toMarkdown,
-} from './core/app/rendering/toMarkdown';
-export {
-  toXml,
-} from './core/app/rendering/toXml';
+export { serialize } from './core/app/format/serialize';
+export { parse } from './core/app/format/parse';
 export type {
   Block,
   BlockType,
@@ -16,6 +12,9 @@ export type {
   HeadingBlock,
 } from './core/domain/blocks/HeadingBlock';
 export type {
+  CodeBlock,
+} from './core/domain/blocks/CodeBlock';
+export type {
   OrderedListBlock,
 } from './core/domain/blocks/OrderedListBlock';
 export type {
@@ -24,8 +23,7 @@ export type {
 export type {
   SectionBlock,
 } from './core/domain/blocks/SectionBlock';
-export { newSectionId } from './core/domain/blocks/SectionBlock';
-export { sectionTagName } from './core/app/rendering/sectionTagName';
+export { sectionTagName, sectionTitleFromTag } from './core/app/format/sectionTag';
 export type {
   BlockContent,
   TextSegment,

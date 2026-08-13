@@ -48,11 +48,19 @@ container block.
    `descriptors/blocks/blockDescriptorRegistry.ts`. Registry order matters:
    paragraph stays first (it's the doc's default block).
 
-5. **Renderers** — add the `case '<name>':` to `blockToMarkdown` in
-   `core-editor/src/core/app/rendering/toMarkdown.ts` **and** to `blockToXml` in
-   `toXml.ts`. Container blocks recurse (`blocksToMarkdown(children, depth + 1)`
-   / `blocksToXml(children)`). Both `default` branches are exhaustiveness checks
-   — typecheck fails until the cases exist.
+5. **Codec** — the block must survive a round trip through the text format, or
+   saving silently loses it. Read [docs/format.md](../../../docs/format.md)
+   first, then:
+   - add the `case '<name>':` to `blockToText` in
+     `core-editor/src/core/app/format/serialize.ts` (container blocks recurse
+     via `blocksToText(children)`). The `default` branch is an exhaustiveness
+     check — typecheck fails until the case exists.
+   - teach `parseBlocks` in `format/parse.ts` to recognize it, and add it to
+     `startsBlock` so a paragraph doesn't swallow it.
+   - if its text form could collide with plain paragraph text, extend
+     `startsBlock` in `format/textEscaping.ts` so paragraphs escape it.
+   - add a corpus entry to `format/roundTrip.test.ts`. Nothing about the parser
+     is checkable by reading — `yarn test` is the verification.
 
 6. **Public surface** — export the block's type from
    `core-editor/src/index.ts`.
@@ -66,7 +74,9 @@ container block.
 
 ## Verify
 
+- `corepack yarn test`
 - `corepack yarn workspaces foreach -A run typecheck`
-- Start the playground (preview server `playground-dev`) and confirm:
-  the block renders, editing round-trips (Live Domain State panel shows the
-  expected JSON), and the Markdown panel shows the expected output.
+- Start the playground (preview server `playground-dev`) and confirm: the block
+  renders, the Prompt JSON pane shows the expected domain shape, the Prompt text
+  pane shows the expected serialization, and the Round-trip pane still reads
+  **● stable**.

@@ -42,6 +42,16 @@ const CSS = `
   line-height: 1;
   color: #57606a;
 }
+.prompt-code-block {
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 4px;
+  background: #f6f8fa;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
 .prompt-ordered-list,
 .prompt-unordered-list {
   margin: 0.5rem 0;

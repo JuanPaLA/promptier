@@ -10,7 +10,7 @@ contracts between workspaces.
 ```
 core-editor
 ├─ src/core/domain/          plain serializable data types — no ProseMirror, no DOM
-├─ src/core/app/             ports & pure use-cases (PromptEditor, toMarkdown, toXml)
+├─ src/core/app/             ports & pure use-cases (PromptEditor, format codec)
 ├─ src/core/infrastructure/  ProseMirror implementation (schema, mappers, descriptors)
 └─ src/element/              outer packaging: the Custom Element that index.ts re-exports
 react-sdk                    thin React wrapper over the element's property/event contract
@@ -51,11 +51,12 @@ internals.
 
 ## Domain model
 
-The document is `PromptContent`: a `version` tag plus a list of `Block`s. It is
-**opaque to hosts** — a dev consuming the SDK persists it wherever they want,
-feeds it back, and renders it with `toMarkdown`. They never author or maintain
-the JSON by hand; the editor is its only writer. `version` exists so documents
-stored long-term (future backoffice) can be migrated when the format evolves.
+The document is `PromptContent`: a `version` tag plus a list of `Block`s. Most
+hosts never see it — the SDK contract is a string (`element.value`, see
+[format.md](format.md)), and `PromptContent` is the *hosted* product's storage,
+where exact fidelity matters. The editor is its only writer. `version` exists so
+stored documents can be migrated when the shape evolves; v2 dropped
+`SectionBlock.id`.
 
 `Block` (in `domain/Block.ts`) **is** the discriminated union on `blockType` —
 there is no separate base interface, so typing anything as `Block` always
@@ -65,16 +66,17 @@ registries:
 - `ParagraphBlock`, `HeadingBlock` — leaf text blocks; they carry inline
   content as `BlockContent` (a list of `TextSegment`s, each with optional
   `Format` marks: bold, code).
-- `SectionBlock` — a titled, **recursive container** (`children: Block[]`).
-  Carries a stable `id` (outline navigation, future cross-references), a plain
-  `title`, and an optional `description` documenting the section's intent.
-  The description is authoring metadata: round-trips through the editor,
-  never rendered to markdown.
+- `CodeBlock` — literal text with an optional `language`. Carries a plain
+  `code` string rather than `BlockContent`: code has no segments to format, and
+  its whitespace is significant. It is also the format's escape hatch — markup
+  inside a fence is never structure.
+- `SectionBlock` — a titled, **recursive container** (`children: Block[]`) with
+  an optional `description` documenting its intent. It carries **no id**:
+  identity is derived from the title (see below).
 
 Sections are first-class rather than inferred from headings because prompt
 *structure* is the editor's value proposition: validation, outline, and
-restructuring all need the structure to exist in the model. The title **is**
-the section's heading — users never manage `#` levels (see Rendering).
+restructuring all need the structure to exist in the model.
 
 ## The descriptor seam (how blocks reach ProseMirror)
 
@@ -139,43 +141,48 @@ these before writing an offset.
 - Structural editor CSS is injected once per document (`styles/editorStyles.ts`)
   because the element mounts in light DOM and `core-editor` has no CSS
   pipeline.
-- Section ids come from `newSectionId()` at the point a section is *created*
-  (the `/section ` input rule). Mapping never mints one — see the decisions log.
+- Section identity is **derived, never stored**: `sectionTagName(title)` is
+  simultaneously the serialized tag, the outline anchor and the id. A stored
+  attr would go stale the moment the title is edited, so `SectionNodeView`
+  recomputes `data-section-id` on every update.
 
-## Rendering (app layer)
+## The format codec (app layer)
 
-`toMarkdown` is a pure function over `PromptContent`, recursive with a `depth`
-parameter:
+`app/format/` holds the one serialization: `serialize` and `parse`, pure and
+DOM-free. XML tags carry structure, markdown carries everything inside — what a
+host stores *is* what a model reads. The grammar, the escaping rules, the
+degradation rule and the two round-trip laws live in [format.md](format.md);
+`roundTrip.test.ts` enforces them.
 
-- A section renders its title as a heading whose level **is its nesting
-  depth** (`#` top-level, `##` one deeper, capped at 6). Moving a section
-  renumbers its whole subtree on export — users never sync heading levels.
-- `description` is not rendered (authoring metadata).
-- Loose `HeadingBlock`s keep their explicit level — an escape hatch inside
-  section bodies.
-- Multi-format segments nest per `FORMAT_ORDER` (innermost first).
+There is deliberately **no second rendering**. `toMarkdown`/`toXml` used to
+coexist, and two section renderings were the whole source of parse-back
+ambiguity: a `#` could be a section title or a loose heading, and no parser
+could tell. Collapsing to one format made `HeadingBlock` unambiguous again
+rather than costing it.
 
-Markdown is one rendering strategy, not the model. A section maps equally well
-to XML tags (`<dialogue_rules>…</dialogue_rules>`, via `toXml` +
-`sectionTagName`); alternative renderers can be added beside `toMarkdown`
-without touching the domain. That is why the domain is data and the renderers
-are functions over it: each new strategy is a new fold, not a new method on
-every block.
+The domain is still data and the codec is still a fold over it, so a second
+strategy remains cheap to add — it is just no longer canonical.
 
 ## Consumption chain
 
-- `PromptEditorElement` (Custom Element) is the public surface:
-  a `content` property (get/set `PromptContent`) and a `change` CustomEvent
-  carrying the new content. That's the whole contract.
+- `PromptEditorElement` (Custom Element) is the public surface. Two properties
+  project one document: **`value`** (prompt text — the SDK contract, also
+  settable as a `value` attribute for plain-HTML hosts) and **`content`**
+  (`PromptContent`, for hosts that want structure). Last write wins; both defer
+  until the editor mounts. Plus `change` / `selectionchange` events.
+  `value` has initial-value semantics like a textarea's content: set it once,
+  read it when saving — binding it per keystroke would re-parse while the user
+  types and fight the caret.
 - `react-sdk` offers two shapes over that contract and no editor logic:
   `PromptEditorField` (controlled component, `content`/`onChange` props) and
   `usePromptEditor` (headless, returns a `PromptEditorController` — the element
   ref, `run`, and the current selection). When a Context layer lands, a
   `PromptEditorProvider` component publishes that same controller.
 - `playground` demonstrates host responsibilities: hold state, derive views
-  from it (outline via a pure walk over `blocks`, markdown preview via
-  `toMarkdown`), navigate using the `data-section-id` attribute the editor
-  puts on section DOM.
+  from it (outline via a pure walk over `blocks`, prompt text via `serialize`),
+  navigate using the `data-section-id` attribute the editor puts on section
+  DOM, and — in `TextLoader` — the string-in/string-out SDK contract. Its
+  round-trip pane checks the codec's law live.
 
 ## Design decisions log
 
@@ -183,19 +190,30 @@ Decided and implemented:
 
 - Sections are first-class blocks, not heading-delimited runs. (Structure must
   exist in the model to be validated, outlined, restructured.)
-- The element keeps a single `content` input; the document *is* the structure.
-  No parallel "structured input" to keep in sync.
+- The element keeps one document; `value` and `content` are two views onto it,
+  not two inputs to reconcile.
 - Collapse (and any future presentation state) stays out of the JSON.
-- `PromptContent` is versioned from day one; hosts treat it as opaque.
-- Section ids are stable and generated by the editor (`newSectionId`).
-- **Mappers are pure functions of their input.** `toProseMirrorNode` passes
-  `block.id` through unchanged rather than minting one for an empty id. It used
-  to, and because `setContent` skips no-op updates by comparing the mapped doc
-  against the current one, a section with an empty id produced a different doc
-  on every pass — recreating the `EditorState`, which wipes undo history and
-  jumps the caret. Ids are minted only where a section is created. A host
-  authoring content by hand calls `newSectionId()` itself; a section left with
-  an empty id simply isn't outline-navigable.
+- `PromptContent` is versioned from day one.
+- **One format, not two.** The string is simultaneously what a host stores and
+  what a model reads, so there is no "export" rendering to diverge from it. A
+  second output was designed and dropped: descriptions serialize as comments and
+  go to the model with everything else, since a stripped variant is a
+  non-breaking `serialize(content, { comments: false })` if token cost ever
+  argues for it. See [format.md](format.md).
+- **Section identity is derived from the title, not stored.** The tag, the
+  outline anchor and the id are one value. This replaced minted ids
+  (`newSectionId`), which existed because the format could not carry them —
+  once the tag *is* the identity, minting is redundant and a stored attr is
+  worse than redundant: it goes stale as the title is typed. The cost is that
+  titles slugify (case and diacritics degrade once, then hold) and same-slug
+  siblings collide. Real identity returns as a versioned migration when
+  cross-references need it.
+- **Mappers are pure functions of their input** — they never mint ids or read
+  the clock. `setContent` skips no-op updates by comparing the mapped doc
+  against the current one, so a mapper that invented a value would produce a
+  different doc on every pass, recreating the `EditorState`, wiping undo history
+  and jumping the caret. Deriving identity from the title preserves this:
+  same input, same output.
 - **The port is a capability; the element is the lifecycle owner; hosts know
   neither.** `PromptEditor` says only what you can do with a *live* editor (read,
   write, run, observe). Creating one is `createProseMirrorEditor(container,
@@ -225,15 +243,16 @@ Decided and implemented:
     connected now builds no engine at all.
 - **The domain is plain serializable data, never classes.** It crosses storage,
   the network and React state; it is versioned for migration; and every
-  operation on it (`toMarkdown`, `toXml`, a future `validate`, token counting) is
+  operation on it (`serialize`, a future `validate`, token counting) is
   a fold over the tree. Classes would demand a second recursive rehydration
   mapper beside the ProseMirror one, break structural equality, and pull each
   consumer's concern onto the block itself. Nothing is lost by leaving them out,
   because the invariants live in the ProseMirror grammar, not in the objects —
   see the permissiveness note below.
-- **`sectionTagName` lives in `app/rendering/`, not in `domain/`.** Deriving an
-  XML tag from a title is a rendering artifact; the domain shouldn't know that
-  titles become tags. `SectionNodeView` imports it from there to draw its hint.
+- **`sectionTagName` lives in `app/format/`, not in `domain/`.** Deriving a tag
+  from a title is a format artifact; the domain shouldn't know that titles
+  become tags. `SectionNodeView` and `sectionDescriptor` import it from there
+  for the tag hint and the outline anchor.
 - `Block` is the closed union itself, not an open base interface, and it is the
   single source of truth: `BlockType` derives from it, and the document
   (`PromptContent.blocks`, `SectionBlock.children`) is typed with it. The
@@ -264,10 +283,14 @@ Decided, not yet implemented (direction commitments):
   referenced from blocks by id (mention-like nodes). Rendering resolves them.
   Blocks must not embed resource payloads.
 
-Known gaps (accepted for the walking skeleton): no tests, so the round-trip
-invariant `fromProseMirrorDoc(toProseMirrorDoc(c)) ≡ c` is unverified; no editing
-UI for section `description`; copy/pasting a section duplicates its `id`; no id
-dedupe; `commandRegistry` collects commands only from mark descriptors, so block
+Known gaps (accepted for the walking skeleton): the codec is under test, but the
+mapper invariant `fromProseMirrorDoc(toProseMirrorDoc(c)) ≡ c` is not — the one
+codec bug found so far (whitespace-only blocks surviving `serialize` but skipped
+by `parse`) was reported from the playground, not caught by a test; no editing
+UI for section `description`; sections whose titles slugify alike share an
+anchor; `commandRegistry` collects commands only from mark descriptors, so block
 commands (copy, delete, move, turn into) will require modifying it rather than
 extending it; `PromptEditorSurface` registers the custom element at module scope,
-which throws on import under SSR.
+which throws on import under SSR; `core-editor` is still `private` with `main`
+pointing at TS source, so there is nothing to put in a `<script src>` — that is
+Phase 3.

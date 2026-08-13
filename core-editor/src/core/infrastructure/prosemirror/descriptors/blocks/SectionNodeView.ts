@@ -1,6 +1,6 @@
 import { Node as ProseMirrorNode } from 'prosemirror-model';
 import { NodeView, ViewMutationRecord } from 'prosemirror-view';
-import { sectionTagName } from '../../../../app/rendering/sectionTagName';
+import { sectionTagName } from '../../../../app/format/sectionTag';
 
 const COLLAPSED_CLASS = 'prompt-section-collapsed';
 
@@ -18,7 +18,6 @@ export class SectionNodeView implements NodeView {
   constructor(node: ProseMirrorNode) {
     this.dom = document.createElement('section');
     this.dom.className = 'prompt-section';
-    this.dom.dataset.sectionId = node.attrs.id;
 
     this.toggle = document.createElement('button');
     this.toggle.type = 'button';
@@ -43,20 +42,24 @@ export class SectionNodeView implements NodeView {
     this.contentDOM.className = 'prompt-section-content';
 
     this.dom.append(this.toggle, this.tagHint, this.contentDOM);
-    this.renderTagHint(node);
+    this.renderIdentity(node);
   }
 
   update(node: ProseMirrorNode): boolean {
     if (node.type.name !== 'section') return false;
-    this.dom.dataset.sectionId = node.attrs.id;
-    this.renderTagHint(node);
+    this.renderIdentity(node);
     return true;
   }
 
-  private renderTagHint(node: ProseMirrorNode): void {
+  /**
+   * The tag is the section's identity: its serialized XML tag, its outline
+   * anchor and its id are one derived value, recomputed as the title is typed.
+   */
+  private renderIdentity(node: ProseMirrorNode): void {
     // First child is the sectionTitle node (grammar: `sectionTitle block+`).
-    const title = node.firstChild?.textContent ?? '';
-    this.tagHint.textContent = `<${sectionTagName(title)}>`;
+    const tag = sectionTagName(node.firstChild?.textContent ?? '');
+    this.dom.dataset.sectionId = tag;
+    this.tagHint.textContent = `<${tag}>`;
   }
 
   stopEvent(event: Event): boolean {

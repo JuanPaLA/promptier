@@ -1,7 +1,8 @@
 import { InputRule } from 'prosemirror-inputrules';
 import { NodeSpec } from 'prosemirror-model';
 import type { Block } from '../../../../domain/Block';
-import { newSectionId, type SectionBlock } from '../../../../domain/blocks/SectionBlock';
+import type { SectionBlock } from '../../../../domain/blocks/SectionBlock';
+import { sectionTagName } from '../../../../app/format/sectionTag';
 import { caretAfterNode, replaceRangeWithBlock } from '../../editing/blockTransactions';
 import type { BlockDescriptor } from './BlockDescriptor';
 import { SectionNodeView } from './SectionNodeView';
@@ -22,10 +23,10 @@ export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
       block.children.length > 0
         ? block.children.map(mapChild)
         : [schema.nodes.paragraph.createAndFill()!];
-    return schema.nodes.section.create(
-      { id: block.id, description: block.description ?? null },
-      [title, ...children],
-    );
+    return schema.nodes.section.create({ description: block.description ?? null }, [
+      title,
+      ...children,
+    ]);
   },
 
   fromProseMirrorNode: (node, mapChild) => {
@@ -41,7 +42,6 @@ export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
     const description = node.attrs.description as string | null;
     return {
       blockType: 'section',
-      id: node.attrs.id as string,
       title,
       ...(description !== null ? { description } : {}),
       children,
@@ -53,7 +53,7 @@ export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
       const $start = state.doc.resolve(start);
       if ($start.parent.type !== schema.nodes.paragraph) return null;
       if ($start.parent.textContent !== '/section') return null;
-      const section = schema.nodes.section.create({ id: newSectionId() }, [
+      const section = schema.nodes.section.create(null, [
         schema.nodes[SECTION_TITLE_NODE].create(),
         schema.nodes.paragraph.create(),
       ]);
@@ -78,18 +78,21 @@ function sectionNodeSpec(): NodeSpec {
     group: 'block',
     content: `${SECTION_TITLE_NODE} block+`,
     attrs: {
-      id: { default: '' },
       description: { default: null },
     },
     defining: true,
+    // The anchor is derived from the title node, not stored: a stored attr would
+    // go stale the moment the title is edited.
     toDOM: (node) =>
-      ['section', { class: 'prompt-section', 'data-section-id': node.attrs.id }, 0] as const,
-    parseDOM: [
-      {
-        tag: 'section.prompt-section',
-        getAttrs: (dom) => ({ id: (dom as HTMLElement).getAttribute('data-section-id') ?? '' }),
-      },
-    ],
+      [
+        'section',
+        {
+          class: 'prompt-section',
+          'data-section-id': sectionTagName(node.firstChild?.textContent ?? ''),
+        },
+        0,
+      ] as const,
+    parseDOM: [{ tag: 'section.prompt-section' }],
   };
 }
 

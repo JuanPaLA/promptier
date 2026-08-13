@@ -1,27 +1,18 @@
 import type { Block } from '../Block';
 
 /**
- * A titled, recursive container of blocks. The title *is* the section's
- * heading: markdown rendering derives `#` depth from nesting, so users never
- * manage heading levels by hand. `description` documents the section's intent
- * (for humans and future structure linting) — it is not rendered.
+ * A titled, recursive container of blocks.
+ *
+ * Identity is derived, never stored: the title slugifies to the section's tag,
+ * which is simultaneously its serialized XML tag, its outline anchor and its
+ * id. Two sections whose titles slugify alike are indistinguishable — accepted
+ * until cross-references need real identity, which will be a versioned
+ * migration like any other.
  */
 export interface SectionBlock {
   readonly blockType: 'section';
-  /** Stable identity for outline navigation and future cross-references. */
-  readonly id: string;
   readonly title: string;
+  /** The section's intent, for maintainers. Serialized as a comment. */
   readonly description?: string;
   readonly children: Block[];
-}
-
-/**
- * Mints a section identity. Call it where a section is *created* — never while
- * mapping an existing one, or the same document would map to a different id on
- * every pass (see the decisions log on mapper purity).
- */
-export function newSectionId(): string {
-  return typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `section-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }

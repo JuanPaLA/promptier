@@ -2,7 +2,7 @@
 
 A business-domain editor for LLM prompts, built on ProseMirror.
 
-Architecture, the domain→ProseMirror descriptor seam, and the design decisions log live in [docs/architecture.md](docs/architecture.md).
+Architecture, the domain→ProseMirror descriptor seam, and the design decisions log live in [docs/architecture.md](docs/architecture.md). The prompt text format — the one serialization, and a permanent compatibility surface — is specified in [docs/format.md](docs/format.md).
 
 ## Workspaces (yarn workspaces)
 
@@ -34,7 +34,7 @@ camelCase ⟺ it exports values or functions (`sectionDescriptor.ts`,
 `function` declarations over `const` arrows for module-level helpers — hoisting
 is what makes the ordering possible. A `const` may sit below a function that
 reads it *at call time*; it may not if the function runs during module
-evaluation (that's a TDZ error). `app/rendering/toMarkdown.ts` is the reference.
+evaluation (that's a TDZ error). `app/format/serialize.ts` is the reference.
 
 **Comments.** Explain what the code cannot. Keep ProseMirror lore that isn't
 derivable from the code (`a PM command called without dispatch is a dry run`) and
@@ -48,6 +48,7 @@ in `infrastructure/prosemirror/editing/` instead.
 ```
 yarn install                    # from repo root
 yarn workspace playground dev   # start the playground
+yarn test                       # vitest, from repo root
 ```
 
 This is intentionally minimal — avoid reading more architectural intent into it than what's written above; the domain model and editor capabilities are still evolving.

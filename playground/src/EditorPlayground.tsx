@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useState, type RefObject } from 'react';
 import {
-  toMarkdown,
-  toXml,
+  PROMPT_CONTENT_VERSION,
+  parse,
+  sectionTagName,
+  serialize,
   type Block,
   type EditorCommand,
   type EditorSelectionState,
   type PromptContent,
+  type PromptEditorElement,
   type SectionBlock,
 } from 'core-editor';
 import { PromptEditorSurface, usePromptEditor } from 'react-sdk';
 
 const initialContent: PromptContent = {
-  version: 1,
+  version: PROMPT_CONTENT_VERSION,
   blocks: [
     { blockType: 'paragraph', content: [
       { text: 'Eres un asistente de soporte. Escribe ' },
@@ -20,7 +23,6 @@ const initialContent: PromptContent = {
     ] },
     {
       blockType: 'section',
-      id: 'objetivos',
       title: 'Objetivos',
       description: 'Qué debe lograr el asistente en cada conversación.',
       children: [
@@ -29,12 +31,10 @@ const initialContent: PromptContent = {
     },
     {
       blockType: 'section',
-      id: 'reglas-dialogo',
       title: 'Reglas de diálogo',
       children: [
         {
           blockType: 'section',
-          id: 'reglas-formato',
           title: 'Reglas de formato',
           children: [
             { blockType: 'paragraph', content: [
@@ -51,7 +51,6 @@ const initialContent: PromptContent = {
         },
         {
           blockType: 'section',
-          id: 'reglas-estilo',
           title: 'Reglas de estilo',
           children: [
             { blockType: 'paragraph', content: [{ text: 'Tono cordial y directo.' }] },
@@ -59,12 +58,29 @@ const initialContent: PromptContent = {
               [{ text: 'Evita jerga técnica innecesaria.' }],
               [{ text: 'Usa frases ' }, { text: 'cortas', formats: ['bold'] }, { text: '.' }],
             ] },
+            { blockType: 'codeBlock', language: 'json', code: '{\n  "tono": "cordial",\n  "maxTurnos": 3\n}' },
           ],
         },
       ],
     },
   ],
 };
+
+const PANE_STYLE = {
+  margin: 0,
+  background: '#f5f5f5',
+  padding: '0.75rem',
+  borderRadius: 4,
+  minHeight: 160,
+  overflow: 'auto',
+  whiteSpace: 'pre-wrap',
+} as const;
+
+/** The codec's law, checked live: serializing a parsed document is a no-op. */
+function roundTripsCleanly(content: PromptContent): boolean {
+  const text = serialize(content);
+  return serialize(parse(text)) === text;
+}
 
 interface OutlineEntry {
   id: string;
@@ -76,7 +92,7 @@ function collectOutline(blocks: Block[], depth = 0): OutlineEntry[] {
   return blocks
     .filter((block): block is SectionBlock => block.blockType === 'section')
     .flatMap((section) => [
-      { id: section.id, title: section.title || '(sin título)', depth },
+      { id: sectionTagName(section.title), title: section.title || '(sin título)', depth },
       ...collectOutline(section.children, depth + 1),
     ]);
 }
@@ -87,9 +103,9 @@ function Outline({ blocks }: { blocks: Block[] }) {
     <nav style={{ height: '100%', overflow: 'auto' }}>
       <h2 style={{ margin: '0 0 0.75rem' }}>Arbol</h2>
       {entries.length === 0 && <p style={{ color: '#888' }}>Sin secciones todavía.</p>}
-      {entries.map((entry) => (
+      {entries.map((entry, index) => (
         <div
-          key={entry.id}
+          key={`${entry.id}-${index}`}
           style={{ paddingLeft: entry.depth * 16, cursor: 'pointer', lineHeight: 1.8 }}
           onClick={() =>
             document
@@ -155,6 +171,45 @@ function FormatToolbar({
   );
 }
 
+/**
+ * The whole SDK contract, demonstrated: a host hands the editor a string and
+ * takes one back, never touching `PromptContent`. This playground is a
+ * *controlled* host, so it resyncs its own state afterwards — a plain SDK
+ * consumer would only ever read `element.value` when saving.
+ */
+function TextLoader({
+  elementRef,
+  onLoaded,
+}: {
+  elementRef: RefObject<PromptEditorElement>;
+  onLoaded: (content: PromptContent) => void;
+}) {
+  const [draft, setDraft] = useState('');
+  return (
+    <section style={{ marginTop: '1.5rem' }}>
+      <h2 style={{ margin: '0 0 0.75rem' }}>Load from text (SDK contract)</h2>
+      <textarea
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        placeholder={'<goals>\nBe fast.\n</goals>'}
+        style={{ width: '100%', minHeight: 120, fontFamily: 'ui-monospace, monospace', padding: '0.5rem' }}
+      />
+      <button
+        type="button"
+        onClick={() => {
+          const element = elementRef.current;
+          if (!element) return;
+          element.value = draft;
+          onLoaded(element.content);
+        }}
+        style={{ marginTop: '0.5rem', padding: '0.4rem 0.9rem', cursor: 'pointer' }}
+      >
+        Load into editor
+      </button>
+    </section>
+  );
+}
+
 export function EditorPlayground() {
   const [content, setContent] = useState<PromptContent>(initialContent);
   const { elementRef, run, selection } = usePromptEditor({ content, onChange: setContent });
@@ -200,54 +255,24 @@ export function EditorPlayground() {
         }}
       >
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ margin: '0 0 0.75rem' }}>Markdown</h2>
-          <pre
-            style={{
-              margin: 0,
-              background: '#f5f5f5',
-              padding: '0.75rem',
-              borderRadius: 4,
-              minHeight: 160,
-              overflow: 'auto',
-              whiteSpace: 'pre-wrap',
-            }}
-          >
-            {toMarkdown(content)}
-          </pre>
+          <h2 style={{ margin: '0 0 0.75rem' }}>Prompt text</h2>
+          <pre style={PANE_STYLE}>{serialize(content)}</pre>
         </div>
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ margin: '0 0 0.75rem' }}>XML</h2>
-          <pre
-            style={{
-              margin: 0,
-              background: '#f5f5f5',
-              padding: '0.75rem',
-              borderRadius: 4,
-              minHeight: 160,
-              overflow: 'auto',
-              whiteSpace: 'pre-wrap',
-            }}
-          >
-            {toXml(content)}
-          </pre>
+          <h2 style={{ margin: '0 0 0.75rem' }}>
+            Round-trip{' '}
+            <span style={{ fontSize: '0.7em', color: roundTripsCleanly(content) ? '#1a7f37' : '#cf222e' }}>
+              {roundTripsCleanly(content) ? '● stable' : '● differs'}
+            </span>
+          </h2>
+          <pre style={PANE_STYLE}>{serialize(parse(serialize(content)))}</pre>
         </div>
         <div style={{ minWidth: 0 }}>
           <h2 style={{ margin: '0 0 0.75rem' }}>Prompt JSON</h2>
-          <pre
-            style={{
-              margin: 0,
-              background: '#f5f5f5',
-              padding: '0.75rem',
-              borderRadius: 4,
-              minHeight: 160,
-              overflow: 'auto',
-              whiteSpace: 'pre-wrap',
-            }}
-          >
-            {JSON.stringify(content, null, 2)}
-          </pre>
+          <pre style={PANE_STYLE}>{JSON.stringify(content, null, 2)}</pre>
         </div>
       </section>
+      <TextLoader elementRef={elementRef} onLoaded={setContent} />
     </div>
   );
 }

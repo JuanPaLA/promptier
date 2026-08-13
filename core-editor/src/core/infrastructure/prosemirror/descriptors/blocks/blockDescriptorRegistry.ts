@@ -5,6 +5,7 @@ import { Command } from 'prosemirror-state';
 import { NodeViewConstructor } from 'prosemirror-view';
 import type { Block, BlockType } from '../../../../domain/Block';
 import { BlockDescriptor } from './BlockDescriptor';
+import { codeBlockDescriptor } from './codeBlockDescriptor';
 import { headingDescriptor } from './headingDescriptor';
 import { orderedListDescriptor } from './orderedListDescriptor';
 import { paragraphDescriptor } from './paragraphDescriptor';
@@ -69,6 +70,7 @@ function blockRegistry(): BlockDescriptorRegistry {
   return {
     paragraph: paragraphDescriptor,
     heading: headingDescriptor,
+    codeBlock: codeBlockDescriptor,
     orderedList: orderedListDescriptor,
     unorderedList: unorderedListDescriptor,
     section: sectionDescriptor,
