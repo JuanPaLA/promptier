@@ -1,6 +1,8 @@
 export { PromptEditorElement, registerPromptEditor } from './element/PromptEditorElement';
 export { serialize } from './core/app/format/serialize';
 export { parse } from './core/app/format/parse';
+export { outline } from './core/app/outline/outline';
+export type { OutlineEntry } from './core/app/outline/OutlineEntry';
 export type {
   Block,
   BlockType,
@@ -28,7 +30,6 @@ export type {
   BlockContent,
   TextSegment,
 } from './core/domain/BlockContent';
-export { PROMPT_CONTENT_VERSION } from './core/domain/PromptContent';
 export type {
   PromptContent,
 } from './core/domain/PromptContent';

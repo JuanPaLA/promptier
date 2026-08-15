@@ -1,7 +1,7 @@
 import type { Block } from '../../domain/Block';
 import type { BlockContent, TextSegment } from '../../domain/BlockContent';
 import type { Format } from '../../domain/Format';
-import { PROMPT_CONTENT_VERSION, type PromptContent } from '../../domain/PromptContent';
+import type { PromptContent } from '../../domain/PromptContent';
 import { sectionTitleFromTag } from './sectionTag';
 import { isEscapable, unescapeBlockStart, unescapeInlineText } from './textEscaping';
 
@@ -13,7 +13,7 @@ import { isEscapable, unescapeBlockStart, unescapeInlineText } from './textEscap
  * so nothing a host stored ever disappears. See docs/format.md.
  */
 export function parse(text: string): PromptContent {
-  return { version: PROMPT_CONTENT_VERSION, blocks: parseBlocks(splitLines(text)) };
+  return { blocks: parseBlocks(splitLines(text)) };
 }
 
 function splitLines(text: string): string[] {

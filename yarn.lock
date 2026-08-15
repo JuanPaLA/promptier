@@ -423,6 +423,56 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nbottarini/javascript-extensions@npm:^0.7.2":
+  version: 0.7.3
+  resolution: "@nbottarini/javascript-extensions@npm:0.7.3"
+  dependencies:
+    ts-custom-error: "npm:^3.3.1"
+  checksum: 10c0/93c8e6f14cdeb1fc0cfd828c783ec4ebcfee559ca709289bb4c6e954e6cb0a5a5c5e9112866dc89600e28fc8c8c5c09facc8fccf3743af7aa05946dede3faf06
+  languageName: node
+  linkType: hard
+
+"@nbottarini/react-presenter@npm:^1.0.0-rc":
+  version: 1.0.0-rc
+  resolution: "@nbottarini/react-presenter@npm:1.0.0-rc"
+  dependencies:
+    "@nbottarini/unhandled-error-decorator": "npm:^0.3.4"
+    "@nbottarini/validator": "npm:^1.1.0"
+  peerDependencies:
+    react: "*"
+  checksum: 10c0/b9976a3489ef9f69363b1590995b74f2e1bc31248019cb71288035e5aac28763fdf6fa4e9cde5ed6776988126d5da64cb03f84e5ff3a7b6215421517542a0e48
+  languageName: node
+  linkType: hard
+
+"@nbottarini/unhandled-error-decorator@npm:^0.3.4":
+  version: 0.3.4
+  resolution: "@nbottarini/unhandled-error-decorator@npm:0.3.4"
+  dependencies:
+    ts-custom-error: "npm:^3.3.1"
+  checksum: 10c0/b05113c2799dacdee4b77f2cd465c2b836102bcbcaf8d77c894107495bc4187ad091b44488542a0e87dc9d069ca928c1b11747e0634c0b840278e16ab500156f
+  languageName: node
+  linkType: hard
+
+"@nbottarini/validator-errors@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "@nbottarini/validator-errors@npm:1.1.0"
+  dependencies:
+    "@nbottarini/javascript-extensions": "npm:^0.7.2"
+    ts-custom-error: "npm:^3.3.1"
+  checksum: 10c0/ce52ac135003727c835a66b7e1155d8206ef7af61001cfe15b0fbcb31e4491c4d9a3b9e48da57ad48ff3df0af318fa78dd5f9ebc20fdd213368af45af74e91a0
+  languageName: node
+  linkType: hard
+
+"@nbottarini/validator@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@nbottarini/validator@npm:1.1.0"
+  dependencies:
+    "@nbottarini/javascript-extensions": "npm:^0.7.2"
+    "@nbottarini/validator-errors": "npm:^1.0.0"
+  checksum: 10c0/0ff9313390be3a74348f41a6498094ebbdc39014563e2e2f748ec8911e7d8d0e1db082a2e60ac330236511dae2e81502a4ae7ba9d60e4b0440edbc8915698ae8
+  languageName: node
+  linkType: hard
+
 "@oxc-project/types@npm:=0.144.0":
   version: 0.144.0
   resolution: "@oxc-project/types@npm:0.144.0"
@@ -789,6 +839,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^26.2.0":
+  version: 26.2.0
+  resolution: "@types/node@npm:26.2.0"
+  dependencies:
+    undici-types: "npm:~8.3.0"
+  checksum: 10c0/f8566d88162241eb55a46f7e4ea097188eab0aaafefea7a58e63adab8c4144eb98c08b7911452c846104c339a0f82282f5e1ed4b26b578d60709614fe2843f4d
+  languageName: node
+  linkType: hard
+
 "@types/prop-types@npm:*":
   version: 15.7.15
   resolution: "@types/prop-types@npm:15.7.15"
@@ -983,6 +1042,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "core-editor@workspace:core-editor"
   dependencies:
+    "@types/node": "npm:^26.2.0"
     prosemirror-commands: "npm:^1.6.0"
     prosemirror-history: "npm:^1.4.1"
     prosemirror-inputrules: "npm:^1.4.0"
@@ -991,6 +1051,7 @@ __metadata:
     prosemirror-state: "npm:^1.4.3"
     prosemirror-view: "npm:^1.34.3"
     typescript: "npm:^5.6.3"
+    vite: "npm:^5.4.10"
   languageName: unknown
   linkType: soft
 
@@ -1650,6 +1711,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "react-sdk@workspace:react-sdk"
   dependencies:
+    "@nbottarini/react-presenter": "npm:^1.0.0-rc"
     "@types/react": "npm:^18.3.12"
     core-editor: "workspace:*"
     react: "npm:^18.3.1"
@@ -1919,6 +1981,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ts-custom-error@npm:^3.3.1":
+  version: 3.3.1
+  resolution: "ts-custom-error@npm:3.3.1"
+  checksum: 10c0/67cc807d03406d7eeb2b908408d455d253cc43b480d669e2e3ea028b9aaa2c78ad1b392425b86368bbbc3c43a15e4abe304312d87ed845091646ec1937bab982
+  languageName: node
+  linkType: hard
+
 "typescript@npm:^5.6.3":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
@@ -1936,6 +2005,13 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/ad09fdf7a756814dce65bc60c1657b40d44451346858eea230e10f2e95a289d9183b6e32e5c11e95acc0ccc214b4f36289dcad4bf1886b0adb84d711d336a430
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~8.3.0":
+  version: 8.3.0
+  resolution: "undici-types@npm:8.3.0"
+  checksum: 10c0/c8aa7e2fbebfce519654dafadc0ece59be888d2ccaf180fb4495da875e7b536d2456345c384069c7e6f3e9c9ab7435f074957da306f142343eee86ff8048855a
   languageName: node
   linkType: hard
 

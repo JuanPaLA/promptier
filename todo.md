@@ -13,10 +13,12 @@
 [] think of defined domain elements such as "chain of thought"
 [] section: rethink // The section's title is its heading; the level comes from nesting depth,
 [X] section as xml wrapping
+[] move tests to tests root
 
 ## CONTROLS
 [] blocks options: copy, delete, move, turn into
 [] make the outline consider both sections and headings.
+[] menu bar options are displayed as ui elements by sdk and processed internaly by core as commands. 
 
 
 # QUESTIONS

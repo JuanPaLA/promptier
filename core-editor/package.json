@@ -1,12 +1,33 @@
 {
   "name": "core-editor",
-  "private": true,
   "version": "0.0.1",
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./format": "./src/core/app/format/index.ts",
+    "./standalone": "./src/standalone.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/types/index.d.ts",
+        "import": "./dist/editor.js",
+        "require": "./dist/editor.cjs"
+      },
+      "./format": {
+        "types": "./dist/types/core/app/format/index.d.ts",
+        "import": "./dist/format.js",
+        "require": "./dist/format.cjs"
+      },
+      "./standalone": "./dist/promptier.js"
+    }
+  },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "vite build && vite build -c vite.standalone.config.ts && tsc -p tsconfig.build.json"
   },
   "dependencies": {
     "prosemirror-commands": "^1.6.0",
@@ -18,6 +39,8 @@
     "prosemirror-view": "^1.34.3"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "@types/node": "^26.2.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
   }
 }

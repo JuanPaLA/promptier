@@ -1,8 +1,9 @@
-import type { EditorCommand } from '../core/app/commands/EditorCommand';
+import type { CommandId, EditorCommand } from '../core/app/commands/EditorCommand';
 import type { EditorSelectionState } from '../core/app/commands/EditorSelectionState';
-import { parse } from '../core/app/format/parse';
-import { serialize } from '../core/app/format/serialize';
-import { PROMPT_CONTENT_VERSION, type PromptContent } from '../core/domain/PromptContent';
+import { parse } from '../core/app/format';
+import { serialize } from '../core/app/format';
+import type { PromptContent } from '../core/domain/PromptContent';
+import { availableCommandIds } from '../core/infrastructure/prosemirror/commands/commandRegistry';
 import { createProseMirrorEditor } from '../core/infrastructure/prosemirror/proseMirrorEditor';
 import { EditorSession } from '../core/app/EditorSession'
 
@@ -14,7 +15,7 @@ export class PromptEditorElement extends HTMLElement {
   static readonly observedAttributes = [VALUE_ATTRIBUTE];
 
   private session: EditorSession | null = null;
-  private pendingContent: PromptContent = { version: PROMPT_CONTENT_VERSION, blocks: [] };
+  private pendingContent: PromptContent = { blocks: [] };
   private unsubscribe: (() => void) | null = null;
   private unsubscribeSelection: (() => void) | null = null;
 
@@ -60,6 +61,8 @@ export class PromptEditorElement extends HTMLElement {
   }
 
   connectedCallback(): void {
+    this.upgradeProperty('value');
+    this.upgradeProperty('content');
     this.classList.add(HOST_CLASS_NAME);
     const session = this.createEditor(this, this.pendingContent);
     this.session = session;
@@ -74,6 +77,39 @@ export class PromptEditorElement extends HTMLElement {
 
   run(command: EditorCommand): void {
     this.session?.editor.run(command);
+  }
+
+  /**
+   * The engine's command catalogue. Answerable without an editor — the set of
+   * commands is a property of the engine, not of a live document — so a host
+   * builds its menu once and asks `getSelectionState()` for what applies now.
+   */
+  availableCommands(): CommandId[] {
+    return availableCommandIds();
+  }
+
+  /**
+   * Command and format state for the current selection, pushed as
+   * `selectionchange` on every transaction. `null` before the editor mounts —
+   * there is no selection to describe yet, and callers already reach commands
+   * through an optional chain, so nothing branches on it.
+   */
+  getSelectionState(): EditorSelectionState | null {
+    return this.session?.editor.getSelectionState() ?? null;
+  }
+
+  /**
+   * A host can set `.value` before this definition loads — a deferred
+   * `<script>`, or React committing the node before the SDK registers the tag.
+   * That write lands as an *own* property which would shadow the accessor for
+   * the element's whole life, so replay it through the prototype on upgrade.
+   */
+  private upgradeProperty(name: 'value' | 'content'): void {
+    if (!Object.prototype.hasOwnProperty.call(this, name)) return;
+    const properties = this as unknown as Record<string, unknown>;
+    const pending = properties[name];
+    delete properties[name];
+    properties[name] = pending;
   }
 
   disconnectedCallback(): void {

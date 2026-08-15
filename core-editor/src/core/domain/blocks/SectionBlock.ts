@@ -6,8 +6,7 @@ import type { Block } from '../Block';
  * Identity is derived, never stored: the title slugifies to the section's tag,
  * which is simultaneously its serialized XML tag, its outline anchor and its
  * id. Two sections whose titles slugify alike are indistinguishable — accepted
- * until cross-references need real identity, which will be a versioned
- * migration like any other.
+ * until cross-references need real identity.
  */
 export interface SectionBlock {
   readonly blockType: 'section';

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Block } from '../../domain/Block';
-import { PROMPT_CONTENT_VERSION, type PromptContent } from '../../domain/PromptContent';
+import type { PromptContent } from '../../domain/PromptContent';
 import { parse } from './parse';
 import { sectionTagName, sectionTitleFromTag } from './sectionTag';
 import { serialize } from './serialize';
 
 function document(...blocks: Block[]): PromptContent {
-  return { version: PROMPT_CONTENT_VERSION, blocks };
+  return { blocks };
 }
 
 /**

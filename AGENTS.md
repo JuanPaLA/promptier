@@ -7,8 +7,9 @@ Architecture, the domain→ProseMirror descriptor seam, and the design decisions
 ## Workspaces (yarn workspaces)
 
 - `core-editor` — the editor itself. Framework-agnostic: no React here yet, until needed. Internally organized as clean architecture (`domain` / `app` / `infrastructure`). Its public surface (`src/index.ts`) exposes a Custom Element (`PromptEditorElement` / `registerPromptEditor`) plus plain domain data types. Nothing ProseMirror-specific is exported.
-- `react-sdk` — thin React wrapper around the Custom Element (`PromptEditorField` for the controlled component, `usePromptEditor` for headless use). Translates the element's property/event contract into React props/callbacks. No editor logic of its own.
+- `react-sdk` — React wrapper around the Custom Element, layered as MVP: a `PromptEditor` port (`core/app`), the `CustomElementPromptEditor` adapter that owns every DOM concern (`core/infrastructure`), and presenters plus components (`ui`). String-first: `<PromptEditor value onChange />`, and `PromptContent` only if a host asks for it. It is a **library, not an application** — no composition root, no `createRoot`; the host composes. See [docs/refactor-plan.md](docs/refactor-plan.md).
 - `playground` — dev app (Vite) for trying the editor with live changes. A plain consumer of `react-sdk`, nothing else.
+- `examples/` — `standalone.html`, the `<script src>` integration in one file. Serve it with the `examples` launch config after building `core-editor`.
 
 ## Rules of thumb
 
@@ -46,9 +47,10 @@ in `infrastructure/prosemirror/editing/` instead.
 ## Commands
 
 ```
-yarn install                    # from repo root
-yarn workspace playground dev   # start the playground
-yarn test                       # vitest, from repo root
+yarn install                        # from repo root
+yarn workspace playground dev       # start the playground
+yarn test                           # vitest, from repo root
+yarn workspace core-editor build    # dist/ — needed by examples/standalone.html
 ```
 
 This is intentionally minimal — avoid reading more architectural intent into it than what's written above; the domain model and editor capabilities are still evolving.

@@ -13,8 +13,8 @@ A developer using the SDK stores the string, not our JSON. That makes this
 format a **permanent compatibility surface**: there is nowhere to put a version
 marker that would not leak into the prompt, so the parser must accept every
 shape it has ever emitted. Changes here are one-way doors from the first
-external user onward. `PROMPT_CONTENT_VERSION` versions the *JSON* document,
-which only the hosted product stores; it does not help the string.
+external user onward. Nothing else carries a version either — `PromptContent`
+dropped its tag, so `parse` is the only compatibility mechanism there is.
 
 ## Grammar
 

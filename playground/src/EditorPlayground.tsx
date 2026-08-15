@@ -1,70 +1,53 @@
-import { useState, type RefObject } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  PROMPT_CONTENT_VERSION,
+  outline,
   parse,
-  sectionTagName,
   serialize,
-  type Block,
   type EditorCommand,
   type EditorSelectionState,
+  type OutlineEntry,
   type PromptContent,
-  type PromptEditorElement,
-  type SectionBlock,
 } from 'core-editor';
-import { PromptEditorSurface, usePromptEditor } from 'react-sdk';
+import { PromptEditorSurface, usePromptEditor, type PromptEditorPort } from 'react-sdk';
+import { MinimalConsumer } from './MinimalConsumer';
 
-const initialContent: PromptContent = {
-  version: PROMPT_CONTENT_VERSION,
-  blocks: [
-    { blockType: 'paragraph', content: [
-      { text: 'Eres un asistente de soporte. Escribe ' },
-      { text: '/section ', formats: ['code'] },
-      { text: 'en una línea vacía para crear una sección.' },
-    ] },
-    {
-      blockType: 'section',
-      title: 'Objetivos',
-      description: 'Qué debe lograr el asistente en cada conversación.',
-      children: [
-        { blockType: 'paragraph', content: [{ text: 'Resolver la consulta en el menor número de turnos.' }] },
-      ],
-    },
-    {
-      blockType: 'section',
-      title: 'Reglas de diálogo',
-      children: [
-        {
-          blockType: 'section',
-          title: 'Reglas de formato',
-          children: [
-            { blockType: 'paragraph', content: [
-              { text: 'Responde en ' },
-              { text: 'markdown', formats: ['bold'] },
-              { text: ', sin encabezados de nivel 1.' },
-            ] },
-            { blockType: 'orderedList', items: [
-              [{ text: 'Saluda con cortesía.' }],
-              [{ text: 'Identifica el problema del usuario.' }],
-              [{ text: 'Propón una solución en ' }, { text: 'pasos concretos', formats: ['bold'] }, { text: '.' }],
-            ] },
-          ],
-        },
-        {
-          blockType: 'section',
-          title: 'Reglas de estilo',
-          children: [
-            { blockType: 'paragraph', content: [{ text: 'Tono cordial y directo.' }] },
-            { blockType: 'unorderedList', items: [
-              [{ text: 'Evita jerga técnica innecesaria.' }],
-              [{ text: 'Usa frases ' }, { text: 'cortas', formats: ['bold'] }, { text: '.' }],
-            ] },
-            { blockType: 'codeBlock', language: 'json', code: '{\n  "tono": "cordial",\n  "maxTurnos": 3\n}' },
-          ],
-        },
-      ],
-    },
-  ],
-};
+/**
+ * The host's starting point is a *string*. Nothing here names a block or a
+ * format — that is the SDK contract this playground exists to show.
+ */
+const INITIAL_PROMPT = [
+  'Eres un asistente de soporte. Escribe `/section ` en una línea vacía para crear una sección.',
+  '',
+  '<objetivos>',
+  '<!-- description: Qué debe lograr el asistente en cada conversación. -->',
+  '',
+  'Resolver la consulta en el menor número de turnos.',
+  '</objetivos>',
+  '',
+  '<reglas_de_dialogo>',
+  '<reglas_de_formato>',
+  'Responde en **markdown**, sin encabezados de nivel 1.',
+  '',
+  '1. Saluda con cortesía.',
+  '2. Identifica el problema del usuario.',
+  '3. Propón una solución en **pasos concretos**.',
+  '</reglas_de_formato>',
+  '',
+  '<reglas_de_estilo>',
+  'Tono cordial y directo.',
+  '',
+  '- Evita jerga técnica innecesaria.',
+  '- Usa frases **cortas**.',
+  '',
+  '```json',
+  '{',
+  '  "tono": "cordial",',
+  '  "maxTurnos": 3',
+  '}',
+  '```',
+  '</reglas_de_estilo>',
+  '</reglas_de_dialogo>',
+].join('\n');
 
 const PANE_STYLE = {
   margin: 0,
@@ -76,29 +59,7 @@ const PANE_STYLE = {
   whiteSpace: 'pre-wrap',
 } as const;
 
-/** The codec's law, checked live: serializing a parsed document is a no-op. */
-function roundTripsCleanly(content: PromptContent): boolean {
-  const text = serialize(content);
-  return serialize(parse(text)) === text;
-}
-
-interface OutlineEntry {
-  id: string;
-  title: string;
-  depth: number;
-}
-
-function collectOutline(blocks: Block[], depth = 0): OutlineEntry[] {
-  return blocks
-    .filter((block): block is SectionBlock => block.blockType === 'section')
-    .flatMap((section) => [
-      { id: sectionTagName(section.title), title: section.title || '(sin título)', depth },
-      ...collectOutline(section.children, depth + 1),
-    ]);
-}
-
-function Outline({ blocks }: { blocks: Block[] }) {
-  const entries = collectOutline(blocks);
+function Outline({ entries }: { entries: OutlineEntry[] }) {
   return (
     <nav style={{ height: '100%', overflow: 'auto' }}>
       <h2 style={{ margin: '0 0 0.75rem' }}>Arbol</h2>
@@ -113,30 +74,30 @@ function Outline({ blocks }: { blocks: Block[] }) {
               ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
           }
         >
-          {entry.title}
+          {entry.title || '(sin título)'}
         </div>
       ))}
     </nav>
   );
 }
 
-interface FormatButton {
-  label: string;
-  command: EditorCommand;
-}
-
-const FORMAT_BUTTONS: FormatButton[] = [
+const FORMAT_BUTTONS: { label: string; command: EditorCommand }[] = [
   { label: 'B', command: { id: 'format.bold' } },
   { label: '</>', command: { id: 'format.code' } },
 ];
 
-function FormatToolbar({
-  selection,
-  onRun,
-}: {
-  selection: EditorSelectionState | null;
-  onRun: (command: EditorCommand) => void;
-}) {
+/**
+ * Drives commands through the port, never the DOM — the shape a real
+ * `<CommandBar>` will have once it moves into the SDK, built from
+ * `availableCommands()` instead of this hardcoded list.
+ */
+function FormatToolbar({ editor }: { editor: PromptEditorPort }) {
+  const [selection, setSelection] = useState<EditorSelectionState | null>(() =>
+    editor.selectionState(),
+  );
+
+  useEffect(() => editor.onSelectionChanged(setSelection), [editor]);
+
   return (
     <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
       {FORMAT_BUTTONS.map(({ label, command }) => {
@@ -150,9 +111,9 @@ function FormatToolbar({
             // editor before run() fires.
             onMouseDown={(event) => {
               event.preventDefault();
-              onRun(command);
+              editor.run(command);
             }}
-            disabled={selection ? !state?.enabled : false}
+            disabled={!state?.enabled}
             style={{
               minWidth: 32,
               padding: '0.25rem 0.5rem',
@@ -172,18 +133,48 @@ function FormatToolbar({
 }
 
 /**
- * The whole SDK contract, demonstrated: a host hands the editor a string and
- * takes one back, never touching `PromptContent`. This playground is a
- * *controlled* host, so it resyncs its own state afterwards — a plain SDK
- * consumer would only ever read `element.value` when saving.
+ * The structured view, which only this playground wants. An SDK host that just
+ * stores prompts never renders anything like it.
  */
-function TextLoader({
-  elementRef,
-  onLoaded,
-}: {
-  elementRef: RefObject<PromptEditorElement>;
-  onLoaded: (content: PromptContent) => void;
-}) {
+function Inspector({ prompt, content }: { prompt: string; content: PromptContent | null }) {
+  const stable = serialize(parse(prompt)) === prompt;
+  return (
+    <section
+      style={{
+        marginTop: '1.5rem',
+        display: 'grid',
+        gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
+        gap: '1.5rem',
+        alignItems: 'start',
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <h2 style={{ margin: '0 0 0.75rem' }}>Prompt text</h2>
+        <pre style={PANE_STYLE}>{prompt}</pre>
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <h2 style={{ margin: '0 0 0.75rem' }}>
+          Round-trip{' '}
+          <span style={{ fontSize: '0.7em', color: stable ? '#1a7f37' : '#cf222e' }}>
+            {stable ? '● stable' : '● differs'}
+          </span>
+        </h2>
+        <pre style={PANE_STYLE}>{serialize(parse(prompt))}</pre>
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <h2 style={{ margin: '0 0 0.75rem' }}>Prompt JSON</h2>
+        <pre style={PANE_STYLE}>{content ? JSON.stringify(content, null, 2) : ''}</pre>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The whole SDK contract: a host hands the editor a string and takes one back.
+ * Loading a new prompt is just setting that string — the editor re-seeds
+ * because it differs from the one it last reported.
+ */
+function TextLoader({ onLoad }: { onLoad: (prompt: string) => void }) {
   const [draft, setDraft] = useState('');
   return (
     <section style={{ marginTop: '1.5rem' }}>
@@ -196,12 +187,7 @@ function TextLoader({
       />
       <button
         type="button"
-        onClick={() => {
-          const element = elementRef.current;
-          if (!element) return;
-          element.value = draft;
-          onLoaded(element.content);
-        }}
+        onClick={() => onLoad(draft)}
         style={{ marginTop: '0.5rem', padding: '0.4rem 0.9rem', cursor: 'pointer' }}
       >
         Load into editor
@@ -211,8 +197,22 @@ function TextLoader({
 }
 
 export function EditorPlayground() {
-  const [content, setContent] = useState<PromptContent>(initialContent);
-  const { elementRef, run, selection } = usePromptEditor({ content, onChange: setContent });
+  const [prompt, setPrompt] = useState(INITIAL_PROMPT);
+  const editor = usePromptEditor({ value: prompt, onChange: setPrompt });
+
+  // The structured document, pulled only because this playground draws an
+  // outline and a JSON pane from it. An SDK host that just saves prompts never
+  // reaches past the string.
+  // Pulled once on mount as well as on every edit: seeding the editor does not
+  // emit `change` (setContent replaces the state rather than applying a
+  // transaction), so subscribing alone would leave these panes empty until the
+  // first keystroke. This effect runs after the presenter's, so the seed landed.
+  const [content, setContent] = useState<PromptContent | null>(null);
+  useEffect(() => {
+    const pullContent = () => setContent(editor.getContent());
+    pullContent();
+    return editor.onPromptChanged(pullContent);
+  }, [editor]);
 
   return (
     <div style={{ minHeight: '100vh', padding: '1.5rem', boxSizing: 'border-box', fontFamily: 'sans-serif' }}>
@@ -226,7 +226,7 @@ export function EditorPlayground() {
       >
         <section style={{ minWidth: 0 }}>
           <h2 style={{ margin: '0 0 0.75rem' }}>System Prompt Editor</h2>
-          <FormatToolbar selection={selection} onRun={run} />
+          <FormatToolbar editor={editor} />
           <div
             style={{
               width: '70vw',
@@ -238,41 +238,16 @@ export function EditorPlayground() {
               overflow: 'hidden',
             }}
           >
-            <PromptEditorSurface ref={elementRef} />
+            <PromptEditorSurface editor={editor} />
           </div>
         </section>
         <aside style={{ height: '70vh', minWidth: 0, overflow: 'hidden' }}>
-          <Outline blocks={content.blocks} />
+          <Outline entries={content ? outline(content) : []} />
         </aside>
       </div>
-      <section
-        style={{
-          marginTop: '1.5rem',
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
-          gap: '1.5rem',
-          alignItems: 'start',
-        }}
-      >
-        <div style={{ minWidth: 0 }}>
-          <h2 style={{ margin: '0 0 0.75rem' }}>Prompt text</h2>
-          <pre style={PANE_STYLE}>{serialize(content)}</pre>
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <h2 style={{ margin: '0 0 0.75rem' }}>
-            Round-trip{' '}
-            <span style={{ fontSize: '0.7em', color: roundTripsCleanly(content) ? '#1a7f37' : '#cf222e' }}>
-              {roundTripsCleanly(content) ? '● stable' : '● differs'}
-            </span>
-          </h2>
-          <pre style={PANE_STYLE}>{serialize(parse(serialize(content)))}</pre>
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <h2 style={{ margin: '0 0 0.75rem' }}>Prompt JSON</h2>
-          <pre style={PANE_STYLE}>{JSON.stringify(content, null, 2)}</pre>
-        </div>
-      </section>
-      <TextLoader elementRef={elementRef} onLoaded={setContent} />
+      <Inspector prompt={prompt} content={content} />
+      <TextLoader onLoad={setPrompt} />
+      <MinimalConsumer defaultValue={'<tono>\nUsa frases **cortas**.\n</tono>'} />
     </div>
   );
 }
