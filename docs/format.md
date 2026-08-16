@@ -23,7 +23,6 @@ The set is closed — exactly what the block and mark registries can express.
 | Construct | Text |
 | --- | --- |
 | Section | `<tag>` … `</tag>`, each on its own line, nestable |
-| Section description | `<!-- description: … -->` as the first line inside the tag |
 | Heading | `# `, `## `, `### ` (levels 1–3) |
 | Paragraph | a run of plain lines |
 | Ordered list | `1. item` on consecutive lines |
@@ -36,7 +35,7 @@ The set is closed — exactly what the block and mark registries can express.
 You are a support assistant.
 
 <objetivos>
-<!-- description: Qué debe lograr el asistente. -->
+Objetivo principal del asistente:
 
 Resolver la consulta en el menor número de turnos.
 </objetivos>
@@ -70,7 +69,7 @@ Escapes keep the codec total: any text a block can hold survives the round trip,
 including text that looks like markup.
 
 - `\`, `*` and `` ` `` are backslash-escaped inside text.
-- A paragraph opening with `# `, `- `, `1. `, `<!--`, or consisting of nothing
+- A paragraph opening with `# `, `- `, `1. `, or consisting of nothing
   but a tag is prefixed with `\`.
 
 Escapes are processed **everywhere, including inside code spans**. CommonMark

@@ -34,13 +34,10 @@ export function unescapeBlockStart(line: string): string {
 }
 
 function startsBlock(line: string): boolean {
-  return BLOCK_MARKER.test(line) || BARE_TAG.test(line) || COMMENT_OPEN.test(line);
+  return BLOCK_MARKER.test(line) || BARE_TAG.test(line);
 }
 
 const BLOCK_MARKER = /^(#{1,3} |- |\d+\. )/;
 
 /** Only a line that is *nothing but* a tag needs escaping — see docs/format.md. */
 const BARE_TAG = /^<\/?[a-zA-Z][\w-]*>$/;
-
-/** A section's first line is read as its description; a paragraph must not be. */
-const COMMENT_OPEN = /^<!--/;

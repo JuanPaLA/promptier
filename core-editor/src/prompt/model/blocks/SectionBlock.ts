@@ -11,7 +11,5 @@ import type { Block } from '../Block';
 export interface SectionBlock {
   readonly blockType: 'section';
   readonly title: string;
-  /** The section's intent, for maintainers. Serialized as a comment. */
-  readonly description?: string;
   readonly children: Block[];
 }

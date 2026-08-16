@@ -13,29 +13,20 @@ export const sectionCodec: BlockCodec<SectionBlock> = {
     const closeOffset = findCloseOffset(cursor, tag);
     if (closeOffset === -1) return null;
 
-    const inner = cursor.slice(1, closeOffset);
-    const firstContent = inner.findIndex((line) => line.trim().length > 0);
-    const description = firstContent === -1 ? null : DESCRIPTION.exec(inner[firstContent]);
-    const children = cursor.parseBlocks(description ? inner.slice(firstContent + 1) : inner);
+    const children = cursor.parseBlocks(cursor.slice(1, closeOffset));
 
     cursor.advance(closeOffset + 1);
     return {
       blockType: 'section',
       title: sectionTitleFromTag(tag),
-      ...(description ? { description: description[1] } : {}),
       children,
     };
   },
 
   serialize(section, serializeBlocks) {
     const tag = sectionTagName(section.title);
-    const parts: string[] = [];
-    if (section.description !== undefined) {
-      parts.push(`<!-- description: ${section.description} -->`);
-    }
     const body = serializeBlocks(section.children);
-    if (body.length > 0) parts.push(body);
-    return `<${tag}>\n${parts.join('\n\n')}${parts.length > 0 ? '\n' : ''}</${tag}>`;
+    return `<${tag}>\n${body}${body.length > 0 ? '\n' : ''}</${tag}>`;
   },
 };
 
@@ -76,4 +67,3 @@ const FENCE_OPEN = /^```(\w*)\s*$/;
 const FENCE_CLOSE = /^```\s*$/;
 const OPEN_TAG = /^<([a-zA-Z][\w-]*)>$/;
 const CLOSE_TAG = /^<\/[a-zA-Z][\w-]*>$/;
-const DESCRIPTION = /^<!--\s*description:\s*([\s\S]*?)\s*-->$/;

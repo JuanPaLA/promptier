@@ -71,9 +71,8 @@ registries:
   `code` string rather than `BlockContent`: code has no segments to format, and
   its whitespace is significant. It is also the format's escape hatch — markup
   inside a fence is never structure.
-- `SectionBlock` — a titled, **recursive container** (`children: Block[]`) with
-  an optional `description` documenting its intent. It carries **no id**:
-  identity is derived from the title (see below).
+- `SectionBlock` — a titled, **recursive container** (`children: Block[]`). It
+  carries **no id**: identity is derived from the title (see below).
 
 Sections are first-class rather than inferred from headings because prompt
 *structure* is the editor's value proposition: validation, outline, and
@@ -130,8 +129,8 @@ these before writing an offset.
 
 ### Section specifics
 
-- Node grammar: `section` = `sectionTitle block+`, with `id`/`description` as
-  attrs. `sectionTitle` is a plain textblock **outside the `block` group**, so
+- Node grammar: `section` = `sectionTitle block+`. `sectionTitle` is a plain
+  textblock **outside the `block` group**, so
   it can only exist where the section's content expression puts it: first
   child. The cheapest validation is structure the grammar makes unrepresentable
   — every section has exactly one title, always first.

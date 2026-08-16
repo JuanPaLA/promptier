@@ -19,7 +19,7 @@ const INITIAL_PROMPT = [
   'Eres un asistente de soporte. Escribe `/section ` en una línea vacía para crear una sección.',
   '',
   '<objetivos>',
-  '<!-- description: Qué debe lograr el asistente en cada conversación. -->',
+  'Objetivo principal de cada conversación:',
   '',
   'Resolver la consulta en el menor número de turnos.',
   '</objetivos>',

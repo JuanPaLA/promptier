@@ -23,10 +23,7 @@ export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
       block.children.length > 0
         ? block.children.map(mapChild)
         : [schema.nodes.paragraph.createAndFill()!];
-    return schema.nodes.section.create({ description: block.description ?? null }, [
-      title,
-      ...children,
-    ]);
+    return schema.nodes.section.create(null, [title, ...children]);
   },
 
   fromProseMirrorNode: (node, mapChild) => {
@@ -39,11 +36,9 @@ export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
         children.push(mapChild(child));
       }
     });
-    const description = node.attrs.description as string | null;
     return {
       blockType: 'section',
       title,
-      ...(description !== null ? { description } : {}),
       children,
     };
   },
@@ -77,9 +72,6 @@ function sectionNodeSpec(): NodeSpec {
   return {
     group: 'block',
     content: `${SECTION_TITLE_NODE} block+`,
-    attrs: {
-      description: { default: null },
-    },
     defining: true,
     // The anchor is derived from the title node, not stored: a stored attr would
     // go stale the moment the title is edited.

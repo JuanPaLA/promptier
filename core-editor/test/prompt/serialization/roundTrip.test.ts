@@ -66,11 +66,16 @@ describe('parse(serialize(content)) === content', () => {
 
     'empty section': document({ blockType: 'section', title: 'goals', children: [] }),
 
-    'section with description': document({
+    'legacy description comment as section content': document({
       blockType: 'section',
       title: 'goals',
-      description: 'What the assistant must achieve.',
-      children: [{ blockType: 'paragraph', content: [{ text: 'Resolve fast.' }] }],
+      children: [
+        {
+          blockType: 'paragraph',
+          content: [{ text: '<!-- description: What the assistant must achieve. -->' }],
+        },
+        { blockType: 'paragraph', content: [{ text: 'Resolve fast.' }] },
+      ],
     }),
 
     'nested sections': document({
@@ -139,7 +144,6 @@ describe('parse(serialize(content)) === content', () => {
       {
         blockType: 'section',
         title: 'dialogue rules',
-        description: 'How to converse.',
         children: [
           { blockType: 'paragraph', content: [{ text: 'Answer in ' }, { text: 'markdown', formats: ['bold'] }, { text: '.' }] },
           { blockType: 'codeBlock', language: 'ts', code: 'const a = 1;' },
@@ -165,6 +169,8 @@ describe('serialize(parse(text)) is idempotent', () => {
     'unterminated fence': '```js\nconst a = 1;',
     'unclosed tag': '<goals>\nno closing tag',
     'accented title': '<reglas_de_dialogo>\nTexto.\n</reglas_de_dialogo>',
+    'legacy description comment':
+      '<goals>\n<!-- description: What the assistant must achieve. -->\n\nResolve fast.\n</goals>',
     empty: '',
   };
 
