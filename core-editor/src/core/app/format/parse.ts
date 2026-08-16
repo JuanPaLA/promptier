@@ -16,10 +16,6 @@ export function parse(text: string): PromptContent {
   return { blocks: parseBlocks(splitLines(text)) };
 }
 
-function splitLines(text: string): string[] {
-  return text.replace(/\r\n?/g, '\n').split('\n');
-}
-
 function parseBlocks(lines: string[]): Block[] {
   const blocks: Block[] = [];
   let index = 0;
@@ -68,6 +64,10 @@ function parseBlocks(lines: string[]): Block[] {
   }
 
   return blocks;
+}
+
+function splitLines(text: string): string[] {
+  return text.replace(/\r\n?/g, '\n').split('\n');
 }
 
 /** Consumes a fence and its literal body; an unterminated fence runs to the end. */

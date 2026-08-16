@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { Block } from '../../domain/Block';
-import type { PromptContent } from '../../domain/PromptContent';
-import { outline } from './outline';
+import type { Block } from '../../../src/core/domain/Block';
+import type { PromptContent } from '../../../src/core/domain/PromptContent';
+import { outline } from '../../../src/core/app/outline/outline';
 
 function document(...blocks: Block[]): PromptContent {
   return { blocks };

@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
  * Skipped when `dist` is absent so `yarn test` works in a fresh clone; run
  * `yarn workspace core-editor build` first to exercise them.
  */
-const bundle = fileURLToPath(new URL('../../../../dist/format.js', import.meta.url));
+const bundle = fileURLToPath(new URL('../../../dist/format.js', import.meta.url));
 const built = existsSync(bundle);
 
 describe.skipIf(!built)('the format bundle', () => {

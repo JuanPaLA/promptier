@@ -27,7 +27,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "vite build && vite build -c vite.standalone.config.ts && tsc -p tsconfig.build.json"
+    "build": "vite build && vite build -c vite.standalone.config.ts && tsc -p tsconfig.build.json",
+    "test": "vitest"
   },
   "dependencies": {
     "prosemirror-commands": "^1.6.0",

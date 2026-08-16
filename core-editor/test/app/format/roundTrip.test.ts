@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import type { Block } from '../../domain/Block';
-import type { PromptContent } from '../../domain/PromptContent';
-import { parse } from './parse';
-import { sectionTagName, sectionTitleFromTag } from './sectionTag';
-import { serialize } from './serialize';
+import type { Block } from '../../../src/core/domain/Block';
+import type { PromptContent } from '../../../src/core/domain/PromptContent';
+import { parse } from '../../../src/core/app/format/parse';
+import { sectionTagName, sectionTitleFromTag } from '../../../src/core/app/format/sectionTag';
+import { serialize } from '../../../src/core/app/format/serialize';
 
 function document(...blocks: Block[]): PromptContent {
   return { blocks };
