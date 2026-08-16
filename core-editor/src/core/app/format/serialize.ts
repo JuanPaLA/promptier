@@ -1,10 +1,6 @@
 import type { Block } from '../../domain/Block';
-import type { BlockContent, TextSegment } from '../../domain/BlockContent';
-import type { SectionBlock } from '../../domain/blocks/SectionBlock';
-import type { Format } from '../../domain/Format';
 import type { PromptContent } from '../../domain/PromptContent';
-import { sectionTagName } from './sectionTag';
-import { escapeBlockStart, escapeInlineText } from './textEscaping';
+import { codecFor } from './codecs/blockCodecRegistry';
 
 /**
  * Renders a document as prompt text: XML tags carry structure, markdown carries
@@ -27,7 +23,7 @@ export function serialize(content: PromptContent): string {
  * fence, a section's tags) are never blank by this test, so a code block full
  * of spaces still survives.
  */
-function blocksToText(blocks: Block[]): string {
+function blocksToText(blocks: readonly Block[]): string {
   return blocks
     .map(blockToText)
     .filter((text) => text.trim().length > 0)
@@ -35,51 +31,5 @@ function blocksToText(blocks: Block[]): string {
 }
 
 function blockToText(block: Block): string {
-  switch (block.blockType) {
-    case 'paragraph':
-      return escapeBlockStart(inlineToText(block.content));
-    case 'heading':
-      return `${'#'.repeat(block.level)} ${inlineToText(block.content)}`;
-    case 'codeBlock':
-      return `\`\`\`${block.language ?? ''}\n${block.code}\n\`\`\``;
-    case 'orderedList':
-      return block.items.map((item, index) => `${index + 1}. ${inlineToText(item)}`).join('\n');
-    case 'unorderedList':
-      return block.items.map((item) => `- ${inlineToText(item)}`).join('\n');
-    case 'section':
-      return sectionToText(block);
-    default: {
-      return block;
-    }
-  }
+  return codecFor(block).serialize(block, blocksToText);
 }
-
-function sectionToText(section: SectionBlock): string {
-  const tag = sectionTagName(section.title);
-  const parts: string[] = [];
-  if (section.description !== undefined) {
-    parts.push(`<!-- description: ${section.description} -->`);
-  }
-  const body = blocksToText(section.children);
-  if (body.length > 0) parts.push(body);
-  return `<${tag}>\n${parts.join('\n\n')}${parts.length > 0 ? '\n' : ''}</${tag}>`;
-}
-
-function inlineToText(content: BlockContent): string {
-  return content.map(segmentToText).join('');
-}
-
-function segmentToText(segment: TextSegment): string {
-  return FORMAT_ORDER.filter((format) => segment.formats?.includes(format)).reduce(
-    (inner, format) => FORMAT_WRAP[format](inner),
-    escapeInlineText(segment.text),
-  );
-}
-
-/** Nesting order for a multi-format segment, innermost first: code inside bold. */
-const FORMAT_ORDER: Format[] = ['code', 'bold'];
-
-const FORMAT_WRAP: Record<Format, (inner: string) => string> = {
-  bold: (inner) => `**${inner}**`,
-  code: (inner) => `\`${inner}\``,
-};

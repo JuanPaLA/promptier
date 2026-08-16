@@ -86,6 +86,28 @@ describe('parse(serialize(content)) === content', () => {
       ],
     }),
 
+    'same-tag nested sections': document({
+      blockType: 'section',
+      title: 'rules',
+      children: [
+        {
+          blockType: 'section',
+          title: 'rules',
+          children: [{ blockType: 'paragraph', content: [{ text: 'Nested.' }] }],
+        },
+        { blockType: 'paragraph', content: [{ text: 'Still in the outer section.' }] },
+      ],
+    }),
+
+    'section close inside a code fence': document({
+      blockType: 'section',
+      title: 'rules',
+      children: [
+        { blockType: 'codeBlock', code: '</rules>' },
+        { blockType: 'paragraph', content: [{ text: 'Still in the section.' }] },
+      ],
+    }),
+
     'text that looks like markup': document({
       blockType: 'paragraph',
       content: [{ text: 'literal **stars**, a `backtick`, and a back\\slash' }],
@@ -149,6 +171,32 @@ describe('serialize(parse(text)) is idempotent', () => {
       expect(serialize(parse(once))).toBe(once);
     });
   }
+});
+
+describe('block codec dispatch', () => {
+  it('separates adjacent block types without blank lines', () => {
+    const text = [
+      'Intro',
+      '# Heading',
+      '- unordered',
+      '1. ordered',
+      '```ts',
+      'const value = 1;',
+      '```',
+      '<rules>',
+      'Body',
+      '</rules>',
+    ].join('\n');
+
+    expect(parse(text).blocks.map((block) => block.blockType)).toEqual([
+      'paragraph',
+      'heading',
+      'unorderedList',
+      'orderedList',
+      'codeBlock',
+      'section',
+    ]);
+  });
 });
 
 describe('blocks that carry nothing', () => {
