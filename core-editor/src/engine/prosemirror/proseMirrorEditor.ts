@@ -22,8 +22,7 @@ import { markInputRules, markKeymaps } from './descriptors/marks/markDescriptorR
 import { promptSchema } from './descriptors/promptSchema';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './mapping/documentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
-import { ensureEditorStyles } from './styles/editorStyles';
-import { EditorSession } from '../../editor/EditorSession'
+import type { EditorSession } from '../../editor/EditorSession';
 
 /**
  * Starts an editor in `container`. The class itself stays unexported so
@@ -43,7 +42,6 @@ class ProseMirrorEditor implements PromptEditor {
   private readonly selectionListeners = new Set<SelectionChangeListener>();
 
   constructor(container: HTMLElement, initialContent: PromptContent) {
-    ensureEditorStyles(container.ownerDocument);
     const state = EditorState.create({
       schema: promptSchema,
       doc: toProseMirrorDoc(initialContent, promptSchema),

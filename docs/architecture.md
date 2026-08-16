@@ -38,7 +38,7 @@ engine/prosemirror/
 ├─ editing/                 reusable document operations (named, not offsets)
 ├─ commands/                CommandDescriptor + registry (host-invocable actions)
 ├─ plugins/                 ProseMirror plugins
-└─ styles/                  the injected stylesheet
+└─ styles/                  fixed styles installed inside the element's shadow root
 ```
 
 `promptSchema` sits inside `descriptors/` rather than beside it because it is
@@ -138,9 +138,11 @@ these before writing an offset.
   (subsections) falls out of the grammar for free.
 - Collapse is implemented in `SectionNodeView` and is **view-only state**: it
   never enters the document JSON, which stays purely semantic.
-- Structural editor CSS is injected once per document (`styles/editorStyles.ts`)
-  because the element mounts in light DOM and `core-editor` has no CSS
-  pipeline.
+- The editor mounts in an open shadow root. Its fixed structural CSS lives in
+  that root (`styles/editorStyles.ts`), so host selectors cannot alter the
+  editing surface and editor selectors cannot escape into the host document.
+  Only the custom-element host participates in host layout; internal classes
+  are not a styling API.
 - Section identity is **derived, never stored**: `sectionTagName(title)` is
   simultaneously the serialized tag, the outline anchor and the id. A stored
   attr would go stale the moment the title is edited, so `SectionNodeView`
@@ -182,7 +184,10 @@ to a section's depth.
 
 ## Consumption chain
 
-- `PromptEditorElement` (Custom Element) is the public surface. Two properties
+- `PromptEditorElement` is the public type contract for the registered Custom
+  Element. The runtime class is created lazily by `registerPromptEditor()`, so
+  importing the package does not evaluate `HTMLElement` during SSR. Two
+  properties
   project one document: **`value`** (prompt text — the SDK contract, also
   settable as a `value` attribute for plain-HTML hosts) and **`content`**
   (`PromptContent`, for hosts that want structure). Last write wins; both defer
@@ -211,10 +216,13 @@ to a section's depth.
     string, and the wrapper reconciles `value` against the last string it
     reported so a host's own echo never re-seeds the document.
   - `registerPromptEditor()` runs when the wrapper receives a DOM node, not at
-    module scope, so importing the package under SSR does not throw. Defining
-    the tag late is safe: the node upgrades in place, and the element replays a
-    `value` or `content` set before that (`upgradeProperty`) instead of letting
-    the own property shadow the accessor forever.
+    module scope. It creates the `HTMLElement` subclass only in a browser, so
+    importing either package during SSR is safe. Defining the tag late is safe:
+    the node upgrades in place, and the element replays a `value` or `content`
+    set before that (`upgradeProperty`) instead of letting the own property
+    shadow the accessor forever. Registration accepts an existing compatible
+    Promptier element (including across development reloads) and rejects a tag
+    name already owned by another element contract.
   - **`change` fires for user edits only.** Writing `value` or `content`
     replaces the state rather than applying a transaction, so it emits nothing.
     That is fine for the host doing the writing and wrong for everyone else, so

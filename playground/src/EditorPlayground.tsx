@@ -67,12 +67,7 @@ function Outline({ entries }: { entries: OutlineEntry[] }) {
       {entries.map((entry, index) => (
         <div
           key={`${entry.id}-${index}`}
-          style={{ paddingLeft: entry.depth * 16, cursor: 'pointer', lineHeight: 1.8 }}
-          onClick={() =>
-            document
-              .querySelector(`[data-section-id="${entry.id}"]`)
-              ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-          }
+          style={{ paddingLeft: entry.depth * 16, lineHeight: 1.8 }}
         >
           {entry.title || '(sin título)'}
         </div>

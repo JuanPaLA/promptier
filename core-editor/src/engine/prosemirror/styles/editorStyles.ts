@@ -1,28 +1,58 @@
-/** Injects the editor's structural styles once per document. */
-export function ensureEditorStyles(doc: Document): void {
-  if (doc.getElementById(STYLE_ID)) return;
-  const style = doc.createElement('style');
-  style.id = STYLE_ID;
+/** Installs the editor's fixed structural styles inside its private DOM root. */
+export function installEditorStyles(root: ShadowRoot): void {
+  const style = root.ownerDocument.createElement('style');
   style.textContent = CSS;
-  doc.head.appendChild(style);
+  root.append(style);
 }
 
-const STYLE_ID = 'prompt-editor-styles';
-
 const CSS = `
-.prompt-editor-host {
+:host {
   display: block;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
 }
-.prompt-editor-host > .ProseMirror {
+.prompt-editor-surface {
+  width: 100%;
   height: 100%;
+  min-width: 0;
+  background: #fff;
+  color: #24292f;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.prompt-editor-surface,
+.prompt-editor-surface *,
+.prompt-editor-surface *::before,
+.prompt-editor-surface *::after {
   box-sizing: border-box;
+}
+.prompt-editor-surface > .ProseMirror {
+  height: 100%;
   overflow: auto;
   outline: none;
   padding-bottom: 2rem;
   cursor: text;
+}
+.ProseMirror p {
+  margin: 0 0 0.75rem;
+}
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.ProseMirror h1 {
+  font-size: 1.75rem;
+}
+.ProseMirror h2 {
+  font-size: 1.5rem;
+}
+.ProseMirror h3 {
+  font-size: 1.25rem;
 }
 .prompt-section {
   position: relative;
@@ -38,6 +68,7 @@ const CSS = `
   border: none;
   background: none;
   cursor: pointer;
+  font-family: inherit;
   font-size: 0.75rem;
   line-height: 1;
   color: #57606a;
