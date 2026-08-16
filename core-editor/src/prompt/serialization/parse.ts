@@ -1,7 +1,7 @@
 import type { Block } from '../model/Block';
 import type { PromptContent } from '../model/PromptContent';
-import type { BlockParseCursor } from './blocks/BlockCodec';
-import { blockCodecs } from './blocks/blockCodecRegistry';
+import type { BlockParseCursor } from './codecs/BlockCodec';
+import { blockCodecs } from './codecs/blockCodecRegistry';
 
 export { parseInline } from './inlineCodec';
 

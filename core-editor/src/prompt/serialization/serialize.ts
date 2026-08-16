@@ -1,6 +1,6 @@
 import type { Block } from '../model/Block';
 import type { PromptContent } from '../model/PromptContent';
-import { codecFor } from './blocks/blockCodecRegistry';
+import { codecFor } from '././codecs/blockCodecRegistry';
 
 /**
  * Renders a document as prompt text: XML tags carry structure, markdown carries
