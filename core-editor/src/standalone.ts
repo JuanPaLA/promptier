@@ -8,7 +8,7 @@
  */
 import { parse } from './prompt/serialization/parse';
 import { serialize } from './prompt/serialization/serialize';
-import { registerPromptEditor } from './element/PromptEditorElement';
+import { registerPromptEditor } from './PromptEditorElement';
 
 registerPromptEditor();
 

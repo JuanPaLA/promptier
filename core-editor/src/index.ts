@@ -1,4 +1,4 @@
-export { PromptEditorElement, registerPromptEditor } from './element/PromptEditorElement';
+export { PromptEditorElement, registerPromptEditor } from './PromptEditorElement';
 export { serialize } from './prompt/serialization/serialize';
 export { parse } from './prompt/serialization/parse';
 export { buildOutline as outline } from './prompt/structure/buildOutline';

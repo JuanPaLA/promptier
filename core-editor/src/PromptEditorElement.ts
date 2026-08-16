@@ -1,10 +1,10 @@
-import type { CommandId, EditorCommand } from '../editor/commands/EditorCommand';
-import type { EditorSelectionState } from '../editor/commands/EditorSelectionState';
-import { EditorSession } from '../editor/EditorSession'
-import { availableCommandIds } from '../engine/prosemirror/commands/commandRegistry';
-import { createProseMirrorEditor } from '../engine/prosemirror/proseMirrorEditor';
-import type { PromptContent } from '../prompt/model/PromptContent';
-import { parse, serialize } from '../prompt/serialization';
+import type { CommandId, EditorCommand } from './editor/commands/EditorCommand';
+import type { EditorSelectionState } from './editor/commands/EditorSelectionState';
+import { EditorSession } from './editor/EditorSession'
+import { availableCommandIds } from './engine/prosemirror/commands/commandRegistry';
+import { createProseMirrorEditor } from './engine/prosemirror/proseMirrorEditor';
+import type { PromptContent } from './prompt/model/PromptContent';
+import { parse, serialize } from './prompt/serialization';
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const HOST_CLASS_NAME = 'prompt-editor-host';
