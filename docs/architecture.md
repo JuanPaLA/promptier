@@ -9,14 +9,14 @@ contracts between workspaces.
 
 ```
 core-editor
-├─ src/prompt/model/         plain serializable prompt data — no ProseMirror, no DOM
-├─ src/prompt/serialization/ canonical text parser, serializer and block codecs
-├─ src/prompt/structure/     derived structural readings such as the outline
-├─ src/editor/               editor and session contracts, plus editor commands
-├─ src/engine/prosemirror/   ProseMirror implementation (schema, mappers, descriptors)
-└─ src/element/              outer packaging: the Custom Element that index.ts re-exports
-react-sdk                    thin React wrapper over the element's property/event contract
-playground                   reference consumer (Vite dev app)
+├─ src/prompt/model/          plain serializable prompt data — no ProseMirror, no DOM
+├─ src/prompt/serialization/  canonical text parser, serializer and block codecs
+├─ src/prompt/structure/      derived structural readings such as the outline
+├─ src/editor/                editor and session contracts, plus editor commands
+├─ src/engine/prosemirror/    ProseMirror implementation (schema, mappers, descriptors)
+└─ src/PromptEditorElement.ts outer packaging: the Custom Element that index.ts re-exports
+react-sdk                     thin React wrapper over the element's property/event contract
+playground                    reference consumer (Vite dev app)
 ```
 
 Dependency rule: `prompt/model` knows nothing outside the model; prompt
@@ -55,7 +55,7 @@ internals.
 ## Domain model
 
 The document is `PromptContent`: a list of `Block`s. Most hosts never see it —
-the SDK contract is a string (`element.value`, see [format.md](format.md)), and
+the SDK contract is a string (`element.value`, see, and
 `PromptContent` is the *hosted* product's storage, where exact fidelity matters.
 The editor is its only writer.
 
@@ -151,8 +151,7 @@ these before writing an offset.
 
 `prompt/serialization/` holds the one serialization: `serialize` and `parse`, pure and
 DOM-free. XML tags carry structure, markdown carries everything inside — what a
-host stores *is* what a model reads. The grammar, the escaping rules, the
-degradation rule and the two round-trip laws live in [format.md](format.md);
+host stores *is* what a model reads.
 `roundTrip.test.ts` enforces them.
 
 There is deliberately **no second rendering**. `toMarkdown`/`toXml` used to
@@ -248,124 +247,3 @@ and SSR can import it.
 
 `exports` points at TS source so the dev loop stays buildless; `publishConfig`
 swaps in `dist` at publish time.
-
-## Design decisions log
-
-Decided and implemented:
-
-- Sections are first-class blocks, not heading-delimited runs. (Structure must
-  exist in the model to be validated, outlined, restructured.)
-- The element keeps one document; `value` and `content` are two views onto it,
-  not two inputs to reconcile.
-- Collapse (and any future presentation state) stays out of the JSON.
-- **`PromptContent` carries no version tag.** It was versioned from day one, on
-  the theory that stored documents would need migrating as the shape evolved.
-  Nothing ever read it: the string is what hosts store, and `parse` reads any
-  prompt text the grammar accepts without asking what wrote it. A field that
-  every writer sets and no reader consults is a cost with no payer. If a stored
-  *document* shape ever needs migrating, the tag comes back with the migration
-  that needs it — and not one release earlier.
-- **One format, not two.** The string is simultaneously what a host stores and
-  what a model reads, so there is no "export" rendering to diverge from it. A
-  second output was designed and dropped: descriptions serialize as comments and
-  go to the model with everything else, since a stripped variant is a
-  non-breaking `serialize(content, { comments: false })` if token cost ever
-  argues for it. See [format.md](format.md).
-- **Section identity is derived from the title, not stored.** The tag, the
-  outline anchor and the id are one value. This replaced minted ids
-  (`newSectionId`), which existed because the format could not carry them —
-  once the tag *is* the identity, minting is redundant and a stored attr is
-  worse than redundant: it goes stale as the title is typed. The cost is that
-  titles slugify (case and diacritics degrade once, then hold) and same-slug
-  siblings collide. Real identity returns when cross-references need it.
-- **Mappers are pure functions of their input** — they never mint ids or read
-  the clock. `setContent` skips no-op updates by comparing the mapped doc
-  against the current one, so a mapper that invented a value would produce a
-  different doc on every pass, recreating the `EditorState`, wiping undo history
-  and jumping the caret. Deriving identity from the title preserves this:
-  same input, same output.
-- **The port is a capability; the element is the lifecycle owner; hosts know
-  neither.** `PromptEditor` says only what you can do with a *live* editor (read,
-  write, run, observe). Creating one is `createProseMirrorEditor(container,
-  initialContent)`, which returns an `EditorSession` — the editor plus the
-  authority to end it. There is no `mount`: an `EditorView` without a container
-  isn't a dormant editor, it's nothing, so having a container is a precondition
-  of *existing*, not a later call. This is what retired the earlier
-  `PromptEditor`/`MountablePromptEditor` split, which tried to express a
-  *phase* boundary ("not valid yet") with a *capability* boundary — so the
-  narrow half was exactly the six methods that threw before `mount`, and no
-  consumer ever depended on it.
-  - The element owns the lifecycle because it is the only party the browser
-    tells about attachment: it creates in `connectedCallback`, destroys in
-    `disconnectedCallback`, and holds the document in `pendingContent` across
-    the gap. One nullable `session` field replaced a non-null editor plus a
-    parallel `mounted` flag — nullness *is* mountedness, so they cannot desync.
-  - `destroy` sits on `EditorSession`, not on `PromptEditor`, so anything handed
-    an editor can drive it but not end it. The concrete class is unexported, so
-    the module boundary enforces that, not just the type.
-  - **Hosts never see any of it.** `createProseMirrorEditor`, `EditorSession`
-    and `destroy` stay out of `index.ts`. Removing the element from the DOM
-    *is* destroy — the custom element turns lifecycle into the browser's job,
-    which is the main reason it's the public surface.
-  - `protected createEditor(container, initialContent)` remains the engine seam
-    (a custom element can't take constructor arguments); only its signature and
-    call site moved. A consequence worth keeping: an element created and never
-    connected now builds no engine at all.
-- **The domain is plain serializable data, never classes.** It crosses storage,
-  the network and React state, and every operation on it (`serialize`, a future
-  `validate`, token counting) is a fold over the tree. Classes would demand a second recursive rehydration
-  mapper beside the ProseMirror one, break structural equality, and pull each
-  consumer's concern onto the block itself. Nothing is lost by leaving them out,
-  because the invariants live in the ProseMirror grammar, not in the objects —
-  see the permissiveness note below.
-- **`sectionTagName` lives in `prompt/serialization/`, not in `prompt/model/`.** Deriving a tag
-  from a title is a format artifact; the domain shouldn't know that titles
-  become tags. `SectionNodeView` and `sectionDescriptor` import it from there
-  for the tag hint and the outline anchor.
-- `Block` is the closed union itself, not an open base interface, and it is the
-  single source of truth: `BlockType` derives from it, and the document
-  (`PromptContent.blocks`, `SectionBlock.children`) is typed with it. The
-  ergonomic name is the correct one — a host writing `blocks: Block[]` gets
-  narrowing instead of silently losing it, which an open base interface made
-  easy to get wrong.
-- The domain stays permissive where the editor grammar is strict: stored JSON
-  may contain a section with empty `children`; the PM grammar requires
-  `block+`, so mapping in backfills an empty paragraph. Structural invariants
-  live in the grammar until `validate()` exists — that's where domain-level
-  invariants will get their real home.
-- List items are values (`BlockContent[]`), not blocks with identity. A leaf
-  block otherwise holds exactly one `BlockContent`; in a list it doubles as "one
-  addressable line among many." That's a scoped simplification — if items ever
-  need stable ids, cross-references or multi-block content, promote them to a
-  `ListItemBlock`. Until then lists stay the only place `BlockContent` is
-  plural.
-
-- **The command catalogue publishes ids and state, never labels.** Both
-  descriptor families feed `commandRegistry`, so adding a command means
-  extending a descriptor, not editing the registry. What a host gets back is
-  `CommandId[]` and a `CommandState` per id — no label, no icon, no group. Ids
-  are already namespaced (`format.bold`), so a menu groups by prefix without a
-  `group` field, and the day labels need translating that is the host's
-  concern, not the engine's.
-
-Decided, not yet implemented (direction commitments):
-
-- **Structure validation is opt-in, non-blocking lint**: a pure
-  `validate(content, schema): Diagnostic[]` in `app/`, where `schema` is a
-  data-driven declaration of expected sections. Opinions ("prompt best
-  practices") ship as presets over that mechanism; the engine stays
-  unopinionated and never blocks typing.
-- **Resources are referenced, never embedded**: tool definitions, variables,
-  JSON schemas reach the editor through a separate `resources` input and are
-  referenced from blocks by id (mention-like nodes). Rendering resolves them.
-  Blocks must not embed resource payloads.
-
-Known gaps (accepted for the walking skeleton): the codec is under test, but the
-mapper invariant `fromProseMirrorDoc(toProseMirrorDoc(c)) ≡ c` is not — the one
-codec bug found so far (whitespace-only blocks surviving `serialize` but skipped
-by `parse`) was reported from the playground, not caught by a test; no editing
-UI for section `description`; sections whose titles slugify alike share an
-anchor; `PromptEditorSurface` registers the custom element at module scope,
-which throws on import under SSR; `core-editor` is still `private` with `main`
-pointing at TS source, so there is nothing to put in a `<script src>` — that is
-Phase 3.
