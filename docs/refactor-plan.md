@@ -100,7 +100,7 @@ belongs to the outline panel's own presenter, where the re-render stays.
 - `getSelectionState()` on the element, neutral before mount.
 - `availableCommands(): CommandId[]`; `commandRegistry` now collects from block
   descriptors as well as marks.
-- `outline(content)` in `app/outline/`, exported from `index.ts` as a pure
+- `buildOutline(content)` in `prompt/structure/`, exported from `index.ts` as the pure
   function beside `serialize`/`parse`. The element does not know about it.
 
 **Phase 2 — the presenter** (`react-sdk`) — *done*

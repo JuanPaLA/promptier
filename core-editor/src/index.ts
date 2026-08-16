@@ -1,41 +1,41 @@
 export { PromptEditorElement, registerPromptEditor } from './element/PromptEditorElement';
-export { serialize } from './core/app/format/serialize';
-export { parse } from './core/app/format/parse';
-export { outline } from './core/app/outline/outline';
-export type { OutlineEntry } from './core/app/outline/OutlineEntry';
+export { serialize } from './prompt/serialization/serialize';
+export { parse } from './prompt/serialization/parse';
+export { buildOutline as outline } from './prompt/structure/buildOutline';
+export type { OutlineEntry } from './prompt/structure/OutlineEntry';
 export type {
   Block,
   BlockType,
-} from './core/domain/Block';
+} from './prompt/model/Block';
 export type {
   ParagraphBlock,
-} from './core/domain/blocks/ParagraphBlock';
+} from './prompt/model/blocks/ParagraphBlock';
 export type {
   HeadingBlock,
-} from './core/domain/blocks/HeadingBlock';
+} from './prompt/model/blocks/HeadingBlock';
 export type {
   CodeBlock,
-} from './core/domain/blocks/CodeBlock';
+} from './prompt/model/blocks/CodeBlock';
 export type {
   OrderedListBlock,
-} from './core/domain/blocks/OrderedListBlock';
+} from './prompt/model/blocks/OrderedListBlock';
 export type {
   UnorderedListBlock,
-} from './core/domain/blocks/UnorderedListBlock';
+} from './prompt/model/blocks/UnorderedListBlock';
 export type {
   SectionBlock,
-} from './core/domain/blocks/SectionBlock';
-export { sectionTagName, sectionTitleFromTag } from './core/app/format/sectionTag';
+} from './prompt/model/blocks/SectionBlock';
+export { sectionTagName, sectionTitleFromTag } from './prompt/serialization/sectionTag';
 export type {
   BlockContent,
   TextSegment,
-} from './core/domain/BlockContent';
+} from './prompt/model/BlockContent';
 export type {
   PromptContent,
-} from './core/domain/PromptContent';
-export type { Format } from './core/domain/Format';
-export type { EditorCommand, CommandId } from './core/app/commands/EditorCommand';
+} from './prompt/model/PromptContent';
+export type { Format } from './prompt/model/Format';
+export type { EditorCommand, CommandId } from './editor/commands/EditorCommand';
 export type {
   EditorSelectionState,
   CommandState,
-} from './core/app/commands/EditorSelectionState';
+} from './editor/commands/EditorSelectionState';

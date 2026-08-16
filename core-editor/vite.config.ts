@@ -17,7 +17,7 @@ export default defineConfig({
     emptyOutDir: true,
     lib: {
       entry: {
-        format: resolve(__dirname, 'src/core/app/format/index.ts'),
+        format: resolve(__dirname, 'src/prompt/serialization/index.ts'),
         editor: resolve(__dirname, 'src/index.ts'),
       },
       formats: ['es', 'cjs'],

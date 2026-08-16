@@ -4,7 +4,7 @@ The one serialization the editor reads and writes. XML tags carry structure,
 markdown carries everything inside. What a host stores **is** what a model
 reads — there is no separate "export" rendering.
 
-`serialize(content)` and `parse(text)` in `core-editor/src/core/app/format/` are
+`serialize(content)` and `parse(text)` in `core-editor/src/prompt/serialization/` are
 the only implementations. Both are pure and DOM-free.
 
 ## Why hosts depend on this document

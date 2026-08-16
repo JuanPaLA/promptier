@@ -7,7 +7,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./format": "./src/core/app/format/index.ts",
+    "./format": "./src/prompt/serialization/index.ts",
     "./standalone": "./src/standalone.ts"
   },
   "publishConfig": {
@@ -18,7 +18,7 @@
         "require": "./dist/editor.cjs"
       },
       "./format": {
-        "types": "./dist/types/core/app/format/index.d.ts",
+        "types": "./dist/types/prompt/serialization/index.d.ts",
         "import": "./dist/format.js",
         "require": "./dist/format.cjs"
       },

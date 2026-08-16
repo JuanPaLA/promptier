@@ -6,8 +6,8 @@
  * module entry has to stay free of them so bundlers can tree-shake it and SSR
  * can import it. This file exists precisely to *have* the side effect.
  */
-import { parse } from './core/app/format/parse';
-import { serialize } from './core/app/format/serialize';
+import { parse } from './prompt/serialization/parse';
+import { serialize } from './prompt/serialization/serialize';
 import { registerPromptEditor } from './element/PromptEditorElement';
 
 registerPromptEditor();

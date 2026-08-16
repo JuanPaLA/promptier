@@ -9,23 +9,26 @@ contracts between workspaces.
 
 ```
 core-editor
-├─ src/core/domain/          plain serializable data types — no ProseMirror, no DOM
-├─ src/core/app/             ports & pure use-cases (PromptEditor, format codec, outline)
-├─ src/core/infrastructure/  ProseMirror implementation (schema, mappers, descriptors)
+├─ src/prompt/model/         plain serializable prompt data — no ProseMirror, no DOM
+├─ src/prompt/serialization/ canonical text parser, serializer and block codecs
+├─ src/prompt/structure/     derived structural readings such as the outline
+├─ src/editor/               editor and session contracts, plus editor commands
+├─ src/engine/prosemirror/   ProseMirror implementation (schema, mappers, descriptors)
 └─ src/element/              outer packaging: the Custom Element that index.ts re-exports
 react-sdk                    thin React wrapper over the element's property/event contract
 playground                   reference consumer (Vite dev app)
 ```
 
-Dependency rule: `domain` knows nothing; `app` knows `domain`; `infrastructure`
-implements `app` ports using `domain` types; `element` wires infrastructure up
-for consumption. Nothing ProseMirror-specific crosses `index.ts`.
+Dependency rule: `prompt/model` knows nothing outside the model; prompt
+capabilities and `editor` build on it; `engine` implements the editor contracts;
+and `element` wires the implementation up for consumption. Nothing
+ProseMirror-specific crosses `index.ts`.
 
-Inside `infrastructure/prosemirror/` the layout follows the role each file
+Inside `engine/prosemirror/` the layout follows the role each file
 plays, so a reader can tell ProseMirror-only code from translation code:
 
 ```
-infrastructure/prosemirror/
+engine/prosemirror/
 ├─ proseMirrorEditor.ts     the adapter — implements the port; the only root file
 ├─ descriptors/             the engine definition: what can exist, how it behaves
 │  ├─ promptSchema.ts       assembled from every descriptor's spec
@@ -56,7 +59,7 @@ the SDK contract is a string (`element.value`, see [format.md](format.md)), and
 `PromptContent` is the *hosted* product's storage, where exact fidelity matters.
 The editor is its only writer.
 
-`Block` (in `domain/Block.ts`) **is** the discriminated union on `blockType` —
+`Block` (in `prompt/model/Block.ts`) **is** the discriminated union on `blockType` —
 there is no separate base interface, so typing anything as `Block` always
 narrows. `BlockType` is derived from it (`Block['blockType']`) for keying
 registries:
@@ -79,7 +82,7 @@ restructuring all need the structure to exist in the model.
 ## The descriptor seam (how blocks reach ProseMirror)
 
 Every block type contributes one `BlockDescriptor`
-(`infrastructure/prosemirror/descriptors/blocks/`). It bundles everything the
+(`engine/prosemirror/descriptors/blocks/`). It bundles everything the
 ProseMirror engine needs for that type:
 
 | Member | Purpose |
@@ -144,9 +147,9 @@ these before writing an offset.
   attr would go stale the moment the title is edited, so `SectionNodeView`
   recomputes `data-section-id` on every update.
 
-## The format codec (app layer)
+## Prompt serialization
 
-`app/format/` holds the one serialization: `serialize` and `parse`, pure and
+`prompt/serialization/` holds the one serialization: `serialize` and `parse`, pure and
 DOM-free. XML tags carry structure, markdown carries everything inside — what a
 host stores *is* what a model reads. The grammar, the escaping rules, the
 degradation rule and the two round-trip laws live in [format.md](format.md);
@@ -161,12 +164,12 @@ rather than costing it.
 The domain is still data and the codec is still a fold over it, so a second
 strategy remains cheap to add — it is just no longer canonical.
 
-## Outline (app layer)
+## Prompt structure
 
-`app/outline/` derives navigable structure from a document: `outline(content):
-OutlineEntry[]`, one entry per section with its tag as `id`, its raw title and
-its nesting depth. It is a fold like `serialize`, and it lives beside it for the
-same reason — an outline is a *reading* of a document, so anything holding a
+`prompt/structure/` derives structural readings from a document.
+`buildOutline(content)` produces one `OutlineEntry` per section with its tag as
+`id`, its raw title and its nesting depth; the public API keeps the shorter
+`outline` name. It is a fold like `serialize`: anything holding a
 `PromptContent` can derive one without a live editor.
 
 That is why it is **not** on the element. A method there would imply the editor
@@ -315,7 +318,7 @@ Decided and implemented:
   consumer's concern onto the block itself. Nothing is lost by leaving them out,
   because the invariants live in the ProseMirror grammar, not in the objects —
   see the permissiveness note below.
-- **`sectionTagName` lives in `app/format/`, not in `domain/`.** Deriving a tag
+- **`sectionTagName` lives in `prompt/serialization/`, not in `prompt/model/`.** Deriving a tag
   from a title is a format artifact; the domain shouldn't know that titles
   become tags. `SectionNodeView` and `sectionDescriptor` import it from there
   for the tag hint and the outline anchor.
