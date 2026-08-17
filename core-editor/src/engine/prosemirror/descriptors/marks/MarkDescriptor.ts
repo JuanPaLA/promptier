@@ -3,7 +3,6 @@ import { MarkSpec, Schema } from 'prosemirror-model';
 import { Command } from 'prosemirror-state';
 
 import type { Format } from '../../../../prompt/model/Format';
-import type { CommandDescriptor } from '../../commands/CommandDescriptor';
 
 /**
  * Everything the ProseMirror infrastructure needs from a single format — the
@@ -16,7 +15,6 @@ import type { CommandDescriptor } from '../../commands/CommandDescriptor';
 export interface MarkDescriptor {
   readonly format: Format;
   readonly markSpec: MarkSpec;
-  readonly commands?: readonly CommandDescriptor[];
   keymap?(schema: Schema): Record<string, Command>;
   inputRules?(schema: Schema): InputRule[];
 }

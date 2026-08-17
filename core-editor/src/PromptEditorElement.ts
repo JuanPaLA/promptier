@@ -1,9 +1,7 @@
-import type { CommandId, EditorCommand } from './editor/commands/EditorCommand';
+import type { EditorCommand } from './editor/commands/EditorCommand';
 import type { EditorSelectionState } from './editor/commands/EditorSelectionState';
 import type { EditorSession } from './editor/EditorSession';
-import { availableCommandIds } from './engine/prosemirror/commands/commandRegistry';
-import { createProseMirrorEditor } from './engine/prosemirror/proseMirrorEditor';
-import { installEditorStyles } from './engine/prosemirror/styles/editorStyles';
+import { availableCommands, createProseMirrorEditor, installEditorStyles } from './engine';
 import type { PromptContent } from './prompt/model/PromptContent';
 import { parse, serialize } from './prompt/serialization';
 
@@ -17,8 +15,8 @@ const VALUE_ATTRIBUTE = 'value';
 export interface PromptEditorElement extends HTMLElement {
   content: PromptContent;
   value: string;
-  run(command: EditorCommand): void;
-  availableCommands(): CommandId[];
+  run(command: EditorCommand): boolean;
+  availableCommands(): readonly EditorCommand[];
   getSelectionState(): EditorSelectionState | null;
 }
 
@@ -109,12 +107,12 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       });
     }
 
-    run(command: EditorCommand): void {
-      this.session?.editor.run(command);
+    run(command: EditorCommand): boolean {
+      return this.session?.editor.run(command) ?? false;
     }
 
-    availableCommands(): CommandId[] {
-      return availableCommandIds();
+    availableCommands(): readonly EditorCommand[] {
+      return availableCommands();
     }
 
     getSelectionState(): EditorSelectionState | null {

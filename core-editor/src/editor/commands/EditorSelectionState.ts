@@ -1,7 +1,8 @@
 import type { Format } from '../../prompt/model/Format';
-import type { CommandId } from './EditorCommand';
+import type { EditorCommand } from './EditorCommand';
 
 export interface CommandState {
+  readonly command: EditorCommand;
   enabled: boolean;
   active: boolean;
 }
@@ -9,5 +10,5 @@ export interface CommandState {
 export interface EditorSelectionState {
   activeFormats: Format[];
   selectionEmpty: boolean;
-  commands: Record<CommandId, CommandState>;
+  commands: readonly CommandState[];
 }

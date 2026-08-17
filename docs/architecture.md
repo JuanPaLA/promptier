@@ -127,6 +127,27 @@ and return a `Transaction`, so they compose — a list can delete its trailing
 item and then insert a paragraph in one chain. New descriptors should reach for
 these before writing an offset.
 
+### Editor commands
+
+`editor/commands/EditorCommand.ts` is the engine-independent command contract.
+Commands are small discriminated data objects: `type` names the semantic action
+and the remaining fields carry that action's input. The current command family
+is `{ type: 'format', format }`; bold and code are two concrete commands, not
+two unrelated command types.
+
+`commands/CommandDescriptor.ts` is the ProseMirror implementation seam for one
+command family. A descriptor advertises the concrete commands it supports and
+receives the complete command when it runs or derives enabled/active state.
+`commandRegistry.ts` is the single router, keyed by the same `type`
+discriminant. New command families belong in the public union only when their
+behavior and payload are implemented; names such as `block.insert` and
+`block.move` are design directions, not placeholder API.
+
+The element imports editor creation, styles and command discovery through
+`engine/index.ts`. This is an internal module boundary, not a second engine
+interface: the element is the composition layer that deliberately wires the
+ProseMirror implementation.
+
 ### Section specifics
 
 - Node grammar: `section` = `sectionTitle block+`. `sectionTitle` is a plain
@@ -199,12 +220,11 @@ to a section's depth.
     `getSelectionState()`. The catalogue is a property of the engine, so it
     answers **before mount**; the selection state is `null` until an editor
     exists, because before that there is no selection to describe. A host
-    builds its menu from the catalogue and paints it from the state, reaching
-    each command through the optional chain it needs anyway for a command that
-    doesn't apply to the current selection.
+    builds its menu from the concrete command catalogue and paints it from the
+    command entries in the current selection state.
 - `react-sdk` forwards that contract as `<PromptEditor value onChange />`, and
-  adds no editor logic. what matters here
-  is the seam it presses on. `playground/src/MinimalConsumer.tsx` is the
+  adds no editor logic. What matters here is the seam it presses on.
+  `playground/src/MinimalConsumer.tsx` is the
   compiler-checked proof of the contract: it imports nothing from `core-editor`.
   - It used to be a *controlled* binding (`content`/`onChange(content)`), which
     forced every React host to hold `PromptContent` — leaking the document model

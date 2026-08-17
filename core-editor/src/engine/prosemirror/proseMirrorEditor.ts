@@ -86,8 +86,8 @@ class ProseMirrorEditor implements PromptEditor {
     return () => this.listeners.delete(listener);
   }
 
-  run(command: EditorCommand): void {
-    runCommand(this.view, command);
+  run(command: EditorCommand): boolean {
+    return runCommand(this.view, command);
   }
 
   getSelectionState(): EditorSelectionState {

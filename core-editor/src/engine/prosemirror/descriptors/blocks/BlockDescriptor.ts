@@ -3,7 +3,6 @@ import { NodeSpec, Node as ProseMirrorNode, Schema } from 'prosemirror-model';
 import { Command } from 'prosemirror-state';
 import { NodeViewConstructor } from 'prosemirror-view';
 import type { Block } from '../../../../prompt/model/Block';
-import type { CommandDescriptor } from '../../commands/CommandDescriptor';
 
 /**
  * Everything the ProseMirror infrastructure needs from a single block type.
@@ -16,8 +15,6 @@ export interface BlockDescriptor<B extends Block = Block> {
   readonly nodeSpec: NodeSpec;
   /** Auxiliary schema nodes this block needs besides its own (e.g. section's title). */
   readonly extraNodes?: Record<string, NodeSpec>;
-  /** Host-invocable actions this block contributes (copy, delete, turn into). */
-  readonly commands?: readonly CommandDescriptor[];
   toProseMirrorNode(
     block: B,
     schema: Schema,

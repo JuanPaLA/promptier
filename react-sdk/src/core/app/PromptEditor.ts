@@ -1,5 +1,4 @@
 import type {
-  CommandId,
   EditorCommand,
   EditorSelectionState,
   PromptContent,
@@ -13,8 +12,8 @@ export interface PromptEditor {
   getPrompt(): string;
   setPrompt(prompt: string): void;
   getContent(): PromptContent;
-  run(command: EditorCommand): void;
-  availableCommands(): CommandId[];
+  run(command: EditorCommand): boolean;
+  availableCommands(): readonly EditorCommand[];
   selectionState(): EditorSelectionState | null;
   onPromptChanged(listener: PromptListener): Unsubscribe;
   onSelectionChanged(listener: SelectionListener): Unsubscribe;

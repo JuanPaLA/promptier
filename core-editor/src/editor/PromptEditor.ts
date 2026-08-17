@@ -9,7 +9,7 @@ export interface PromptEditor {
   getContent(): PromptContent;
   setContent(content: PromptContent): void;
   onChange(listener: EditorChangeListener): () => void;
-  run(command: EditorCommand): void;
+  run(command: EditorCommand): boolean;
   getSelectionState(): EditorSelectionState;
   onSelectionChange(listener: SelectionChangeListener): () => void;
 }

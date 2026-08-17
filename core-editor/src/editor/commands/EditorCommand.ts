@@ -1,5 +1,8 @@
-export type EditorCommand =
-  | { id: 'format.bold' }
-  | { id: 'format.code' };
+import type { Format } from '../../prompt/model/Format';
 
-export type CommandId = EditorCommand['id'];
+export interface FormatCommand {
+  readonly type: 'format';
+  readonly format: Format;
+}
+
+export type EditorCommand = FormatCommand;

@@ -35,7 +35,7 @@ export type {
   PromptContent,
 } from './prompt/model/PromptContent';
 export type { Format } from './prompt/model/Format';
-export type { EditorCommand, CommandId } from './editor/commands/EditorCommand';
+export type { EditorCommand, FormatCommand } from './editor/commands/EditorCommand';
 export type {
   EditorSelectionState,
   CommandState,

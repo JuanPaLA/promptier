@@ -1,6 +1,5 @@
 import {
   registerPromptEditor,
-  type CommandId,
   type EditorCommand,
   type EditorSelectionState,
   type PromptContent,
@@ -53,11 +52,11 @@ export class CustomElementPromptEditor implements PromptEditor {
     return this.element?.content ?? EMPTY_CONTENT;
   }
 
-  run(command: EditorCommand): void {
-    this.element?.run(command);
+  run(command: EditorCommand): boolean {
+    return this.element?.run(command) ?? false;
   }
 
-  availableCommands(): CommandId[] {
+  availableCommands(): readonly EditorCommand[] {
     return this.element?.availableCommands?.() ?? [];
   }
 

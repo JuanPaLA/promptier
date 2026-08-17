@@ -77,8 +77,8 @@ function Outline({ entries }: { entries: OutlineEntry[] }) {
 }
 
 const FORMAT_BUTTONS: { label: string; command: EditorCommand }[] = [
-  { label: 'B', command: { id: 'format.bold' } },
-  { label: '</>', command: { id: 'format.code' } },
+  { label: 'B', command: { type: 'format', format: 'bold' } },
+  { label: '</>', command: { type: 'format', format: 'code' } },
 ];
 
 /**
@@ -96,11 +96,14 @@ function FormatToolbar({ editor }: { editor: PromptEditorPort }) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
       {FORMAT_BUTTONS.map(({ label, command }) => {
-        const state = selection?.commands[command.id];
+        const state = selection?.commands.find(
+          ({ command: candidate }) =>
+            candidate.type === command.type && candidate.format === command.format,
+        );
         const active = state?.active ?? false;
         return (
           <button
-            key={command.id}
+            key={`${command.type}.${command.format}`}
             type="button"
             // Keep the editor selection alive: a plain click would blur the
             // editor before run() fires.
