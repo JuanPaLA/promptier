@@ -203,8 +203,7 @@ to a section's depth.
     each command through the optional chain it needs anyway for a command that
     doesn't apply to the current selection.
 - `react-sdk` forwards that contract as `<PromptEditor value onChange />`, and
-  adds no editor logic. Its own layering, the reasoning behind it and the phases
-  that got there live in [refactor-plan.md](refactor-plan.md); what matters here
+  adds no editor logic. what matters here
   is the seam it presses on. `playground/src/MinimalConsumer.tsx` is the
   compiler-checked proof of the contract: it imports nothing from `core-editor`.
   - It used to be a *controlled* binding (`content`/`onChange(content)`), which
