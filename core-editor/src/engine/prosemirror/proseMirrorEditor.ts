@@ -6,9 +6,9 @@ import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import type {
   EditorChangeListener,
-  PromptEditor,
+  EditorSession,
   SelectionChangeListener,
-} from '../../editor/PromptEditor';
+} from '../../editor/EditorSession';
 import type { EditorCommand } from '../../editor/commands/EditorCommand';
 import type { EditorSelectionState } from '../../editor/commands/EditorSelectionState';
 import type { PromptContent } from '../../prompt/model/PromptContent';
@@ -22,21 +22,14 @@ import { markInputRules, markKeymaps } from './descriptors/marks/markDescriptorR
 import { promptSchema } from './descriptors/promptSchema';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './mapping/documentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
-import type { EditorSession } from '../../editor/EditorSession';
-
-/**
- * Starts an editor in `container`. The class itself stays unexported so
- * `destroy` is reachable only through the session — no cast gets you there.
- */
 export function createProseMirrorEditor(
   container: HTMLElement,
   initialContent: PromptContent,
 ): EditorSession {
-  const editor = new ProseMirrorEditor(container, initialContent);
-  return { editor, destroy: () => editor.destroy() };
+  return new ProseMirrorEditor(container, initialContent);
 }
 
-class ProseMirrorEditor implements PromptEditor {
+class ProseMirrorEditor implements EditorSession {
   private readonly view: EditorView;
   private readonly listeners = new Set<EditorChangeListener>();
   private readonly selectionListeners = new Set<SelectionChangeListener>();
@@ -59,9 +52,6 @@ class ProseMirrorEditor implements PromptEditor {
     this.view = new EditorView(container, {
       state,
       nodeViews: blockNodeViews(),
-      // Reads `this.view`, which is assigned below — safe because nothing
-      // dispatches while `new EditorView` runs: node views only build DOM and
-      // plugins only act on events.
       dispatchTransaction: (transaction: Transaction) => this.apply(transaction),
     });
   }

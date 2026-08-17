@@ -1,9 +1,9 @@
-import type { EditorCommand } from './editor/commands/EditorCommand';
-import type { EditorSelectionState } from './editor/commands/EditorSelectionState';
-import type { EditorSession } from './editor/EditorSession';
-import { availableCommands, createProseMirrorEditor, installEditorStyles } from './engine';
-import type { PromptContent } from './prompt/model/PromptContent';
-import { parse, serialize } from './prompt/serialization';
+import type { EditorCommand } from '../editor/commands/EditorCommand';
+import type { EditorSelectionState } from '../editor/commands/EditorSelectionState';
+import type { EditorSession } from '../editor/EditorSession';
+import { availableCommands, createProseMirrorEditor, installEditorStyles } from '../engine';
+import type { PromptContent } from '../prompt/model/PromptContent';
+import { parse, serialize } from '../prompt/serialization';
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
@@ -50,8 +50,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     private readonly editorContainer: HTMLElement;
     private session: EditorSession | null = null;
     private pendingContent: PromptContent = { blocks: [] };
-    private unsubscribe: (() => void) | null = null;
-    private unsubscribeSelection: (() => void) | null = null;
+    private sessionSubscriptions: Array<() => void> = [];
 
     constructor() {
       super();
@@ -62,20 +61,13 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       root.append(this.editorContainer);
     }
 
-    protected createEditor(
-      container: HTMLElement,
-      initialContent: PromptContent,
-    ): EditorSession {
-      return createProseMirrorEditor(container, initialContent);
-    }
-
     get content(): PromptContent {
-      return this.session?.editor.getContent() ?? this.pendingContent;
+      return this.session?.getContent() ?? this.pendingContent;
     }
 
     set content(value: PromptContent) {
       this.pendingContent = value;
-      this.session?.editor.setContent(value);
+      this.session?.setContent(value);
     }
 
     /** The document as prompt text for hosts that do not carry `PromptContent`. */
@@ -96,19 +88,23 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       if (this.session) return;
       this.upgradeProperty('value');
       this.upgradeProperty('content');
-      const session = this.createEditor(this.editorContainer, this.pendingContent);
+      const session = createProseMirrorEditor(this.editorContainer, this.pendingContent);
       this.session = session;
-      this.unsubscribe = session.editor.onChange((content) => {
-        this.pendingContent = content;
-        this.dispatchEvent(new CustomEvent<PromptContent>('change', { detail: content }));
-      });
-      this.unsubscribeSelection = session.editor.onSelectionChange((state) => {
-        this.dispatchEvent(new CustomEvent<EditorSelectionState>('selectionchange', { detail: state }));
-      });
+      this.sessionSubscriptions = [
+        session.onChange((content) => {
+          this.pendingContent = content;
+          this.dispatchEvent(new CustomEvent<PromptContent>('change', { detail: content }));
+        }),
+        session.onSelectionChange((state) => {
+          this.dispatchEvent(
+            new CustomEvent<EditorSelectionState>('selectionchange', { detail: state }),
+          );
+        }),
+      ];
     }
 
     run(command: EditorCommand): boolean {
-      return this.session?.editor.run(command) ?? false;
+      return this.session?.run(command) ?? false;
     }
 
     availableCommands(): readonly EditorCommand[] {
@@ -116,7 +112,14 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     }
 
     getSelectionState(): EditorSelectionState | null {
-      return this.session?.editor.getSelectionState() ?? null;
+      return this.session?.getSelectionState() ?? null;
+    }
+
+    disconnectedCallback(): void {
+      this.sessionSubscriptions.forEach((unsubscribe) => unsubscribe());
+      this.sessionSubscriptions = [];
+      this.session?.destroy();
+      this.session = null;
     }
 
     /** Replays a property assigned before the browser upgraded this element. */
@@ -126,15 +129,6 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       const pending = properties[name];
       delete properties[name];
       properties[name] = pending;
-    }
-
-    disconnectedCallback(): void {
-      this.unsubscribe?.();
-      this.unsubscribe = null;
-      this.unsubscribeSelection?.();
-      this.unsubscribeSelection = null;
-      this.session?.destroy();
-      this.session = null;
     }
   };
 }

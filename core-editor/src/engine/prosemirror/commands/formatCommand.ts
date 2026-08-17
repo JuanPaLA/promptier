@@ -1,9 +1,9 @@
 import { toggleMark } from 'prosemirror-commands';
 
-import type { FormatCommand } from '../../../editor/commands/EditorCommand';
 import { markDescriptors } from '../descriptors/marks/markDescriptorRegistry';
 import type { CommandDescriptor } from './CommandDescriptor';
 import { isMarkActive } from './markActivity';
+import type { FormatCommand } from '../../../editor/commands/FormatCommand';
 
 export const formatCommand: CommandDescriptor<FormatCommand> = {
   type: 'format',

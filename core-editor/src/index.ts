@@ -1,5 +1,5 @@
-export { registerPromptEditor } from './PromptEditorElement';
-export type { PromptEditorElement } from './PromptEditorElement';
+export { registerPromptEditor } from './custom-element/PromptEditorElement';
+export type { PromptEditorElement } from './custom-element/PromptEditorElement';
 export { serialize } from './prompt/serialization/serialize';
 export { parse } from './prompt/serialization/parse';
 export { buildOutline as outline } from './prompt/structure/buildOutline';
@@ -35,8 +35,7 @@ export type {
   PromptContent,
 } from './prompt/model/PromptContent';
 export type { Format } from './prompt/model/Format';
-export type { EditorCommand, FormatCommand } from './editor/commands/EditorCommand';
-export type {
-  EditorSelectionState,
-  CommandState,
-} from './editor/commands/EditorSelectionState';
+export type { EditorCommand } from './editor/commands/EditorCommand';
+export type { CommandState } from './editor/commands/CommandState';
+export type { EditorSelectionState } from './editor/commands/EditorSelectionState';
+export type { FormatCommand } from './editor/commands/FormatCommand';

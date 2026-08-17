@@ -12,9 +12,9 @@ core-editor
 ├─ src/prompt/model/          plain serializable prompt data — no ProseMirror, no DOM
 ├─ src/prompt/serialization/  canonical text parser, serializer and block codecs
 ├─ src/prompt/structure/      derived structural readings such as the outline
-├─ src/editor/                editor and session contracts, plus editor commands
+├─ src/editor/                mounted editor-session contract, plus editor commands
 ├─ src/engine/prosemirror/    ProseMirror implementation (schema, mappers, descriptors)
-└─ src/PromptEditorElement.ts outer packaging: the Custom Element that index.ts re-exports
+└─ src/custom-element/        browser packaging: the Custom Element that index.ts re-exports
 react-sdk                     thin React wrapper over the element's property/event contract
 playground                    reference consumer (Vite dev app)
 ```
@@ -44,7 +44,7 @@ engine/prosemirror/
 `promptSchema` sits inside `descriptors/` rather than beside it because it is
 their *derived product*, not a peer input.
 
-**The swap unit is `PromptEditor`, not `BlockDescriptor`.** `nodeSpec`, content
+**The swap unit is `EditorSession`, not `BlockDescriptor`.** `nodeSpec`, content
 expressions, node views and input rules aren't incidental to ProseMirror — they
 *are* its model, so descriptors speak ProseMirror on purpose and are not
 portable. Migrating engines means writing a new adapter (a `createXEditor`
@@ -207,8 +207,12 @@ to a section's depth.
 
 - `PromptEditorElement` is the public type contract for the registered Custom
   Element. The runtime class is created lazily by `registerPromptEditor()`, so
-  importing the package does not evaluate `HTMLElement` during SSR. Two
-  properties
+  importing the package does not evaluate `HTMLElement` during SSR. The element
+  owns a nullable `EditorSession`; it does not implement that contract because
+  a Custom Element can exist before it is connected, while a session always
+  represents a mounted editor and owns its cleanup. Connecting creates a
+  session, disconnecting destroys it, and reconnecting creates a new one from
+  the last content. Two properties
   project one document: **`value`** (prompt text — the SDK contract, also
   settable as a `value` attribute for plain-HTML hosts) and **`content`**
   (`PromptContent`, for hosts that want structure). Last write wins; both defer
