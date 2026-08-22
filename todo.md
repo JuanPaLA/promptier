@@ -1,7 +1,7 @@
 # CORE
 ## UI
-[] menu bar
-[] outline navigation
+[X] menu bar foundation with format commands
+[X] outline navigation with hide/show
 [] bottom bar with token count
 [] review style inyection strategy
 [] hide/show sections tags hints
@@ -18,7 +18,7 @@
 ## CONTROLS
 [] blocks options: copy, delete, move, turn into
 [] make the outline consider both sections and headings.
-[] menu bar options are displayed as ui elements by sdk and processed internaly by core as commands. 
+[X] menu bar options are displayed as UI elements by the SDK and processed internally by core commands.
 
 
 # QUESTIONS

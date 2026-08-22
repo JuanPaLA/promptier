@@ -22,8 +22,8 @@ describe('outline', () => {
     const content = document(section('Goals', paragraph), paragraph, section('Rules', paragraph));
 
     expect(buildOutline(content)).toEqual([
-      { id: 'goals', title: 'Goals', depth: 0 },
-      { id: 'rules', title: 'Rules', depth: 0 },
+      { id: 'goals', title: 'Goals', depth: 0, path: [0] },
+      { id: 'rules', title: 'Rules', depth: 0, path: [2] },
     ]);
   });
 
@@ -34,22 +34,22 @@ describe('outline', () => {
     );
 
     expect(buildOutline(content)).toEqual([
-      { id: 'dialogue_rules', title: 'Dialogue rules', depth: 0 },
-      { id: 'formato', title: 'Formato', depth: 1 },
-      { id: 'estilo', title: 'Estilo', depth: 1 },
-      { id: 'closing', title: 'Closing', depth: 0 },
+      { id: 'dialogue_rules', title: 'Dialogue rules', depth: 0, path: [0] },
+      { id: 'formato', title: 'Formato', depth: 1, path: [0, 0] },
+      { id: 'estilo', title: 'Estilo', depth: 1, path: [0, 1] },
+      { id: 'closing', title: 'Closing', depth: 0, path: [1] },
     ]);
   });
 
   it('anchors on the same tag the codec serializes, diacritics included', () => {
     expect(buildOutline(document(section('Reglas de diálogo', paragraph)))).toEqual([
-      { id: 'reglas_de_dialogo', title: 'Reglas de diálogo', depth: 0 },
+      { id: 'reglas_de_dialogo', title: 'Reglas de diálogo', depth: 0, path: [0] },
     ]);
   });
 
   it('keeps an untitled section addressable and leaves the placeholder to the UI', () => {
     expect(buildOutline(document(section('', paragraph)))).toEqual([
-      { id: 'section', title: '', depth: 0 },
+      { id: 'section', title: '', depth: 0, path: [0] },
     ]);
   });
 });

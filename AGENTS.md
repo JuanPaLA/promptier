@@ -7,8 +7,8 @@ Architecture, the domain→ProseMirror descriptor seam, and the design decisions
 ## Workspaces (yarn workspaces)
 
 - `core-editor` — the editor itself. Framework-agnostic: no React here yet, until needed. Internally organized by responsibility: the prompt model and its pure capabilities (`prompt`), editor contracts (`editor`), the ProseMirror implementation (`engine`), and browser packaging (`custom-element`). Its public surface (`src/index.ts`) exposes a Custom Element (`PromptEditorElement` / `registerPromptEditor`) plus plain domain data types. Nothing ProseMirror-specific is exported.
-- `react-sdk` — React wrapper around the Custom Element, layered as MVP: a `PromptEditor` port (`core/app`), the `CustomElementPromptEditor` adapter that owns every DOM concern (`core/infrastructure`), and presenters plus components (`ui`). String-first: `<PromptEditor value onChange />`, and `PromptContent` only if a host asks for it. It is a **library, not an application** — no composition root, no `createRoot`; the host composes. See [docs/refactor-plan.md](docs/refactor-plan.md).
-- `playground` — dev app (Vite) for trying the editor with live changes. A plain consumer of `react-sdk`, nothing else.
+- `react-sdk` — React presentation around the Custom Element: one private `PromptEditorController` (`app`), a root view-model hook, and prop-driven editor widgets plus styles (`ui`). String-first: `<PromptEditor value onChange />`; only the root widget translates core snapshots and commands into UI models and callbacks. It is a **library, not an application** — no `createRoot`; the host supplies the composition root. See [docs/refactor-plan.md](docs/refactor-plan.md).
+- `playground` — dev app (Vite) and reference React host. It owns page layout and persistence behavior, and consumes only `react-sdk` for the editor experience.
 - `examples/` — `standalone.html`, the `<script src>` integration in one file. Serve it with the `examples` launch config after building `core-editor`.
 
 ## Rules of thumb

@@ -7,12 +7,12 @@ import { EditorView } from 'prosemirror-view';
 import type {
   EditorChangeListener,
   EditorSession,
-  SelectionChangeListener,
+  EditorStateChangeListener,
 } from '../../editor/EditorSession';
 import type { EditorCommand } from '../../editor/commands/EditorCommand';
-import type { EditorSelectionState } from '../../editor/commands/EditorSelectionState';
+import type { EditorStateSnapshot } from '../../editor/commands/EditorStateSnapshot';
 import type { PromptContent } from '../../prompt/model/PromptContent';
-import { runCommand, selectionStateFromEditorState } from './commands/commandRegistry';
+import { runCommand, stateSnapshotFromEditorState } from './commands/commandRegistry';
 import {
   blockInputRules,
   blockKeymaps,
@@ -22,6 +22,7 @@ import { markInputRules, markKeymaps } from './descriptors/marks/markDescriptorR
 import { promptSchema } from './descriptors/promptSchema';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './mapping/documentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
+
 export function createProseMirrorEditor(
   container: HTMLElement,
   initialContent: PromptContent,
@@ -32,7 +33,7 @@ export function createProseMirrorEditor(
 class ProseMirrorEditor implements EditorSession {
   private readonly view: EditorView;
   private readonly listeners = new Set<EditorChangeListener>();
-  private readonly selectionListeners = new Set<SelectionChangeListener>();
+  private readonly stateListeners = new Set<EditorStateChangeListener>();
 
   constructor(container: HTMLElement, initialContent: PromptContent) {
     const state = EditorState.create({
@@ -69,6 +70,7 @@ class ProseMirrorEditor implements EditorSession {
       plugins: this.view.state.plugins,
     });
     this.view.updateState(newState);
+    this.notifyStateChanged();
   }
 
   onChange(listener: EditorChangeListener): () => void {
@@ -80,19 +82,19 @@ class ProseMirrorEditor implements EditorSession {
     return runCommand(this.view, command);
   }
 
-  getSelectionState(): EditorSelectionState {
-    return selectionStateFromEditorState(this.view.state);
+  getState(): EditorStateSnapshot {
+    return stateSnapshotFromEditorState(this.view.state);
   }
 
-  onSelectionChange(listener: SelectionChangeListener): () => void {
-    this.selectionListeners.add(listener);
-    return () => this.selectionListeners.delete(listener);
+  onStateChange(listener: EditorStateChangeListener): () => void {
+    this.stateListeners.add(listener);
+    return () => this.stateListeners.delete(listener);
   }
 
   destroy(): void {
     this.view.destroy();
     this.listeners.clear();
-    this.selectionListeners.clear();
+    this.stateListeners.clear();
   }
 
   private apply(transaction: Transaction): void {
@@ -102,8 +104,12 @@ class ProseMirrorEditor implements EditorSession {
       const content = fromProseMirrorDoc(newState.doc);
       this.listeners.forEach((listener) => listener(content));
     }
-    // Every transaction, not just docChanged: cursor moves change the snapshot.
-    const selectionState = selectionStateFromEditorState(newState);
-    this.selectionListeners.forEach((listener) => listener(selectionState));
+    // Every transaction, not just docChanged: cursor and history changes affect UI state.
+    this.notifyStateChanged();
+  }
+
+  private notifyStateChanged(): void {
+    const snapshot = stateSnapshotFromEditorState(this.view.state);
+    this.stateListeners.forEach((listener) => listener(snapshot));
   }
 }

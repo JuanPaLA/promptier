@@ -1,5 +1,5 @@
 import type { EditorCommand } from '../editor/commands/EditorCommand';
-import type { EditorSelectionState } from '../editor/commands/EditorSelectionState';
+import type { EditorStateSnapshot } from '../editor/commands/EditorStateSnapshot';
 import type { EditorSession } from '../editor/EditorSession';
 import { availableCommands, createProseMirrorEditor, installEditorStyles } from '../engine';
 import type { PromptContent } from '../prompt/model/PromptContent';
@@ -8,7 +8,7 @@ import { parse, serialize } from '../prompt/serialization';
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
 const ELEMENT_CONTRACT_MARK = Symbol.for('promptier.element.contract');
-const ELEMENT_CONTRACT_VERSION = 1;
+const ELEMENT_CONTRACT_VERSION = 2;
 const VALUE_ATTRIBUTE = 'value';
 
 /** The browser-facing contract implemented by the registered custom element. */
@@ -17,7 +17,7 @@ export interface PromptEditorElement extends HTMLElement {
   value: string;
   run(command: EditorCommand): boolean;
   availableCommands(): readonly EditorCommand[];
-  getSelectionState(): EditorSelectionState | null;
+  getState(): EditorStateSnapshot | null;
 }
 
 export function registerPromptEditor(tagName: string = DEFAULT_TAG_NAME): void {
@@ -95,9 +95,9 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
           this.pendingContent = content;
           this.dispatchEvent(new CustomEvent<PromptContent>('change', { detail: content }));
         }),
-        session.onSelectionChange((state) => {
+        session.onStateChange((state) => {
           this.dispatchEvent(
-            new CustomEvent<EditorSelectionState>('selectionchange', { detail: state }),
+            new CustomEvent<EditorStateSnapshot>('statechange', { detail: state }),
           );
         }),
       ];
@@ -111,8 +111,8 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       return availableCommands();
     }
 
-    getSelectionState(): EditorSelectionState | null {
-      return this.session?.getSelectionState() ?? null;
+    getState(): EditorStateSnapshot | null {
+      return this.session?.getState() ?? null;
     }
 
     disconnectedCallback(): void {

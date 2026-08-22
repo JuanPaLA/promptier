@@ -15,7 +15,7 @@ core-editor
 ├─ src/editor/                mounted editor-session contract, plus editor commands
 ├─ src/engine/prosemirror/    ProseMirror implementation (schema, mappers, descriptors)
 └─ src/custom-element/        browser packaging: the Custom Element that index.ts re-exports
-react-sdk                     thin React wrapper over the element's property/event contract
+react-sdk                     React adapter, observable binding and editor UI composition
 playground                    reference consumer (Vite dev app)
 ```
 
@@ -131,9 +131,11 @@ these before writing an offset.
 
 `editor/commands/EditorCommand.ts` is the engine-independent command contract.
 Commands are small discriminated data objects: `type` names the semantic action
-and the remaining fields carry that action's input. The current command family
-is `{ type: 'format', format }`; bold and code are two concrete commands, not
-two unrelated command types.
+and the remaining fields carry that action's input. Formatting uses
+`{ type: 'format', format }`; bold and code are two concrete commands, not two
+unrelated command types. Outline navigation uses a structural block path so a
+wrapper never has to reach into the engine DOM or treat a title-derived id as
+unique.
 
 `commands/CommandDescriptor.ts` is the ProseMirror implementation seam for one
 command family. A descriptor advertises the concrete commands it supports and
@@ -189,8 +191,10 @@ strategy remains cheap to add — it is just no longer canonical.
 
 `prompt/structure/` derives structural readings from a document.
 `buildOutline(content)` produces one `OutlineEntry` per section with its tag as
-`id`, its raw title and its nesting depth; the public API keeps the shorter
-`outline` name. It is a fold like `serialize`: anything holding a
+`id`, its raw title, nesting depth, and ephemeral structural `path`; the public
+API keeps the shorter `outline` name. The path addresses the current tree for
+commands such as navigation while `id` remains a readable derived anchor. It is
+a fold like `serialize`: anything holding a
 `PromptContent` can derive one without a live editor.
 
 That is why it is **not** on the element. A method there would imply the editor
@@ -216,20 +220,24 @@ to a section's depth.
   project one document: **`value`** (prompt text — the SDK contract, also
   settable as a `value` attribute for plain-HTML hosts) and **`content`**
   (`PromptContent`, for hosts that want structure). Last write wins; both defer
-  until the editor mounts. Plus `change` / `selectionchange` events.
+  until the editor mounts. Plus `change` / `statechange` events.
   `value` has initial-value semantics like a textarea's content: set it once,
   read it when saving — binding it per keystroke would re-parse while the user
   types and fight the caret.
-  - For driving UI it also answers `availableCommands()` and
-    `getSelectionState()`. The catalogue is a property of the engine, so it
-    answers **before mount**; the selection state is `null` until an editor
-    exists, because before that there is no selection to describe. A host
-    builds its menu from the concrete command catalogue and paints it from the
-    command entries in the current selection state.
-- `react-sdk` forwards that contract as `<PromptEditor value onChange />`, and
-  adds no editor logic. What matters here is the seam it presses on.
-  `playground/src/MinimalConsumer.tsx` is the
-  compiler-checked proof of the contract: it imports nothing from `core-editor`.
+  - For driving UI it also answers `availableCommands()` and `getState()`. The
+    catalogue is a property of the engine, so it answers **before mount**; the
+    state snapshot is `null` until an editor exists. A host builds its menu from
+    concrete commands and paints it from their enabled/active state. The
+    snapshot describes all command-relevant runtime state, not only selection,
+    and `statechange` fires after transactions and programmatic document writes.
+- `react-sdk` exposes `<PromptEditor value onChange />` and owns the React editor
+  interface: shell layout, the collapsible outline, command view models,
+  accessibility and focus behavior. It adds no editor *semantics*. Its private
+  `PromptEditorController` normalizes Custom Element properties/events into a
+  cached snapshot. The root `usePromptEditorViewModel` hook consumes that store,
+  reconciles `value` / `onChange`, and translates core state into widget models
+  and callbacks. Header, outline and editor-surface widgets receive props; they
+  do not know about the controller, core commands, ProseMirror, or context.
   - It used to be a *controlled* binding (`content`/`onChange(content)`), which
     forced every React host to hold `PromptContent` — leaking the document model
     into the one place the SDK exists to keep it out of. It then swung to
@@ -247,15 +255,13 @@ to a section's depth.
     Promptier element (including across development reloads) and rejects a tag
     name already owned by another element contract.
   - **`change` fires for user edits only.** Writing `value` or `content`
-    replaces the state rather than applying a transaction, so it emits nothing.
-    That is fine for the host doing the writing and wrong for everyone else, so
-    `react-sdk` notifies its own subscribers on write — otherwise a sibling
-    outline keeps rendering the previous document. Whether the element itself
-    should emit on host writes is open.
-- `playground` starts from a *string* and pulls structure only because it draws
-  an outline and inspector panes: `TextLoader` shows the string contract,
-  `MinimalConsumer` shows a whole integration with no `core-editor` import, and
-  the round-trip pane checks the codec's law live.
+    replaces the document and emits `statechange`, while `react-sdk` also
+    publishes the new prompt through its own snapshot. A controlled host's echo
+    is reconciled against the last prompt observed by the root view-model hook,
+    so it does not re-seed the editor or fight the caret.
+- `playground` is the compiler-checked reference host: it imports only
+  `react-sdk`, supplies a string, receives a string, and owns save state. It does
+  not implement command bars, outlines, inspectors, or editor styling.
 
 ## Distribution
 
