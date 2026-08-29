@@ -1,5 +1,5 @@
 import type { CommandItemVM } from '../PromptEditorVM';
-import { EditorToolbar } from './EditorToolbar';
+import { CommandEditorToolbar } from './CommandEditorToolbar';
 
 export interface EditorHeaderProps {
   readonly outlineOpen: boolean;
@@ -27,7 +27,7 @@ export function EditorHeader({
           ▤
         </button>
       )}
-      <EditorToolbar items={commandItems} onAction={onCommand} />
+      <CommandEditorToolbar items={commandItems} onAction={onCommand} />
     </header>
   );
 }
