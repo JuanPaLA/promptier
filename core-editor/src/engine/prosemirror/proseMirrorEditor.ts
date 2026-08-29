@@ -6,9 +6,9 @@ import { EditorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import type {
   EditorChangeListener,
-  EditorSession,
+  PromptEditor,
   EditorStateChangeListener,
-} from '../../editor/EditorSession';
+} from '../../editor/PromptEditor';
 import type { EditorCommand } from '../../editor/commands/EditorCommand';
 import type { EditorStateSnapshot } from '../../editor/commands/EditorStateSnapshot';
 import type { PromptContent } from '../../prompt/model/PromptContent';
@@ -26,11 +26,11 @@ import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
 export function createProseMirrorEditor(
   container: HTMLElement,
   initialContent: PromptContent,
-): EditorSession {
+): PromptEditor {
   return new ProseMirrorEditor(container, initialContent);
 }
 
-class ProseMirrorEditor implements EditorSession {
+class ProseMirrorEditor implements PromptEditor {
   private readonly view: EditorView;
   private readonly listeners = new Set<EditorChangeListener>();
   private readonly stateListeners = new Set<EditorStateChangeListener>();

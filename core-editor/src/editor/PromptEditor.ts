@@ -5,7 +5,7 @@ import type { EditorStateSnapshot } from './commands/EditorStateSnapshot';
 export type EditorChangeListener = (content: PromptContent) => void;
 export type EditorStateChangeListener = (state: EditorStateSnapshot) => void;
 
-export interface EditorSession {
+export interface PromptEditor {
   getContent(): PromptContent;
   setContent(content: PromptContent): void;
   onChange(listener: EditorChangeListener): () => void;

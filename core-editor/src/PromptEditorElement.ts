@@ -1,6 +1,6 @@
 import type { EditorCommand } from './editor/commands/EditorCommand';
 import type { EditorStateSnapshot } from './editor/commands/EditorStateSnapshot';
-import type { EditorSession } from './editor/EditorSession';
+import type { PromptEditor } from './editor/PromptEditor';
 import { availableCommands, createProseMirrorEditor, installEditorStyles } from './engine';
 import type { PromptContent } from './prompt/model/PromptContent';
 import { parse, serialize } from './prompt/serialization';
@@ -11,7 +11,6 @@ const ELEMENT_CONTRACT_MARK = Symbol.for('promptier.element.contract');
 const ELEMENT_CONTRACT_VERSION = 2;
 const VALUE_ATTRIBUTE = 'value';
 
-/** The browser-facing contract implemented by the registered custom element. */
 export interface PromptEditorElement extends HTMLElement {
   content: PromptContent;
   value: string;
@@ -48,7 +47,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     static readonly observedAttributes = [VALUE_ATTRIBUTE];
 
     private readonly editorContainer: HTMLElement;
-    private session: EditorSession | null = null;
+    private session: PromptEditor | null = null;
     private pendingContent: PromptContent = { blocks: [] };
     private sessionSubscriptions: Array<() => void> = [];
 

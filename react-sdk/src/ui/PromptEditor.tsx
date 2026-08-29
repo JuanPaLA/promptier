@@ -17,13 +17,13 @@ export interface PromptEditorProps extends PromptEditorPresenterProps {
 
 export function PromptEditor(props: PromptEditorProps) {
   const [editor] = useState(() => new PromptEditorService());
-  const [outlineOpen, setOutlineOpen] = useState(
-    props.defaultOutlineOpen ?? true,
-  );
-  const presenter = usePresenter(
+  const [outlineOpen, setOutlineOpen] = useState(true)
+
+    const presenter = usePresenter(
     (onChange) => new PromptEditorPresenter(onChange, editor),
     { value: props.value, onChange: props.onChange },
   );
+
   return (
     <div className="promptier-editor">
       <style>{styles}</style>
