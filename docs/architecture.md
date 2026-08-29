@@ -14,7 +14,7 @@ core-editor
 ├─ src/prompt/structure/      derived structural readings such as the outline
 ├─ src/editor/                mounted editor-session contract, plus editor commands
 ├─ src/engine/prosemirror/    ProseMirror implementation (schema, mappers, descriptors)
-└─ src/ProptEditorElement     browser packaging: the Custom Element that index.ts re-exports
+└─ src/ProptEditorElement.ts  browser packaging: the Custom Element that index.ts re-exports
 react-sdk                     Custom Element service, presenter and React UI composition
 playground                    reference consumer (Vite dev app)
 ```
@@ -235,12 +235,13 @@ to a section's depth.
   accessibility and focus behavior. It adds no editor *semantics*. Its private
   `PromptEditorService` normalizes Custom Element properties/events into a
   cached snapshot. `PromptEditorPresenter` is the single reactive owner that
-  reconciles `value` / `onChange`, translates core state into `CommandItemVM`
-  and outline items, and exposes actions. Header, toolbar and outline widgets
-  receive those models and callbacks; they know nothing about the service,
-  core commands, ProseMirror, or context. The root component keeps local-only
-  composition state such as outline visibility and renders the Custom Element
-  inline.
+  reconciles `value` / `onChange` and exposes actions. `PromptEditorVM`
+  translates core snapshots into command and outline items while retaining the
+  private domain lookups needed by those actions. Header, toolbar and outline
+  widgets receive those models and callbacks; they know nothing about the
+  service, core commands, ProseMirror, or context. The root component keeps
+  local-only composition state such as outline visibility and renders the
+  Custom Element inline.
   - It used to be a *controlled* binding (`content`/`onChange(content)`), which
     forced every React host to hold `PromptContent` — leaking the document model
     into the one place the SDK exists to keep it out of. It then swung to

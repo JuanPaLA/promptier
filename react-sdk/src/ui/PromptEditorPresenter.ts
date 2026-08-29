@@ -1,21 +1,10 @@
 import { PresenterBase, type ChangeFunc } from '@nbottarini/react-presenter';
-import {
-  outline,
-  type CommandState,
-  type EditorCommand,
-  type OutlineEntry,
-} from 'core-editor';
 
 import {
   PromptEditorService,
-  type PromptEditorSnapshot,
   type Unsubscribe,
 } from '../app/PromptEditorService';
-import {
-  CommandItemVM,
-  OutlineItemVM,
-  type PromptEditorVM,
-} from './PromptEditorVM';
+import { PromptEditorVM } from './PromptEditorVM';
 
 export interface PromptEditorPresenterProps {
   readonly value?: string;
@@ -28,8 +17,6 @@ export class PromptEditorPresenter extends PresenterBase<
 > {
   private editorSubscription: Unsubscribe | null = null;
   private lastReportedPrompt = '';
-  private editorCommandsById = new Map<string, EditorCommand>();
-  private outlinePathById = new Map<string, readonly number[]>();
 
   constructor(onChange: ChangeFunc, private readonly editor: PromptEditorService) {
     super(onChange);
@@ -37,7 +24,7 @@ export class PromptEditorPresenter extends PresenterBase<
   }
 
   protected initModel(): PromptEditorVM {
-    return this.viewModelFrom(this.editor.getSnapshot());
+    return PromptEditorVM.from(this.editor.getSnapshot());
   }
 
   start(): void {
@@ -52,12 +39,12 @@ export class PromptEditorPresenter extends PresenterBase<
   }
 
   runCommand = (id: string): void => {
-    const command = this.editorCommandsById.get(id);
+    const command = this.model.commandFor(id);
     if (command) this.editor.run(command);
   };
 
   selectOutlineItem = (id: string): void => {
-    const path = this.outlinePathById.get(id);
+    const path = this.model.outlinePathFor(id);
     if (!path) return;
     this.editor.run({ type: 'navigate', target: { kind: 'section', path } });
   };
@@ -70,12 +57,12 @@ export class PromptEditorPresenter extends PresenterBase<
 
   private handleEditorChange = (): void => {
     const snapshot = this.editor.getSnapshot();
-    this.updateModel(this.viewModelFrom(snapshot));
+    this.updateModel(PromptEditorVM.from(snapshot));
     this.reportPrompt(snapshot.prompt);
   };
 
   private refreshViewModel(): void {
-    this.updateModel(this.viewModelFrom(this.editor.getSnapshot()));
+    this.updateModel(PromptEditorVM.from(this.editor.getSnapshot()));
   }
 
   private reportPrompt(prompt: string): void {
@@ -84,44 +71,4 @@ export class PromptEditorPresenter extends PresenterBase<
     this.props.onChange?.(prompt);
   }
 
-  private viewModelFrom(snapshot: PromptEditorSnapshot): PromptEditorVM {
-    const [commandItems, commandsById] = buildCommandItems(
-      snapshot.state?.commands ?? [],
-    );
-    const [outlineItems, pathsById] = buildOutlineItems(
-      outline(snapshot.content),
-    );
-    this.editorCommandsById = commandsById;
-    this.outlinePathById = pathsById;
-    return {
-      commandItems,
-      outlineItems,
-    };
-  }
-}
-
-function buildCommandItems(
-  states: readonly CommandState[],
-): [readonly CommandItemVM[], Map<string, EditorCommand>] {
-  const items: CommandItemVM[] = [];
-  const commandsById = new Map<string, EditorCommand>();
-  states.forEach((state) => {
-    const item = CommandItemVM.from(state);
-    if (!item) return;
-    items.push(item);
-    commandsById.set(item.id, state.command);
-  });
-  return [items, commandsById];
-}
-
-function buildOutlineItems(
-  entries: readonly OutlineEntry[],
-): [readonly OutlineItemVM[], Map<string, readonly number[]>] {
-  const pathsById = new Map<string, readonly number[]>();
-  const items = entries.map((entry) => {
-    const item = OutlineItemVM.from(entry);
-    pathsById.set(item.id, entry.path);
-    return item;
-  });
-  return [items, pathsById];
 }

@@ -1,4 +1,3 @@
-/// <reference path="../custom-elements.d.ts" />
 import { usePresenter } from '@nbottarini/react-presenter';
 import { useState } from 'react';
 

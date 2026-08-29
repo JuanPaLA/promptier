@@ -12,8 +12,8 @@ The UI foundation keeps editor semantics in `core-editor`, React UI in
 - `react-sdk` keeps one concrete Custom Element service private and exposes the
   string-first `<PromptEditor value onChange />` component.
 - One presenter is the reactive owner of editor-facing UI state. It reconciles
-  `value` / `onChange`, reads core command/state contracts, builds
-  `CommandItemVM` and outline items, and exposes actions to prop-driven widgets.
+  `value` / `onChange` and exposes actions to prop-driven widgets. Its
+  `PromptEditorVM` translates core snapshots into command and outline items.
 - The root `PromptEditor` component owns only transient composition state such
   as whether the outline is visible. The Custom Element surface is inline
   because it has no independent behavior.

@@ -1,8 +1,66 @@
-import type { CommandState, OutlineEntry } from 'core-editor';
+import {
+  outline,
+  type CommandState,
+  type EditorCommand,
+  type OutlineEntry,
+} from 'core-editor';
 
-export interface PromptEditorVM {
-  readonly commandItems: readonly CommandItemVM[];
-  readonly outlineItems: readonly OutlineItemVM[];
+import type { PromptEditorSnapshot } from '../app/PromptEditorService';
+
+export class PromptEditorVM {
+  static from(snapshot: PromptEditorSnapshot): PromptEditorVM {
+    const [commandItems, editorCommandsById] =
+      PromptEditorVM.buildCommandItems(snapshot.state?.commands ?? []);
+    const [outlineItems, outlinePathsById] =
+      PromptEditorVM.buildOutlineItems(outline(snapshot.content));
+    return new PromptEditorVM(
+      commandItems,
+      outlineItems,
+      editorCommandsById,
+      outlinePathsById,
+    );
+  }
+
+  commandFor(id: string): EditorCommand | undefined {
+    return this.editorCommandsById.get(id);
+  }
+
+  outlinePathFor(id: string): readonly number[] | undefined {
+    return this.outlinePathsById.get(id);
+  }
+
+  private constructor(
+    readonly commandItems: readonly CommandItemVM[],
+    readonly outlineItems: readonly OutlineItemVM[],
+    private readonly editorCommandsById: ReadonlyMap<string, EditorCommand>,
+    private readonly outlinePathsById: ReadonlyMap<string, readonly number[]>,
+  ) {}
+
+  private static buildCommandItems(
+    states: readonly CommandState[],
+  ): [readonly CommandItemVM[], Map<string, EditorCommand>] {
+    const items: CommandItemVM[] = [];
+    const commandsById = new Map<string, EditorCommand>();
+    states.forEach((state) => {
+      const item = CommandItemVM.from(state);
+      if (!item) return;
+      items.push(item);
+      commandsById.set(item.id, state.command);
+    });
+    return [items, commandsById];
+  }
+
+  private static buildOutlineItems(
+    entries: readonly OutlineEntry[],
+  ): [readonly OutlineItemVM[], Map<string, readonly number[]>] {
+    const pathsById = new Map<string, readonly number[]>();
+    const items = entries.map((entry) => {
+      const item = OutlineItemVM.from(entry);
+      pathsById.set(item.id, entry.path);
+      return item;
+    });
+    return [items, pathsById];
+  }
 }
 
 export class CommandItemVM {
