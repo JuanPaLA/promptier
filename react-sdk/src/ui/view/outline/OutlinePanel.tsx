@@ -1,4 +1,4 @@
-import type { OutlineItemVM } from '../../PromptEditorVM';
+import type { OutlineItemVM } from '../PromptEditorVM';
 
 export interface OutlinePanelProps {
   readonly items: readonly OutlineItemVM[];

@@ -1,0 +1,1 @@
+export type CommandTypes = 'format' | 'insert' | 'utility';

@@ -1,14 +1,14 @@
 import { usePresenter } from '@nbottarini/react-presenter';
 import { useState } from 'react';
 
-import { PromptEditorService } from '../app/PromptEditorService';
-import { styles } from './styles/styles';
+import { PromptEditorService } from '../../lib/PromptEditorService';
+import { styles } from '../styles/styles';
 import {
   PromptEditorPresenter,
   type PromptEditorPresenterProps,
 } from './PromptEditorPresenter';
-import { EditorHeader } from './widgets/header/EditorHeader';
-import { OutlinePanel } from './widgets/outline/OutlinePanel';
+import { EditorHeader } from './header/EditorHeader';
+import { OutlinePanel } from './outline/OutlinePanel';
 
 export interface PromptEditorProps extends PromptEditorPresenterProps {
   readonly defaultOutlineOpen?: boolean;

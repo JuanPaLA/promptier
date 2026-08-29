@@ -52,7 +52,7 @@ container block.
    saving silently loses it. Read [docs/format.md](../../../docs/format.md)
    first, then:
    - add the `case '<name>':` to `blockToText` in
-     `core-editor/src/core/app/format/serialize.ts` (container blocks recurse
+     `core-editor/src/core/lib/format/serialize.ts` (container blocks recurse
      via `blocksToText(children)`). The `default` branch is an exhaustiveness
      check — typecheck fails until the case exists.
    - teach `parseBlocks` in `format/parse.ts` to recognize it, and add it to

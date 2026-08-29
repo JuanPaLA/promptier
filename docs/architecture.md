@@ -16,7 +16,7 @@ core-editor
 ├─ src/engine/prosemirror/    ProseMirror implementation (schema, mappers, descriptors)
 └─ src/ProptEditorElement.ts  browser packaging: the Custom Element that index.ts re-exports
 react-sdk                     Custom Element service, presenter and React UI composition
-playground                    reference consumer (Vite dev app)
+playground                    reference consumer (Vite dev lib)
 ```
 
 Dependency rule: `prompt/model` knows nothing outside the model; prompt

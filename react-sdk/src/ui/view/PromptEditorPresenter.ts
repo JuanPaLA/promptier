@@ -3,7 +3,7 @@ import { PresenterBase, type ChangeFunc } from '@nbottarini/react-presenter';
 import {
   PromptEditorService,
   type Unsubscribe,
-} from '../app/PromptEditorService';
+} from '../../lib/PromptEditorService';
 import { PromptEditorVM } from './PromptEditorVM';
 
 export interface PromptEditorPresenterProps {

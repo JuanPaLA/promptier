@@ -1,4 +1,4 @@
-import type { CommandItemVM } from '../../PromptEditorVM';
+import type { CommandItemVM } from '../PromptEditorVM';
 import { EditorToolbar } from './EditorToolbar';
 
 export interface EditorHeaderProps {

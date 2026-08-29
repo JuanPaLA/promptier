@@ -30,18 +30,18 @@ fails to parse back, without any type error.
    the registry is a mapped type over `Format`).
 
 4. **Codec** — a format has to survive `parse(serialize(…))`, in both files:
-   - `app/format/serialize.ts`: add the wrapper to `FORMAT_WRAP` (typecheck
+   - `lib/format/serialize.ts`: add the wrapper to `FORMAT_WRAP` (typecheck
      enforces this one) and insert the format at the right position in
      `FORMAT_ORDER` (typecheck does NOT — a format absent from `FORMAT_ORDER`
      silently never renders). Order is innermost-first: `code` sits innermost,
      so multi-format segments produce e.g. `` **`text`** ``.
-   - `app/format/parse.ts`: recognize the delimiter in `parseInline` and give
+   - `lib/format/parse.ts`: recognize the delimiter in `parseInline` and give
      the format a rank in `FORMAT_RANK`. The rank must match schema declaration
      order (`markRegistry()`), because that is the order ProseMirror reports
      marks in — a mismatch breaks the round trip on multi-format segments only.
    - if the delimiter can appear as literal text, add it to `ESCAPABLE` in
-     `app/format/textEscaping.ts`.
-   - add a corpus entry to `app/format/roundTrip.test.ts`, including one
+     `lib/format/textEscaping.ts`.
+   - add a corpus entry to `lib/format/roundTrip.test.ts`, including one
      segment combining the new format with an existing one.
 
 5. **Public surface** — `Format` is already exported from

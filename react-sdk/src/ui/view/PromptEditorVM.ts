@@ -1,11 +1,7 @@
-import {
-  outline,
-  type CommandState,
-  type EditorCommand,
-  type OutlineEntry,
-} from 'core-editor';
+import { type CommandState, type EditorCommand, outline, type OutlineEntry } from 'core-editor'
 
-import type { PromptEditorSnapshot } from '../app/PromptEditorService';
+import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
+import { CommandTypes } from '../../models/CommandTypes'
 
 export class PromptEditorVM {
   static from(snapshot: PromptEditorSnapshot): PromptEditorVM {
@@ -66,7 +62,7 @@ export class PromptEditorVM {
 export class CommandItemVM {
   private constructor(
     readonly id: string,
-    readonly group: CommandGroup,
+    readonly group: CommandTypes,
     readonly label: string,
     readonly glyph: string,
     readonly disabled: boolean,
@@ -105,8 +101,6 @@ export class CommandItemVM {
     }
   }
 }
-
-export type CommandGroup = 'format' | 'insert' | 'utility';
 
 export class OutlineItemVM {
   private constructor(

@@ -1,4 +1,5 @@
-import type { CommandGroup, CommandItemVM } from '../../PromptEditorVM';
+import type { CommandItemVM } from '../PromptEditorVM';
+import { CommandTypes } from '../../../models/CommandTypes'
 
 export interface EditorToolbarProps {
   readonly items: readonly CommandItemVM[];
@@ -43,7 +44,7 @@ export function EditorToolbar({ items, onAction }: EditorToolbarProps) {
 }
 
 interface CommandGroupItems {
-  readonly group: CommandGroup;
+  readonly group: CommandTypes;
   readonly items: readonly CommandItemVM[];
 }
 
@@ -54,8 +55,8 @@ function groupsFrom(items: readonly CommandItemVM[]): CommandGroupItems[] {
   });
 }
 
-const COMMAND_GROUPS: readonly CommandGroup[] = ['format', 'insert', 'utility'];
-const COMMAND_GROUP_LABELS: Record<CommandGroup, string> = {
+const COMMAND_GROUPS: readonly CommandTypes[] = ['format', 'insert', 'utility'];
+const COMMAND_GROUP_LABELS: Record<CommandTypes, string> = {
   format: 'Formatting',
   insert: 'Insert blocks',
   utility: 'Utilities',

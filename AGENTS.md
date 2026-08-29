@@ -8,7 +8,7 @@ Architecture, the domain→ProseMirror descriptor seam, and the design decisions
 
 - `core-editor` — the editor itself. Internally organized by responsibility: the prompt model and its pure capabilities (`prompt`), editor contracts (`editor`), the ProseMirror implementation (`engine`), and browser packaging (`custom-element`). Its public surface (`src/index.ts`) exposes a Custom Element (`PromptEditorElement` / `registerPromptEditor`) plus plain domain data types. Nothing ProseMirror-specific is exported.
 - `react-sdk` — React presentation around the Custom Element. String-first: `<PromptEditor value onChange />`; the presenter translates core snapshots and commands into UI models and callbacks. 
-- `playground` — dev app (Vite) and reference React host. It owns page layout and persistence behavior, and consumes only `react-sdk` for the editor experience.
+- `playground` — dev lib (Vite) and reference React host. It owns page layout and persistence behavior, and consumes only `react-sdk` for the editor experience.
 
 ## Rules of thumb
 
