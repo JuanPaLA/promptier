@@ -17,6 +17,7 @@ export interface PromptEditorProps extends PromptEditorPresenterProps {
 export function PromptEditor(props: PromptEditorProps) {
   const [editor] = useState(() => new PromptEditorService());
   const [outlineOpen, setOutlineOpen] = useState(true)
+  const toggleOutline = () => setOutlineOpen((open) => !open);
 
     const presenter = usePresenter(
     (onChange) => new PromptEditorPresenter(onChange, editor),
@@ -26,19 +27,20 @@ export function PromptEditor(props: PromptEditorProps) {
   return (
     <div className="promptier-editor">
       <style>{styles}</style>
-      <EditorHeader
-        outlineOpen={outlineOpen}
-        commandItems={presenter.model.commandItems}
-        onToggleOutline={() => setOutlineOpen((open) => !open)}
-        onCommand={presenter.runCommand}
-      />
-      <div className="promptier-body">
-        {outlineOpen && (
-          <OutlinePanel
-            items={presenter.model.outlineItems}
-            onSelect={presenter.selectOutlineItem}
-          />
-        )}
+      {outlineOpen && (
+        <OutlinePanel
+          items={presenter.model.outlineItems}
+          onSelect={presenter.selectOutlineItem}
+          onToggle={toggleOutline}
+        />
+      )}
+      <div className="promptier-main">
+        <EditorHeader
+          outlineOpen={outlineOpen}
+          commandItems={presenter.model.commandItems}
+          onToggleOutline={toggleOutline}
+          onCommand={presenter.runCommand}
+        />
         <div className="promptier-surface">
           <prompt-editor ref={editor.attach} />
         </div>

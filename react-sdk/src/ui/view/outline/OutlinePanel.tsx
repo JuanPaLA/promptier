@@ -3,26 +3,40 @@ import type { OutlineItemVM } from '../PromptEditorVM';
 export interface OutlinePanelProps {
   readonly items: readonly OutlineItemVM[];
   readonly onSelect: (id: string) => void;
+  readonly onToggle: () => void;
 }
 
-export function OutlinePanel({ items, onSelect }: OutlinePanelProps) {
+export function OutlinePanel({ items, onSelect, onToggle }: OutlinePanelProps) {
   return (
     <nav className="promptier-outline" aria-label="Prompt outline">
-      <div className="promptier-outline-heading">Outline</div>
-      {items.length === 0 && (
-        <p className="promptier-outline-empty">No sections yet.</p>
-      )}
-      {items.map((item) => (
+      <header className="promptier-outline-header">
         <button
-          key={item.id}
-          className="promptier-outline-entry"
+          className="promptier-outline-toggle"
           type="button"
-          style={{ paddingInlineStart: `${0.75 + item.depth}rem` }}
-          onClick={() => onSelect(item.id)}
+          aria-label="Hide outline"
+          aria-expanded={true}
+          onClick={onToggle}
         >
-          {item.label}
+          ◧
         </button>
-      ))}
+        Outline
+      </header>
+      <div className="promptier-outline-list">
+        {items.length === 0 && (
+          <p className="promptier-outline-empty">No sections yet.</p>
+        )}
+        {items.map((item) => (
+          <button
+            key={item.id}
+            className="promptier-outline-entry"
+            type="button"
+            style={{ paddingInlineStart: `${0.75 + item.depth}rem` }}
+            onClick={() => onSelect(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
     </nav>
   );
 }

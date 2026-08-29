@@ -9,6 +9,7 @@ one of its parameters.
 [] Show estimated token count.
 [] Make every outside section header an outline entry.
 [] Show raw content editor.
+[] Open the editor in full screen.
 
 
 # DOUBTS AND DEBTS

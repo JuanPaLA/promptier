@@ -4,12 +4,14 @@ export const styles = `
   --promptier-muted: #57606a;
   --promptier-subtle: #f6f8fa;
   --promptier-active: #dbeafe;
+  /* Both top bars must align across the outline seam: control height + block padding + border. */
+  --promptier-bar-height: calc(2.8rem + 1px);
   display: flex;
   min-width: 0;
   width: 100%;
   height: 100%;
   min-height: 12rem;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
   border: 1px solid var(--promptier-border);
   border-radius: 0.5rem;
@@ -21,14 +23,24 @@ export const styles = `
 .promptier-editor * {
   box-sizing: border-box;
 }
+.promptier-main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
 .promptier-header {
   display: flex;
-  min-height: 2.75rem;
+  min-height: var(--promptier-bar-height);
   align-items: center;
   gap: 0.5rem;
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--promptier-border);
   background: var(--promptier-subtle);
+}
+.promptier-outline-toggle {
+  flex: 0 0 auto;
 }
 .promptier-outline-toggle,
 .promptier-command-button {
@@ -70,27 +82,35 @@ export const styles = `
   padding-inline-start: 0.4rem;
   border-inline-start: 1px solid var(--promptier-border);
 }
-.promptier-body {
-  display: flex;
-  min-width: 0;
-  min-height: 0;
-  flex: 1;
-}
 .promptier-outline {
+  display: flex;
   width: 15rem;
+  min-height: 0;
   flex: 0 0 15rem;
-  overflow: auto;
-  padding: 0.75rem 0;
+  flex-direction: column;
+  overflow: hidden;
   border-right: 1px solid var(--promptier-border);
   background: #fbfcfd;
 }
-.promptier-outline-heading {
-  padding: 0 0.75rem 0.5rem;
+.promptier-outline-header {
+  display: flex;
+  min-height: var(--promptier-bar-height);
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--promptier-border);
+  background: var(--promptier-subtle);
   color: var(--promptier-muted);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+.promptier-outline-list {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  padding: 0.75rem 0;
 }
 .promptier-outline-empty {
   margin: 0;

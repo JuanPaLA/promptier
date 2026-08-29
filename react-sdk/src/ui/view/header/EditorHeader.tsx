@@ -16,15 +16,17 @@ export function EditorHeader({
 }: EditorHeaderProps) {
   return (
     <header className="promptier-header">
-      <button
-        className="promptier-outline-toggle"
-        type="button"
-        aria-label={outlineOpen ? 'Hide outline' : 'Show outline'}
-        aria-expanded={outlineOpen}
-        onClick={onToggleOutline}
-      >
-        {outlineOpen ? '◧' : '▤'}
-      </button>
+      {!outlineOpen && (
+        <button
+          className="promptier-outline-toggle"
+          type="button"
+          aria-label="Show outline"
+          aria-expanded={false}
+          onClick={onToggleOutline}
+        >
+          ▤
+        </button>
+      )}
       <EditorToolbar items={commandItems} onAction={onCommand} />
     </header>
   );
