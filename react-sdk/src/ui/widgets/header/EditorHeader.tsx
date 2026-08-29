@@ -1,17 +1,18 @@
-import { EditorToolbar, type ToolbarItemViewModel } from './EditorToolbar';
+import type { CommandItemVM } from '../../PromptEditorVM';
+import { EditorToolbar } from './EditorToolbar';
 
 export interface EditorHeaderProps {
   readonly outlineOpen: boolean;
-  readonly toolbarItems: readonly ToolbarItemViewModel[];
+  readonly commandItems: readonly CommandItemVM[];
   readonly onToggleOutline: () => void;
-  readonly onToolbarAction: (id: string) => void;
+  readonly onCommand: (id: string) => void;
 }
 
 export function EditorHeader({
   outlineOpen,
-  toolbarItems,
+  commandItems,
   onToggleOutline,
-  onToolbarAction,
+  onCommand,
 }: EditorHeaderProps) {
   return (
     <header className="promptier-header">
@@ -24,7 +25,7 @@ export function EditorHeader({
       >
         {outlineOpen ? '◧' : '▤'}
       </button>
-      <EditorToolbar items={toolbarItems} onAction={onToolbarAction} />
+      <EditorToolbar items={commandItems} onAction={onCommand} />
     </header>
   );
 }

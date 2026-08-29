@@ -1,11 +1,7 @@
-export interface OutlineItemViewModel {
-  readonly id: string;
-  readonly label: string;
-  readonly depth: number;
-}
+import type { OutlineItemVM } from '../../PromptEditorVM';
 
 export interface OutlinePanelProps {
-  readonly items: readonly OutlineItemViewModel[];
+  readonly items: readonly OutlineItemVM[];
   readonly onSelect: (id: string) => void;
 }
 

@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@nbottarini/react-presenter": "^1.0.0-rc",
     "core-editor": "workspace:*"
   },
   "peerDependencies": {

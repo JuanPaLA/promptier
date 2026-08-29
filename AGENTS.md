@@ -6,25 +6,17 @@ Architecture, the domain→ProseMirror descriptor seam, and the design decisions
 
 ## Workspaces (yarn workspaces)
 
-- `core-editor` — the editor itself. Framework-agnostic: no React here yet, until needed. Internally organized by responsibility: the prompt model and its pure capabilities (`prompt`), editor contracts (`editor`), the ProseMirror implementation (`engine`), and browser packaging (`custom-element`). Its public surface (`src/index.ts`) exposes a Custom Element (`PromptEditorElement` / `registerPromptEditor`) plus plain domain data types. Nothing ProseMirror-specific is exported.
-- `react-sdk` — React presentation around the Custom Element: one private `PromptEditorController` (`app`), a root view-model hook, and prop-driven editor widgets plus styles (`ui`). String-first: `<PromptEditor value onChange />`; only the root widget translates core snapshots and commands into UI models and callbacks. It is a **library, not an application** — no `createRoot`; the host supplies the composition root. See [docs/refactor-plan.md](docs/refactor-plan.md).
+- `core-editor` — the editor itself. Internally organized by responsibility: the prompt model and its pure capabilities (`prompt`), editor contracts (`editor`), the ProseMirror implementation (`engine`), and browser packaging (`custom-element`). Its public surface (`src/index.ts`) exposes a Custom Element (`PromptEditorElement` / `registerPromptEditor`) plus plain domain data types. Nothing ProseMirror-specific is exported.
+- `react-sdk` — React presentation around the Custom Element. String-first: `<PromptEditor value onChange />`; the presenter translates core snapshots and commands into UI models and callbacks. 
 - `playground` — dev app (Vite) and reference React host. It owns page layout and persistence behavior, and consumes only `react-sdk` for the editor experience.
-- `examples/` — `standalone.html`, the `<script src>` integration in one file. Serve it with the `examples` launch config after building `core-editor`.
 
 ## Rules of thumb
 
-- `core-editor` must stay consumable without React (plain HTML, iframe, any framework). If a change forces a non-React consumer to need React, it's in the wrong workspace.
+- `core-editor` must stay consumable without React.
 - Only `core-editor/src/index.ts`'s exports are public. `core-editor/src/prompt/**`, `src/editor/**`, and `src/engine/**` are internal. `core-editor/src/custom-element/**` is the browser packaging layer that wires the engine into a Custom Element for consumption — it's what `index.ts` actually re-exports.
 - Dev loop is buildless across workspaces: package `main`/`types` point at TS source directly, so editing `core-editor` or `react-sdk` while `playground`'s dev server is running hot-reloads with no explicit build step.
 
 ## Conventions
-
-**Naming.** The brand lives in the package name, not in identifiers. Prefix with
-the brand only when the unprefixed name would be too generic in the consumer's
-namespace — Lexical exports `LexicalComposer` because `<Composer>` collides with
-everything; TipTap exports `EditorContent`. `PromptEditorField` is specific
-enough, so it isn't `PromptierEditorField`. Keep the domain qualifier as narrow
-as the product actually is: it's a *prompt* editor, not only a system-prompt one.
 
 **File casing.** PascalCase ⟺ the file exports a type, interface, class or React
 component (`BlockDescriptor.ts`, `SectionNodeView.ts`, `PromptEditorField.tsx`).

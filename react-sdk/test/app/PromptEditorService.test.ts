@@ -5,19 +5,18 @@ import type {
   EditorStateSnapshot,
   PromptContent,
 } from 'core-editor';
-import { PromptEditorController } from '../../src/app/PromptEditorController';
+import { PromptEditorService } from '../../src/app/PromptEditorService';
 
-describe('PromptEditorController', () => {
+describe('PromptEditorService', () => {
   it('publishes initial element state when it attaches', () => {
-    const controller = new PromptEditorController();
+    const service = new PromptEditorService();
     const listener = vi.fn();
     const element = new FakePromptEditorElement('hello');
-    controller.subscribe(listener);
+    service.subscribe(listener);
 
-    controller.attach(asHtmlElement(element));
+    service.attach(asHtmlElement(element));
 
-    expect(controller.getSnapshot()).toEqual({
-      ready: true,
+    expect(service.getSnapshot()).toEqual({
       prompt: 'hello',
       content: element.content,
       state: element.getState(),
@@ -25,26 +24,26 @@ describe('PromptEditorController', () => {
     expect(listener).toHaveBeenCalledOnce();
   });
 
-  it('seeds the element from the initial prompt', () => {
-    const controller = new PromptEditorController('seeded');
+  it('applies a prompt queued before the element attaches', () => {
+    const service = new PromptEditorService();
     const element = new FakePromptEditorElement('');
 
-    controller.attach(asHtmlElement(element));
+    service.setPrompt('seeded');
+    service.attach(asHtmlElement(element));
 
     expect(element.value).toBe('seeded');
-    expect(controller.getSnapshot().prompt).toBe('seeded');
+    expect(service.getSnapshot().prompt).toBe('seeded');
   });
 
   it('publishes writes and retains the last prompt when it detaches', () => {
-    const controller = new PromptEditorController();
+    const service = new PromptEditorService();
     const element = new FakePromptEditorElement('initial');
-    controller.attach(asHtmlElement(element));
+    service.attach(asHtmlElement(element));
 
-    controller.setPrompt('updated');
-    controller.attach(null);
+    service.setPrompt('updated');
+    service.attach(null);
 
-    expect(controller.getSnapshot()).toMatchObject({
-      ready: false,
+    expect(service.getSnapshot()).toMatchObject({
       prompt: 'updated',
       state: null,
     });

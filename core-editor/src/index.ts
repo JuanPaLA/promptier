@@ -1,5 +1,5 @@
-export { registerPromptEditor } from './custom-element/PromptEditorElement';
-export type { PromptEditorElement } from './custom-element/PromptEditorElement';
+export { registerPromptEditor } from './PromptEditorElement';
+export type { PromptEditorElement } from './PromptEditorElement';
 export { serialize } from './prompt/serialization/serialize';
 export { parse } from './prompt/serialization/parse';
 export { buildOutline as outline } from './prompt/structure/buildOutline';

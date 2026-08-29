@@ -1,9 +1,9 @@
-import type { EditorCommand } from '../editor/commands/EditorCommand';
-import type { EditorStateSnapshot } from '../editor/commands/EditorStateSnapshot';
-import type { EditorSession } from '../editor/EditorSession';
-import { availableCommands, createProseMirrorEditor, installEditorStyles } from '../engine';
-import type { PromptContent } from '../prompt/model/PromptContent';
-import { parse, serialize } from '../prompt/serialization';
+import type { EditorCommand } from './editor/commands/EditorCommand';
+import type { EditorStateSnapshot } from './editor/commands/EditorStateSnapshot';
+import type { EditorSession } from './editor/EditorSession';
+import { availableCommands, createProseMirrorEditor, installEditorStyles } from './engine';
+import type { PromptContent } from './prompt/model/PromptContent';
+import { parse, serialize } from './prompt/serialization';
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';

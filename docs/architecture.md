@@ -14,8 +14,8 @@ core-editor
 ├─ src/prompt/structure/      derived structural readings such as the outline
 ├─ src/editor/                mounted editor-session contract, plus editor commands
 ├─ src/engine/prosemirror/    ProseMirror implementation (schema, mappers, descriptors)
-└─ src/custom-element/        browser packaging: the Custom Element that index.ts re-exports
-react-sdk                     React adapter, observable binding and editor UI composition
+└─ src/ProptEditorElement     browser packaging: the Custom Element that index.ts re-exports
+react-sdk                     Custom Element service, presenter and React UI composition
 playground                    reference consumer (Vite dev app)
 ```
 
@@ -233,11 +233,14 @@ to a section's depth.
 - `react-sdk` exposes `<PromptEditor value onChange />` and owns the React editor
   interface: shell layout, the collapsible outline, command view models,
   accessibility and focus behavior. It adds no editor *semantics*. Its private
-  `PromptEditorController` normalizes Custom Element properties/events into a
-  cached snapshot. The root `usePromptEditorViewModel` hook consumes that store,
-  reconciles `value` / `onChange`, and translates core state into widget models
-  and callbacks. Header, outline and editor-surface widgets receive props; they
-  do not know about the controller, core commands, ProseMirror, or context.
+  `PromptEditorService` normalizes Custom Element properties/events into a
+  cached snapshot. `PromptEditorPresenter` is the single reactive owner that
+  reconciles `value` / `onChange`, translates core state into `CommandItemVM`
+  and outline items, and exposes actions. Header, toolbar and outline widgets
+  receive those models and callbacks; they know nothing about the service,
+  core commands, ProseMirror, or context. The root component keeps local-only
+  composition state such as outline visibility and renders the Custom Element
+  inline.
   - It used to be a *controlled* binding (`content`/`onChange(content)`), which
     forced every React host to hold `PromptContent` — leaking the document model
     into the one place the SDK exists to keep it out of. It then swung to
@@ -257,7 +260,7 @@ to a section's depth.
   - **`change` fires for user edits only.** Writing `value` or `content`
     replaces the document and emits `statechange`, while `react-sdk` also
     publishes the new prompt through its own snapshot. A controlled host's echo
-    is reconciled against the last prompt observed by the root view-model hook,
+    is reconciled against the last prompt observed by the presenter,
     so it does not re-seed the editor or fight the caret.
 - `playground` is the compiler-checked reference host: it imports only
   `react-sdk`, supplies a string, receives a string, and owns save state. It does

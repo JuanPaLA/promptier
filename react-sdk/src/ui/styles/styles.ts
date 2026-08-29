@@ -59,7 +59,16 @@ export const styles = `
 .promptier-command-bar {
   display: flex;
   align-items: center;
+}
+.promptier-command-group {
+  display: flex;
+  align-items: center;
   gap: 0.2rem;
+}
+.promptier-command-group + .promptier-command-group {
+  margin-inline-start: 0.4rem;
+  padding-inline-start: 0.4rem;
+  border-inline-start: 1px solid var(--promptier-border);
 }
 .promptier-body {
   display: flex;
