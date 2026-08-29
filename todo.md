@@ -7,3 +7,9 @@ one of its parameters.
 [] Add Quote block element.
 [] Move blocks through prompt.
 [] Show estimated token count.
+[] Make every outside section header an outline entry.
+[] Show raw content editor.
+
+
+# DOUBTS AND DEBTS
+[] Use of tailwind within react layer.

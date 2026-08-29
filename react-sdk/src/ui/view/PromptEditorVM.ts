@@ -4,16 +4,23 @@ import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
 import { CommandTypes } from '../../models/CommandTypes'
 
 export class PromptEditorVM {
+  private constructor(
+    readonly commandItems: readonly CommandItemVM[],
+    readonly outlineItems: readonly OutlineItemVM[],
+    private readonly editorCommandsById: ReadonlyMap<string, EditorCommand>,
+    private readonly outlinePathsById: ReadonlyMap<string, readonly number[]>,
+  ) {}
+
   static from(snapshot: PromptEditorSnapshot): PromptEditorVM {
     const [commandItems, editorCommandsById] =
-      PromptEditorVM.buildCommandItems(snapshot.state?.commands ?? []);
+        PromptEditorVM.buildCommandItems(snapshot.state?.commands ?? []);
     const [outlineItems, outlinePathsById] =
-      PromptEditorVM.buildOutlineItems(outline(snapshot.content));
+        PromptEditorVM.buildOutlineItems(outline(snapshot.content));
     return new PromptEditorVM(
-      commandItems,
-      outlineItems,
-      editorCommandsById,
-      outlinePathsById,
+        commandItems,
+        outlineItems,
+        editorCommandsById,
+        outlinePathsById,
     );
   }
 
@@ -24,13 +31,6 @@ export class PromptEditorVM {
   outlinePathFor(id: string): readonly number[] | undefined {
     return this.outlinePathsById.get(id);
   }
-
-  private constructor(
-    readonly commandItems: readonly CommandItemVM[],
-    readonly outlineItems: readonly OutlineItemVM[],
-    private readonly editorCommandsById: ReadonlyMap<string, EditorCommand>,
-    private readonly outlinePathsById: ReadonlyMap<string, readonly number[]>,
-  ) {}
 
   private static buildCommandItems(
     states: readonly CommandState[],
