@@ -12,5 +12,6 @@ one of its parameters.
 [] Open the editor in full screen.
 
 
-# DOUBTS AND DEBTS
+# DOUBTS
 [] Use of tailwind within react layer.
+[] Why react-sdk/src/custom-elements.d.ts defines a PromptEditorElement element and not then one wrapping it?

@@ -2,7 +2,6 @@ export { registerPromptEditor } from './PromptEditorElement';
 export type { PromptEditorElement } from './PromptEditorElement';
 export { serialize } from './prompt/serialization/serialize';
 export { parse } from './prompt/serialization/parse';
-export { buildOutline as outline } from './prompt/structure/buildOutline';
 export type { OutlineEntry } from './prompt/structure/OutlineEntry';
 export type {
   Block,

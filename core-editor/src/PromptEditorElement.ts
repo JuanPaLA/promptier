@@ -56,7 +56,6 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       this.editor?.setContent(value);
     }
 
-    /** The document as prompt text for hosts that do not carry `PromptContent`. */
     get value(): string {
       return serialize(this.content);
     }
