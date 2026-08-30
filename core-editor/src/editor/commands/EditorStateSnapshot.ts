@@ -6,7 +6,6 @@ export interface EditorSelectionSnapshot {
   readonly empty: boolean;
 }
 
-/** Runtime editor state intended for command-driven external UI. */
 export interface EditorStateSnapshot {
   readonly selection: EditorSelectionSnapshot;
   readonly commands: readonly CommandState[];
