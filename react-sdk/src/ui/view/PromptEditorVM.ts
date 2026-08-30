@@ -1,7 +1,6 @@
 import { type CommandState, type EditorCommand, outline, type OutlineEntry } from 'core-editor'
 
 import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
-import { CommandTypes } from '../../models/CommandTypes'
 
 export class PromptEditorVM {
   private constructor(
@@ -62,41 +61,34 @@ export class PromptEditorVM {
 export class CommandItemVM {
   private constructor(
     readonly id: string,
-    readonly group: CommandTypes,
     readonly label: string,
     readonly glyph: string,
     readonly disabled: boolean,
     readonly active: boolean,
-    readonly shortcut?: string,
   ) {}
 
   static from(state: CommandState): CommandItemVM | null {
     if (state.command.type !== 'format') return null;
     const common = {
-      group: 'format' as const,
       disabled: !state.enabled,
       active: state.active,
     };
     switch (state.command.format) {
       case 'bold':
         return new CommandItemVM(
-          'format.bold',
-          common.group,
+          `[${state.command.type}].${state.command.format}`,
           'Bold',
           'B',
           common.disabled,
           common.active,
-          'Ctrl+B',
         );
       case 'code':
         return new CommandItemVM(
           'format.code',
-          common.group,
           'Inline code',
           '</>',
           common.disabled,
           common.active,
-          'Ctrl+`',
         );
     }
   }

@@ -14,16 +14,12 @@ export function CommandsToolBar({ items, onAction }: CommandsToolBarProps) {
           aria-label={'Formatting'}
         >
           {items.map((item) => {
-            const title = item.shortcut
-              ? `${item.label} (${item.shortcut})`
-              : item.label;
-
-            return (
+              return (
               <button
                 key={item.id}
                 className="promptier-command-button"
                 type="button"
-                title={title}
+                title={item.label}
                 aria-label={item.label}
                 aria-pressed={item.active}
                 disabled={item.disabled}
