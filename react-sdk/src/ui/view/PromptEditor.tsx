@@ -7,7 +7,8 @@ import {
   PromptEditorPresenter,
   type PromptEditorPresenterProps,
 } from './PromptEditorPresenter';
-import { EditorHeader } from './header/EditorHeader';
+import { Footer } from './footer/Footer';
+import { Header } from './header/Header';
 import { OutlinePanel } from './outline/OutlinePanel';
 
 export interface PromptEditorProps extends PromptEditorPresenterProps {
@@ -35,7 +36,7 @@ export function PromptEditor(props: PromptEditorProps) {
         />
       )}
       <div className="promptier-main">
-        <EditorHeader
+        <Header
           outlineOpen={outlineOpen}
           commandItems={presenter.model.commandItems}
           onToggleOutline={toggleOutline}
@@ -44,6 +45,11 @@ export function PromptEditor(props: PromptEditorProps) {
         <div className="promptier-surface">
           <prompt-editor ref={editor.attach} />
         </div>
+        <Footer
+          charsLength={22}
+          wordCount={23}
+          tokenCount={23}
+        />
       </div>
     </div>
   );

@@ -1,6 +1,11 @@
 import type { CommandItemVM } from '../PromptEditorVM'
 
-export function CommandEditorToolbar({ items, onAction }: { items: readonly CommandItemVM[]; onAction: (id: string) => void }) {
+export interface CommandsToolBarProps {
+  readonly items: readonly CommandItemVM[];
+  readonly onAction: (id: string) => void;
+}
+
+export function CommandsToolBar({ items, onAction }: CommandsToolBarProps) {
   return (
     <div className="promptier-command-bar" role="toolbar" aria-label="Editor actions">
         <div
