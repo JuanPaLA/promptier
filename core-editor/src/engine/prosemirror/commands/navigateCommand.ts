@@ -6,7 +6,6 @@ import type { CommandDescriptor } from './CommandDescriptor';
 
 export const navigateCommand: CommandDescriptor<NavigateCommand> = {
   type: 'navigate',
-  // Navigation targets come from the current outline, not a static catalogue.
   availableCommands: () => [],
   run: (view, command) => {
     const target = sectionAtPath(view.state.doc, command.target.path);

@@ -7,8 +7,6 @@ import { parse, serialize } from './prompt/serialization'
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
-const ELEMENT_CONTRACT_MARK = Symbol.for('promptier.element.contract');
-const ELEMENT_CONTRACT_VERSION = 2;
 const VALUE_ATTRIBUTE = 'value';
 
 export interface PromptEditorElement extends HTMLElement {
@@ -19,22 +17,14 @@ export interface PromptEditorElement extends HTMLElement {
 }
 
 export function registerPromptEditor(tagName: string = DEFAULT_TAG_NAME): void {
-  // Importing the package is safe during SSR. The actual element class only
-  // exists in a browser, when there is a registry to receive it.
   if (typeof customElements === 'undefined' || typeof HTMLElement === 'undefined') return;
-
   const existing = customElements.get(tagName);
   if (existing) {
-    if (Reflect.get(existing, ELEMENT_CONTRACT_MARK) === ELEMENT_CONTRACT_VERSION) return;
     throw new Error(
       `Cannot register <${tagName}>: that custom-element name is already in use.`,
     );
   }
-
   const constructor = createPromptEditorElementConstructor();
-  Reflect.defineProperty(constructor, ELEMENT_CONTRACT_MARK, {
-    value: ELEMENT_CONTRACT_VERSION,
-  });
   customElements.define(tagName, constructor);
 }
 
@@ -46,7 +36,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     static readonly observedAttributes = [VALUE_ATTRIBUTE];
 
     private readonly editorContainer: HTMLElement;
-    private session: PromptEditor | null = null;
+    private editor: PromptEditor | null = null;
     private pendingContent: PromptContent = { blocks: [] };
     private sessionSubscriptions: Array<() => void> = [];
 
@@ -60,12 +50,12 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     }
 
     get content(): PromptContent {
-      return this.session?.getContent() ?? this.pendingContent;
+      return this.editor?.getContent() ?? this.pendingContent;
     }
 
     set content(value: PromptContent) {
       this.pendingContent = value;
-      this.session?.setContent(value);
+      this.editor?.setContent(value);
     }
 
     /** The document as prompt text for hosts that do not carry `PromptContent`. */
@@ -83,11 +73,11 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     }
 
     connectedCallback(): void {
-      if (this.session) return;
+      if (this.editor) return;
       this.upgradeProperty('value');
       this.upgradeProperty('content');
       const session = createProseMirrorEditor(this.editorContainer, this.pendingContent);
-      this.session = session;
+      this.editor = session;
       this.sessionSubscriptions = [
         session.onChange((content) => {
           this.pendingContent = content;
@@ -102,18 +92,18 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     }
 
     run(command: EditorCommand): boolean {
-      return this.session?.run(command) ?? false;
+      return this.editor?.run(command) ?? false;
     }
 
     getState(): EditorState | null {
-      return this.session?.getState() ?? null;
+      return this.editor?.getState() ?? null;
     }
 
     disconnectedCallback(): void {
       this.sessionSubscriptions.forEach((unsubscribe) => unsubscribe());
       this.sessionSubscriptions = [];
-      this.session?.destroy();
-      this.session = null;
+      this.editor?.destroy();
+      this.editor = null;
     }
 
     /** Replays a property assigned before the browser upgraded this element. */

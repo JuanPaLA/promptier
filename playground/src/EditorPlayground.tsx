@@ -26,7 +26,6 @@ const INITIAL_PROMPT = [
 /** A host page: it supplies prompt text, receives prompt text, and saves it. */
 export function EditorPlayground() {
   const [prompt, setPrompt] = useState(INITIAL_PROMPT);
-  const [savedPrompt, setSavedPrompt] = useState(INITIAL_PROMPT);
 
   return (
     <main
@@ -58,16 +57,6 @@ export function EditorPlayground() {
           marginTop: '1rem',
         }}
       >
-        <button
-          type="button"
-          onClick={() => setSavedPrompt(prompt)}
-          style={{ padding: '0.45rem 1rem', cursor: 'pointer' }}
-        >
-          Save prompt
-        </button>
-        <span style={{ color: '#57606a', fontSize: '0.9rem' }}>
-          {prompt === savedPrompt ? 'Saved' : 'Unsaved changes'}
-        </span>
       </footer>
     </main>
   );

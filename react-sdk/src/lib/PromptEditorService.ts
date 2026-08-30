@@ -1,7 +1,7 @@
 import {
   registerPromptEditor,
   type EditorCommand,
-  type EditorStateSnapshot,
+  type EditorState,
   type PromptContent,
   type PromptEditorElement,
 } from 'core-editor';
@@ -12,7 +12,7 @@ export type Unsubscribe = () => void;
 export interface PromptEditorSnapshot {
   readonly prompt: string;
   readonly content: PromptContent;
-  readonly state: EditorStateSnapshot | null;
+  readonly state: EditorState | null;
 }
 
 /** Adapts the Custom Element lifecycle and events for the SDK presenter. */
