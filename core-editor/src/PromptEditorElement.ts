@@ -7,7 +7,6 @@ import { parse, serialize } from './prompt/serialization'
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
-const VALUE_ATTRIBUTE = 'value';
 
 export interface PromptEditorElement extends HTMLElement {
   content: PromptContent;
@@ -33,7 +32,6 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     extends HTMLElement
     implements PromptEditorElement
   {
-    static readonly observedAttributes = [VALUE_ATTRIBUTE];
 
     private readonly editorContainer: HTMLElement;
     private editor: PromptEditor | null = null;
@@ -65,11 +63,6 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
 
     set value(text: string) {
       this.content = parse(text);
-    }
-
-    attributeChangedCallback(name: string, _previous: string | null, next: string | null): void {
-      // One-way, like `<input value>`: later edits are not reflected to it.
-      if (name === VALUE_ATTRIBUTE && next !== null) this.value = next;
     }
 
     connectedCallback(): void {
