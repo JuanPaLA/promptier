@@ -36,7 +36,7 @@ engine/prosemirror/
 │  └─ marks/                MarkDescriptor + its registry + one file per format
 ├─ mapping/                 domain ⇄ ProseMirror, both directions, stateless
 ├─ editing/                 reusable document operations (named, not offsets)
-├─ commands/                CommandDescriptor + registry (host-invocable actions)
+├─ commands/                execution routing + editor-state projection
 ├─ plugins/                 ProseMirror plugins
 └─ styles/                  fixed styles installed inside the element's shadow root
 ```
@@ -137,15 +137,23 @@ unrelated command types. Outline navigation uses a structural block path so a
 wrapper never has to reach into the engine DOM or treat a title-derived id as
 unique.
 
-`commands/CommandDescriptor.ts` is the ProseMirror implementation seam for one
-command family. A descriptor advertises the concrete commands it supports and
-receives the complete command when it runs or derives enabled/active state.
-`commandRegistry.ts` is the single router, keyed by the same `type`
-discriminant. New command families belong in the public union only when their
+Execution and state reporting are independent capabilities. A
+`CommandHandler` executes one command family, while a `CommandStateProvider`
+contributes concrete commands and their current enabled/active state.
+`EditorCommandRegistry` owns execution routing, keyed by the command's `type`
+discriminant. `EditorStateReader` combines state providers into the public
+`EditorState`; it does not consult the execution registry. Formatting
+implements both capabilities, while navigation implements execution only
+because its targets come from the current outline.
+
+`createProseMirrorEditor` is the command composition root. Adding a command
+family means implementing either or both capabilities and registering the new
+object there; the registry, state reader, editor adapter and browser packaging
+do not change. New command families belong in the public union only when their
 behavior and payload are implemented; names such as `block.insert` and
 `block.move` are design directions, not placeholder API.
 
-The element imports editor creation, styles and command discovery through
+The element imports editor creation and styles through
 `engine/index.ts`. This is an internal module boundary, not a second engine
 interface: the element is the composition layer that deliberately wires the
 ProseMirror implementation.
@@ -224,12 +232,11 @@ to a section's depth.
   `value` has initial-value semantics like a textarea's content: set it once,
   read it when saving — binding it per keystroke would re-parse while the user
   types and fight the caret.
-  - For driving UI it also answers `availableCommands()` and `getState()`. The
-    catalogue is a property of the engine, so it answers **before mount**; the
-    state snapshot is `null` until an editor exists. A host builds its menu from
-    concrete commands and paints it from their enabled/active state. The
-    snapshot describes all command-relevant runtime state, not only selection,
-    and `statechange` fires after transactions and programmatic document writes.
+  - For driving UI it also answers `getState()`, which is `null` until an editor
+    exists. Its commands are the authoritative catalogue for the current
+    editor and carry their enabled state plus active state when that concept
+    applies. `statechange` fires after transactions and programmatic document
+    writes.
 - `react-sdk` exposes `<PromptEditor value onChange />` and owns the React editor
   interface: shell layout, the collapsible outline, command view models,
   accessibility and focus behavior. It adds no editor *semantics*. Its private

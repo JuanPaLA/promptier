@@ -71,7 +71,7 @@ export class CommandItemVM {
     if (state.command.type !== 'format') return null;
     const common = {
       disabled: !state.enabled,
-      active: state.active,
+      active: state.active ?? false,
     };
     switch (state.command.format) {
       case 'bold':

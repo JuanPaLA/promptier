@@ -4,21 +4,16 @@ import { inputRules } from 'prosemirror-inputrules';
 import { keymap } from 'prosemirror-keymap';
 import { EditorState as ProseMirrorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import type {
-  EditorChangeListener,
-  PromptEditor,
-  EditorStateChangeListener,
-} from '../../editor/PromptEditor';
+import type { EditorChangeListener, PromptEditor, EditorStateChangeListener } from '../../editor/PromptEditor';
 import type { EditorCommand } from '../../editor/commands/EditorCommand';
 import type { EditorState } from '../../editor/commands/EditorState';
 import type { PromptContent } from '../../prompt/model/PromptContent';
-import { runCommand, stateSnapshotFromEditorState } from './commands/commandRegistry';
-import {
-  blockInputRules,
-  blockKeymaps,
-  blockNodeViews,
-} from './descriptors/blocks/blockDescriptorRegistry';
-import { markInputRules, markKeymaps } from './descriptors/marks/markDescriptorRegistry';
+import { EditorCommandRegistry } from './commands/EditorCommandRegistry';
+import { EditorStateReader } from './state/EditorStateReader';
+import { FormatCommands } from './commands/FormatCommands';
+import { NavigateCommands } from './commands/NavigateCommands';
+import { blockInputRules, blockKeymaps, blockNodeViews } from './descriptors/blocks/blockDescriptorRegistry';
+import { markDescriptors, markInputRules, markKeymaps } from './descriptors/marks/markDescriptorRegistry';
 import { promptSchema } from './descriptors/promptSchema';
 import { fromProseMirrorDoc, toProseMirrorDoc } from './mapping/documentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
@@ -27,7 +22,15 @@ export function createProseMirrorEditor(
   container: HTMLElement,
   initialContent: PromptContent,
 ): PromptEditor {
-  return new ProseMirrorEditor(container, initialContent);
+  const formatCommands = new FormatCommands(markDescriptors.map(({ format }) => format));
+  const commandRegistry = new EditorCommandRegistry([formatCommands, new NavigateCommands()]);
+  const stateReader = new EditorStateReader([formatCommands]);
+  return new ProseMirrorEditor(
+    container,
+    initialContent,
+    commandRegistry,
+    stateReader,
+  );
 }
 
 class ProseMirrorEditor implements PromptEditor {
@@ -35,7 +38,12 @@ class ProseMirrorEditor implements PromptEditor {
   private readonly listeners = new Set<EditorChangeListener>();
   private readonly stateListeners = new Set<EditorStateChangeListener>();
 
-  constructor(container: HTMLElement, initialContent: PromptContent) {
+  constructor(
+    container: HTMLElement,
+    initialContent: PromptContent,
+    private readonly commands: EditorCommandRegistry,
+    private readonly stateReader: EditorStateReader,
+  ) {
     const state = ProseMirrorState.create({
       schema: promptSchema,
       doc: toProseMirrorDoc(initialContent, promptSchema),
@@ -79,11 +87,11 @@ class ProseMirrorEditor implements PromptEditor {
   }
 
   run(command: EditorCommand): boolean {
-    return runCommand(this.view, command);
+    return this.commands.run(this.view, command);
   }
 
   getState(): EditorState {
-    return stateSnapshotFromEditorState(this.view.state);
+    return this.stateReader.read(this.view.state);
   }
 
   onStateChange(listener: EditorStateChangeListener): () => void {
@@ -109,7 +117,7 @@ class ProseMirrorEditor implements PromptEditor {
   }
 
   private notifyStateChanged(): void {
-    const snapshot = stateSnapshotFromEditorState(this.view.state);
-    this.stateListeners.forEach((listener) => listener(snapshot));
+    const state = this.stateReader.read(this.view.state);
+    this.stateListeners.forEach((listener) => listener(state));
   }
 }
