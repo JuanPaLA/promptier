@@ -4,7 +4,7 @@ import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
 
 export class PromptEditorVM {
   private constructor(
-    readonly commandItems: readonly CommandItemVM[],
+    readonly formatCommands: readonly CommandItemVM[],
     readonly outlineItems: readonly OutlineItemVM[],
     private readonly editorCommandsById: ReadonlyMap<string, EditorCommand>,
     private readonly outlinePathsById: ReadonlyMap<string, readonly number[]>,

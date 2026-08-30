@@ -38,7 +38,7 @@ export function PromptEditor(props: PromptEditorProps) {
       <div className="promptier-main">
         <Header
           outlineOpen={outlineOpen}
-          commandItems={presenter.model.commandItems}
+          formatCommands={presenter.model.formatCommands}
           onToggleOutline={toggleOutline}
           onCommand={presenter.runCommand}
         />

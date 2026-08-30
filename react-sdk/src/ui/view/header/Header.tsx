@@ -3,14 +3,14 @@ import { CommandsToolBar } from './CommandsToolBar';
 
 export interface EditorHeaderProps {
   readonly outlineOpen: boolean;
-  readonly commandItems: readonly CommandItemVM[];
+  readonly formatCommands: readonly CommandItemVM[];
   readonly onToggleOutline: () => void;
   readonly onCommand: (id: string) => void;
 }
 
 export function Header({
   outlineOpen,
-  commandItems,
+  formatCommands,
   onToggleOutline,
   onCommand,
 }: EditorHeaderProps) {
@@ -27,7 +27,7 @@ export function Header({
           ▤
         </button>
       )}
-      <CommandsToolBar items={commandItems} onAction={onCommand} />
+      <CommandsToolBar items={formatCommands} onAction={onCommand} />
     </header>
   );
 }
