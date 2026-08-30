@@ -1,14 +1,11 @@
-import type { EditorState } from 'prosemirror-state';
-import type { EditorView } from 'prosemirror-view';
+import type { EditorState } from 'prosemirror-state'
+import type { EditorView } from 'prosemirror-view'
 
-import type { EditorCommand } from '../../../editor/commands/EditorCommand';
-import type { EditorStateSnapshot } from '../../../editor/commands/EditorStateSnapshot';
-import type { Format } from '../../../prompt/model/Format';
-import { markDescriptors } from '../descriptors/marks/markDescriptorRegistry';
-import type { CommandDescriptor } from './CommandDescriptor';
-import { formatCommand } from './formatCommand';
-import { isMarkActive } from './markActivity';
-import { navigateCommand } from './navigateCommand';
+import type { EditorCommand } from '../../../editor/commands/EditorCommand'
+import type { EditorStateSnapshot } from '../../../editor/commands/EditorStateSnapshot'
+import type { CommandDescriptor } from './CommandDescriptor'
+import { formatCommand } from './formatCommand'
+import { navigateCommand } from './navigateCommand'
 
 export function runCommand(view: EditorView, command: EditorCommand): boolean {
   const descriptor = descriptorFor(command);
@@ -28,10 +25,6 @@ export function availableCommands(): readonly EditorCommand[] {
 
 export function stateSnapshotFromEditorState(state: EditorState): EditorStateSnapshot {
   return {
-    selection: {
-      activeFormats: activeFormats(state),
-      empty: state.selection.empty,
-    },
     commands: availableCommands().map((command) => {
       const descriptor = descriptorFor(command);
       return {
@@ -41,15 +34,6 @@ export function stateSnapshotFromEditorState(state: EditorState): EditorStateSna
       };
     }),
   };
-}
-
-function activeFormats(state: EditorState): Format[] {
-  return markDescriptors
-    .filter((descriptor) => {
-      const type = state.schema.marks[descriptor.format];
-      return type ? isMarkActive(state, type) : false;
-    })
-    .map((descriptor) => descriptor.format);
 }
 
 function descriptorFor<C extends EditorCommand>(command: C): CommandDescriptor<C> | undefined {

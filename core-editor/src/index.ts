@@ -38,7 +38,6 @@ export type { Format } from './prompt/model/Format';
 export type { EditorCommand } from './editor/commands/EditorCommand';
 export type { CommandState } from './editor/commands/CommandState';
 export type {
-  EditorSelectionSnapshot,
   EditorStateSnapshot,
 } from './editor/commands/EditorStateSnapshot';
 export type { FormatCommand } from './editor/commands/FormatCommand';
