@@ -2,7 +2,7 @@ import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
 import { inputRules } from 'prosemirror-inputrules';
 import { keymap } from 'prosemirror-keymap';
-import { EditorState, Transaction } from 'prosemirror-state';
+import { EditorState as ProseMirrorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import type {
   EditorChangeListener,
@@ -10,7 +10,7 @@ import type {
   EditorStateChangeListener,
 } from '../../editor/PromptEditor';
 import type { EditorCommand } from '../../editor/commands/EditorCommand';
-import type { EditorStateSnapshot } from '../../editor/commands/EditorStateSnapshot';
+import type { EditorState } from '../../editor/commands/EditorState';
 import type { PromptContent } from '../../prompt/model/PromptContent';
 import { runCommand, stateSnapshotFromEditorState } from './commands/commandRegistry';
 import {
@@ -36,12 +36,12 @@ class ProseMirrorEditor implements PromptEditor {
   private readonly stateListeners = new Set<EditorStateChangeListener>();
 
   constructor(container: HTMLElement, initialContent: PromptContent) {
-    const state = EditorState.create({
+    const state = ProseMirrorState.create({
       schema: promptSchema,
       doc: toProseMirrorDoc(initialContent, promptSchema),
       plugins: [
         history(),
-        keymap({ 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }),
+        keymap({ 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }), // todo: should be defined as history commands?
         keymap(blockKeymaps(promptSchema)),
         keymap(markKeymaps(promptSchema)),
         keymap(baseKeymap),
@@ -64,7 +64,7 @@ class ProseMirrorEditor implements PromptEditor {
   setContent(content: PromptContent): void {
     const newDoc = toProseMirrorDoc(content, promptSchema);
     if (this.view.state.doc.eq(newDoc)) return;
-    const newState = EditorState.create({
+    const newState = ProseMirrorState.create({
       schema: promptSchema,
       doc: newDoc,
       plugins: this.view.state.plugins,
@@ -82,7 +82,7 @@ class ProseMirrorEditor implements PromptEditor {
     return runCommand(this.view, command);
   }
 
-  getState(): EditorStateSnapshot {
+  getState(): EditorState {
     return stateSnapshotFromEditorState(this.view.state);
   }
 

@@ -1,5 +1,5 @@
 import type { CommandState } from './CommandState'
 
-export interface EditorStateSnapshot {
+export interface EditorState {
   readonly commands: readonly CommandState[];
 }

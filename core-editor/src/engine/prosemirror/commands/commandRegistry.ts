@@ -1,8 +1,8 @@
-import type { EditorState } from 'prosemirror-state'
+import type { EditorState as ProseMirrorState } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
 
 import type { EditorCommand } from '../../../editor/commands/EditorCommand'
-import type { EditorStateSnapshot } from '../../../editor/commands/EditorStateSnapshot'
+import type { EditorState } from '../../../editor/commands/EditorState'
 import type { CommandDescriptor } from './CommandDescriptor'
 import { formatCommand } from './formatCommand'
 import { navigateCommand } from './navigateCommand'
@@ -12,18 +12,13 @@ export function runCommand(view: EditorView, command: EditorCommand): boolean {
   return descriptor?.run(view, command) ?? false;
 }
 
-/**
- * Every command this engine can run. A property of the engine, not of a live
- * document, so a host can build its menu before an editor exists and ask
- * `getState()` for what applies right now.
- */
-export function availableCommands(): readonly EditorCommand[] {
+function availableCommands(): readonly EditorCommand[] {
   return commandDescriptors.flatMap(
     (descriptor) => descriptor.availableCommands() as readonly EditorCommand[],
   );
 }
 
-export function stateSnapshotFromEditorState(state: EditorState): EditorStateSnapshot {
+export function stateSnapshotFromEditorState(state: ProseMirrorState): EditorState {
   return {
     commands: availableCommands().map((command) => {
       const descriptor = descriptorFor(command);

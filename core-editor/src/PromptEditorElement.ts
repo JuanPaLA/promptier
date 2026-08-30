@@ -1,9 +1,9 @@
-import type { EditorCommand } from './editor/commands/EditorCommand';
-import type { EditorStateSnapshot } from './editor/commands/EditorStateSnapshot';
-import type { PromptEditor } from './editor/PromptEditor';
-import { availableCommands, createProseMirrorEditor, installEditorStyles } from './engine';
-import type { PromptContent } from './prompt/model/PromptContent';
-import { parse, serialize } from './prompt/serialization';
+import type { EditorCommand } from './editor/commands/EditorCommand'
+import type { EditorState } from './editor/commands/EditorState'
+import type { PromptEditor } from './editor/PromptEditor'
+import { createProseMirrorEditor, installEditorStyles } from './engine'
+import type { PromptContent } from './prompt/model/PromptContent'
+import { parse, serialize } from './prompt/serialization'
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
@@ -15,8 +15,7 @@ export interface PromptEditorElement extends HTMLElement {
   content: PromptContent;
   value: string;
   run(command: EditorCommand): boolean;
-  availableCommands(): readonly EditorCommand[];
-  getState(): EditorStateSnapshot | null;
+  getState(): EditorState | null;
 }
 
 export function registerPromptEditor(tagName: string = DEFAULT_TAG_NAME): void {
@@ -96,7 +95,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
         }),
         session.onStateChange((state) => {
           this.dispatchEvent(
-            new CustomEvent<EditorStateSnapshot>('statechange', { detail: state }),
+            new CustomEvent<EditorState>('statechange', { detail: state }),
           );
         }),
       ];
@@ -106,11 +105,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       return this.session?.run(command) ?? false;
     }
 
-    availableCommands(): readonly EditorCommand[] {
-      return availableCommands();
-    }
-
-    getState(): EditorStateSnapshot | null {
+    getState(): EditorState | null {
       return this.session?.getState() ?? null;
     }
 
