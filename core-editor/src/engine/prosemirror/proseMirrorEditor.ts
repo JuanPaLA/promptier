@@ -2,32 +2,50 @@ import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
 import { inputRules } from 'prosemirror-inputrules';
 import { keymap } from 'prosemirror-keymap';
+import type { Schema } from 'prosemirror-model';
 import { EditorState as ProseMirrorState, Transaction } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
-import type { EditorChangeListener, PromptEditor, EditorStateChangeListener } from '../../editor/PromptEditor';
+import type {
+  EditorChangeListener,
+  EditorStateChangeListener,
+  PromptEditor,
+} from '../../editor/PromptEditor';
 import type { EditorCommand } from '../../editor/commands/EditorCommand';
 import type { EditorState } from '../../editor/commands/EditorState';
 import type { PromptContent } from '../../prompt/model/PromptContent';
 import { EditorCommandRegistry } from './commands/EditorCommandRegistry';
-import { EditorStateReader } from './state/EditorStateReader';
 import { FormatCommands } from './commands/FormatCommands';
 import { NavigateCommands } from './commands/NavigateCommands';
-import { blockInputRules, blockKeymaps, blockNodeViews } from './descriptors/blocks/blockDescriptorRegistry';
-import { markDescriptors, markInputRules, markKeymaps } from './descriptors/marks/markDescriptorRegistry';
-import { promptSchema } from './descriptors/promptSchema';
-import { fromProseMirrorDoc, toProseMirrorDoc } from './mapping/documentMapper';
+import { BlockRegistry } from './descriptors/blocks/BlockRegistry';
+import { codeBlockDescriptor } from './descriptors/blocks/codeBlockDescriptor';
+import { headingDescriptor } from './descriptors/blocks/headingDescriptor';
+import { orderedListDescriptor } from './descriptors/blocks/orderedListDescriptor';
+import { paragraphDescriptor } from './descriptors/blocks/paragraphDescriptor';
+import { sectionDescriptor } from './descriptors/blocks/sectionDescriptor';
+import { unorderedListDescriptor } from './descriptors/blocks/unorderedListDescriptor';
+import { boldDescriptor } from './descriptors/marks/boldDescriptor';
+import { codeDescriptor } from './descriptors/marks/codeDescriptor';
+import { MarkRegistry } from './descriptors/marks/MarkRegistry';
+import { createPromptSchema } from './descriptors/promptSchema';
+import { PromptDocumentMapper } from './mapping/PromptDocumentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
+import { EditorStateReader } from './state/EditorStateReader';
 
 export function createProseMirrorEditor(
   container: HTMLElement,
   initialContent: PromptContent,
 ): PromptEditor {
-  const formatCommands = new FormatCommands(markDescriptors.map(({ format }) => format));
+  const formatCommands = new FormatCommands(markRegistry.all().map(({ format }) => format));
   const commandRegistry = new EditorCommandRegistry([formatCommands, new NavigateCommands()]);
   const stateReader = new EditorStateReader([formatCommands]);
+
   return new ProseMirrorEditor(
     container,
     initialContent,
+    promptSchema,
+    documentMapper,
+    blockRegistry,
+    markRegistry,
     commandRegistry,
     stateReader,
   );
@@ -41,39 +59,45 @@ class ProseMirrorEditor implements PromptEditor {
   constructor(
     container: HTMLElement,
     initialContent: PromptContent,
+    private readonly schema: Schema,
+    private readonly documentMapper: PromptDocumentMapper,
+    private readonly blocks: BlockRegistry,
+    private readonly marks: MarkRegistry,
     private readonly commands: EditorCommandRegistry,
     private readonly stateReader: EditorStateReader,
   ) {
     const state = ProseMirrorState.create({
-      schema: promptSchema,
-      doc: toProseMirrorDoc(initialContent, promptSchema),
+      schema: this.schema,
+      doc: this.documentMapper.toDocument(initialContent),
       plugins: [
         history(),
         keymap({ 'Mod-z': undo, 'Mod-y': redo, 'Mod-Shift-z': redo }), // todo: should be defined as history commands?
-        keymap(blockKeymaps(promptSchema)),
-        keymap(markKeymaps(promptSchema)),
+        keymap(this.blocks.keymap(this.schema)),
+        keymap(this.marks.keymap(this.schema)),
         keymap(baseKeymap),
-        inputRules({ rules: [...blockInputRules(promptSchema), ...markInputRules(promptSchema)] }),
+        inputRules({
+          rules: [...this.blocks.inputRules(this.schema), ...this.marks.inputRules(this.schema)],
+        }),
         appendTrailingParagraph(),
       ],
     });
 
     this.view = new EditorView(container, {
       state,
-      nodeViews: blockNodeViews(),
+      nodeViews: this.blocks.nodeViews(),
       dispatchTransaction: (transaction: Transaction) => this.apply(transaction),
     });
   }
 
   getContent(): PromptContent {
-    return fromProseMirrorDoc(this.view.state.doc);
+    return this.documentMapper.fromDocument(this.view.state.doc);
   }
 
   setContent(content: PromptContent): void {
-    const newDoc = toProseMirrorDoc(content, promptSchema);
+    const newDoc = this.documentMapper.toDocument(content);
     if (this.view.state.doc.eq(newDoc)) return;
     const newState = ProseMirrorState.create({
-      schema: promptSchema,
+      schema: this.schema,
       doc: newDoc,
       plugins: this.view.state.plugins,
     });
@@ -109,7 +133,7 @@ class ProseMirrorEditor implements PromptEditor {
     const newState = this.view.state.apply(transaction);
     this.view.updateState(newState);
     if (transaction.docChanged) {
-      const content = fromProseMirrorDoc(newState.doc);
+      const content = this.documentMapper.fromDocument(newState.doc);
       this.listeners.forEach((listener) => listener(content));
     }
     // Every transaction, not just docChanged: cursor and history changes affect UI state.
@@ -121,3 +145,20 @@ class ProseMirrorEditor implements PromptEditor {
     this.stateListeners.forEach((listener) => listener(state));
   }
 }
+
+const blockRegistry = new BlockRegistry({
+  paragraph: paragraphDescriptor,
+  heading: headingDescriptor,
+  codeBlock: codeBlockDescriptor,
+  orderedList: orderedListDescriptor,
+  unorderedList: unorderedListDescriptor,
+  section: sectionDescriptor,
+});
+
+const markRegistry = new MarkRegistry({
+  bold: boldDescriptor,
+  code: codeDescriptor,
+});
+
+const promptSchema = createPromptSchema(blockRegistry, markRegistry);
+const documentMapper = new PromptDocumentMapper(promptSchema, blockRegistry);

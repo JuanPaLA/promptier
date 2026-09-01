@@ -2,7 +2,7 @@ import { toggleMark } from 'prosemirror-commands';
 import { MarkSpec } from 'prosemirror-model';
 import { MarkDescriptor } from './MarkDescriptor';
 
-export const boldDescriptor: MarkDescriptor = {
+export const boldDescriptor: MarkDescriptor<'bold'> = {
   format: 'bold',
   markSpec: boldMarkSpec(),
   keymap: (schema) => ({ 'Mod-b': toggleMark(schema.marks.bold) }),

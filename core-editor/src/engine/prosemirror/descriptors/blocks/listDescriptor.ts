@@ -72,7 +72,7 @@ export function createListDescriptor<B extends ListBlock>(
     keymaps: (schema) => ({
       // Owned here rather than deferred to baseKeymap, so list behavior doesn't
       // depend on plugin ordering. Each list type guards on its own node, so the
-      // composed Enter (see blockKeymaps) routes to the right handler.
+      // composed Enter (see BlockRegistry.keymap) routes to the right handler.
       Enter: (state, dispatch) => {
         const { $from, empty } = state.selection;
         if (!empty || $from.parent.type !== schema.nodes[LIST_ITEM_NODE]) return false;

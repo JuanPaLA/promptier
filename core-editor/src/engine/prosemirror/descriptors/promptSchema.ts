@@ -1,13 +1,14 @@
 import { NodeSpec, Schema } from 'prosemirror-model';
-import { blockDescriptors } from './blocks/blockDescriptorRegistry';
-import { markSpecs } from './marks/markDescriptorRegistry';
+import type { BlockRegistry } from './blocks/BlockRegistry';
+import type { MarkRegistry } from './marks/MarkRegistry';
 
-/** The editor's grammar, assembled from every descriptor's spec. */
-export const promptSchema = buildPromptSchema();
-
-function buildPromptSchema(): Schema {
+/** Builds the editor grammar from one explicit set of block and mark contributions. */
+export function createPromptSchema(
+  blocks: BlockRegistry,
+  marks: MarkRegistry,
+): Schema {
   const blockNodes: Record<string, NodeSpec> = {};
-  for (const descriptor of blockDescriptors) {
+  for (const descriptor of blocks.all()) {
     blockNodes[descriptor.blockType] = descriptor.nodeSpec;
     Object.assign(blockNodes, descriptor.extraNodes);
   }
@@ -17,6 +18,6 @@ function buildPromptSchema(): Schema {
       ...blockNodes,
       text: { group: 'inline' },
     },
-    marks: markSpecs(),
+    marks: marks.specs(),
   });
 }

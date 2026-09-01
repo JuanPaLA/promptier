@@ -12,8 +12,8 @@ import type { Format } from '../../../../prompt/model/Format';
  * marks 1:1 — that's what lets blockContentMapper read `mark.type.name` as a
  * Format.
  */
-export interface MarkDescriptor {
-  readonly format: Format;
+export interface MarkDescriptor<F extends Format = Format> {
+  readonly format: F;
   readonly markSpec: MarkSpec;
   keymap?(schema: Schema): Record<string, Command>;
   inputRules?(schema: Schema): InputRule[];

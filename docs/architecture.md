@@ -31,18 +31,18 @@ plays, so a reader can tell ProseMirror-only code from translation code:
 engine/prosemirror/
 ├─ proseMirrorEditor.ts     the adapter — implements the port; the only root file
 ├─ descriptors/             the engine definition: what can exist, how it behaves
-│  ├─ promptSchema.ts       assembled from every descriptor's spec
-│  ├─ blocks/               BlockDescriptor + its registry + one file per block
-│  └─ marks/                MarkDescriptor + its registry + one file per format
-├─ mapping/                 domain ⇄ ProseMirror, both directions, stateless
+│  ├─ promptSchema.ts       schema factory over explicit descriptor registries
+│  ├─ blocks/               BlockDescriptor + BlockRegistry
+│  └─ marks/                MarkDescriptor + MarkRegistry
+├─ mapping/                 PromptDocumentMapper owns domain ⇄ ProseMirror translation
 ├─ editing/                 reusable document operations (named, not offsets)
 ├─ commands/                execution routing + editor-state projection
 ├─ plugins/                 ProseMirror plugins
 └─ styles/                  fixed styles installed inside the element's shadow root
 ```
 
-`promptSchema` sits inside `descriptors/` rather than beside it because it is
-their *derived product*, not a peer input.
+`createPromptSchema` sits inside `descriptors/` rather than beside them because
+the schema is their *derived product*, not a peer input.
 
 **The swap unit is `EditorSession`, not `BlockDescriptor`.** `nodeSpec`, content
 expressions, node views and input rules aren't incidental to ProseMirror — they
@@ -96,25 +96,36 @@ ProseMirror engine needs for that type:
 
 Two deliberate inversions keep this cycle-free:
 
-- **Schema is passed in, not imported.** The schema is assembled *from* every
-  descriptor's `nodeSpec` (`descriptors/promptSchema.ts`), so descriptors — and
-  `documentMapper` — receive it as an argument.
+- **Schema is passed in, not imported.** `createPromptSchema` assembles it from
+  the registries, then `PromptDocumentMapper` and every descriptor receive that exact
+  schema instance.
 - **Recursion is injected.** Container blocks map their children through a
-  `mapChild` callback provided by the registry, instead of importing the
-  registry (which imports them).
+  `mapChild` callback provided by `PromptDocumentMapper`, instead of importing the
+  mapper or registry that owns their traversal.
 
-`blockDescriptorRegistry.ts` is the single integration point: it maps
-`BlockType → descriptor` and derives everything the editor consumes
-(`blockDescriptors` for the schema, `blockInputRules`, `blockKeymaps`,
-`blockNodeViews`, and the two mapping entry points used by `documentMapper`).
-Registry order matters: the first block-group node becomes the doc's default
-block (paragraph).
+`BlockRegistry` owns the exhaustive `BlockType → descriptor` map,
+descriptor order, lookup validation, and the aggregation of input rules,
+keymaps and node views. Unknown types fail rather than silently mapping as a
+different block. `PromptDocumentMapper` separately owns recursive document and block
+translation. Registry order matters: the first block-group node becomes the
+doc's default block (paragraph).
 
 Marks follow the same pattern in miniature: `MarkDescriptor` +
-`markDescriptorRegistry` provide mark specs, input rules and keymaps.
+`MarkRegistry` provides mark specs, input rules and keymaps. Both
+registries compose duplicate key bindings in declaration order, so one
+contribution returning `false` delegates to the next instead of overwriting it.
 `blockContentMapper` centralizes the inline translation (domain `TextSegment`
 formats ⇄ ProseMirror marks) so block descriptors delegate instead of each
 reimplementing it.
+
+`proseMirrorEditor.ts` is the descriptor composition root as well as the command
+composition root. It registers every concrete descriptor once, builds one shared
+schema and mapper from those registries, and passes the resulting objects into
+each mounted editor session. Adding a domain block or format extends the
+corresponding exhaustive registration map; registry, schema, mapper and editor
+algorithms stay unchanged. Prompt serialization and React presentation remain
+separate exhaustive seams and may require their own contribution for a new
+domain type.
 
 ### Editing operations
 

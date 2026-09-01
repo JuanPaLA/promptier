@@ -2,12 +2,6 @@ import type { Mark, Node as ProseMirrorNode, Schema } from 'prosemirror-model';
 import type { BlockContent, TextSegment } from '../../../prompt/model/BlockContent';
 import type { Format } from '../../../prompt/model/Format';
 
-/**
- * Domain BlockContent ⇄ ProseMirror inline nodes — the inline analog of
- * documentMapper. Block descriptors delegate text mapping here so the
- * marks ⇄ formats translation lives in one place instead of per block.
- */
-
 export function blockContentToNodes(content: BlockContent, schema: Schema): ProseMirrorNode[] {
   return content
     .filter((segment) => segment.text.length > 0)
