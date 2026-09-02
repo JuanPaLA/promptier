@@ -1,15 +1,15 @@
 export interface FooterProps {
-    charsLength: number
-    wordCount: number
-    tokenCount?: number
+  readonly charsLength: number;
+  readonly wordCount: number;
+  readonly tokenCount?: number;
 }
 
 export function Footer({ charsLength, wordCount, tokenCount }: FooterProps) {
-    return (
-        <div>
-            {charsLength}
-            {wordCount}
-            {tokenCount}
-        </div>
-    )
+  return (
+    <footer className="promptier-footer" aria-label="Document statistics">
+      <span>Characters: {charsLength}</span>
+      <span>Words: {wordCount}</span>
+      {tokenCount !== undefined && <span>Tokens: {tokenCount}</span>}
+    </footer>
+  );
 }

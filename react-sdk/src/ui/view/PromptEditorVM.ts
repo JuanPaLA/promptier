@@ -6,6 +6,8 @@ export class PromptEditorVM {
   private constructor(
     readonly formatCommands: readonly CommandItemVM[],
     readonly outlineItems: readonly OutlineItemVM[],
+    readonly charsCount: number,
+    readonly wordCount: number,
     private readonly editorCommandsById: ReadonlyMap<string, EditorCommand>,
     private readonly outlinePathsById: ReadonlyMap<string, readonly number[]>,
   ) {}
@@ -18,6 +20,8 @@ export class PromptEditorVM {
     return new PromptEditorVM(
         commandItems,
         outlineItems,
+        snapshot.prompt.length,
+        snapshot.prompt.split(" ").length,
         editorCommandsById,
         outlinePathsById,
     );

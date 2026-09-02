@@ -46,9 +46,8 @@ export function PromptEditor(props: PromptEditorProps) {
           <prompt-editor ref={editor.attach} />
         </div>
         <Footer
-          charsLength={22}
-          wordCount={23}
-          tokenCount={23}
+          charsLength={presenter.model.charsCount}
+          wordCount={presenter.model.wordCount}
         />
       </div>
     </div>

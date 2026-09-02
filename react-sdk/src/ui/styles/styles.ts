@@ -6,6 +6,7 @@ export const styles = `
   --promptier-active: #dbeafe;
   /* Both top bars must align across the outline seam: control height + block padding + border. */
   --promptier-bar-height: calc(2.8rem + 1px);
+  --promptier-footer-height: calc(1.4rem + 0.5px);
   display: flex;
   min-width: 0;
   width: 100%;
@@ -147,6 +148,21 @@ export const styles = `
   display: block;
   width: 100%;
   height: 100%;
+}
+.promptier-footer {
+  display: flex;
+  height: var(--promptier-footer-height);
+  min-height: var(--promptier-footer-height);
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0 0.5rem;
+  border-top: 1px solid var(--promptier-border);
+  background: var(--promptier-subtle);
+  color: var(--promptier-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 @media (max-width: 42rem) {
   .promptier-outline {
