@@ -19,24 +19,26 @@ export function Header({
 }: EditorHeaderProps) {
   return (
     <header className="promptier-header">
-      {viewControls.viewMode === 'curated' && (
-        <>
-          {!outlineOpen && (
-            <div className="promptier-navigation" role="group" aria-label="Navigation">
-              <button className="promptier-outline-toggle" type="button"
-                aria-label="Show outline" aria-expanded={false} onClick={onToggleOutline}>
-                ▤
-              </button>
+      <div className="promptier-header-actions">
+        {viewControls.viewMode === 'curated' && (
+          <>
+            {!outlineOpen && (
+              <div className="promptier-navigation" role="group" aria-label="Navigation">
+                <button className="promptier-outline-toggle" type="button"
+                  aria-label="Show outline" aria-expanded={false} onClick={onToggleOutline}>
+                  ▤
+                </button>
+              </div>
+            )}
+            <div className="promptier-editing-actions">
+              <CommandsToolBar items={formatCommands} onAction={onCommand} />
             </div>
-          )}
-          <div className="promptier-editing-actions">
-            <CommandsToolBar items={formatCommands} onAction={onCommand} />
-          </div>
-        </>
-      )}
-      <div className="promptier-header-trailing">
-        <CopyButton status={copyStatus} onCopy={onCopy} />
-        <ViewControls {...viewControls} />
+          </>
+        )}
+        <div className="promptier-header-trailing">
+          <CopyButton status={copyStatus} onCopy={onCopy} />
+          <ViewControls {...viewControls} />
+        </div>
       </div>
     </header>
   );

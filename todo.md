@@ -8,7 +8,7 @@ one of its parameters.
 [] Move blocks through prompt.
 [] Show estimated token count.
 [] Make every outside section header an outline entry.
-[] Show raw content editor.
+[X] Show raw content editor.
 [X] Open the editor in full screen.
 
 # UI

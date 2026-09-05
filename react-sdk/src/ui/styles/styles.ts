@@ -15,7 +15,7 @@ export const styles = `
   flex-direction: row;
   overflow: hidden;
   border: 1px solid var(--promptier-border);
-  border-radius: 0.5rem;
+  border-radius: 0;
   background: #fff;
   color: #24292f;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -44,7 +44,7 @@ export const styles = `
 .promptier-header {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
+  height: var(--promptier-bar-height);
   flex-shrink: 0;
   min-height: var(--promptier-bar-height);
   align-items: center;
@@ -52,6 +52,21 @@ export const styles = `
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid var(--promptier-border);
   background: var(--promptier-subtle);
+}
+.promptier-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.promptier-header-actions::-webkit-scrollbar {
+  display: none;
+}
+.promptier-header-actions > * {
+  flex-shrink: 0;
 }
 .promptier-outline-toggle {
   flex: 0 0 auto;
@@ -101,11 +116,11 @@ export const styles = `
   gap: 0.25rem;
 }
 .promptier-editing-actions {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .promptier-header-trailing {
   margin-inline-start: auto;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
   gap: 0.5rem;
 }
@@ -115,7 +130,7 @@ export const styles = `
   border-inline-start: 1px solid var(--promptier-border);
 }
 .promptier-view-controls {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .promptier-copy-feedback:not(:empty) {
   position: absolute;
@@ -171,7 +186,7 @@ export const styles = `
 }
 .promptier-command-group {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 0.2rem;
 }
@@ -192,6 +207,8 @@ export const styles = `
 }
 .promptier-outline-header {
   display: flex;
+  height: var(--promptier-bar-height);
+  flex-shrink: 0;
   min-height: var(--promptier-bar-height);
   align-items: center;
   gap: 0.5rem;
