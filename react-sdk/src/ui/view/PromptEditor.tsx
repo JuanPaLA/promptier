@@ -1,5 +1,5 @@
 import { usePresenter } from '@nbottarini/react-presenter';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { PromptEditorService } from '../../lib/PromptEditorService';
 import { styles } from '../styles/styles';
@@ -10,23 +10,24 @@ import {
 import { Footer } from './footer/Footer';
 import { Header } from './header/Header';
 import { OutlinePanel } from './outline/OutlinePanel';
+import { useFullscreen } from './useFullscreen';
 
-export interface PromptEditorProps extends PromptEditorPresenterProps {
-  readonly defaultOutlineOpen?: boolean;
-}
+export type PromptEditorProps = PromptEditorPresenterProps;
 
 export function PromptEditor(props: PromptEditorProps) {
+  const editorRoot = useRef<HTMLDivElement>(null);
   const [editor] = useState(() => new PromptEditorService());
-  const [outlineOpen, setOutlineOpen] = useState(true)
+  const [outlineOpen, setOutlineOpen] = useState(true);
+  const fullView = useFullscreen(editorRoot);
   const toggleOutline = () => setOutlineOpen((open) => !open);
 
-    const presenter = usePresenter(
+  const presenter = usePresenter(
     (onChange) => new PromptEditorPresenter(onChange, editor),
     { value: props.value, onChange: props.onChange },
   );
 
   return (
-    <div className="promptier-editor">
+    <div ref={editorRoot} className="promptier-editor">
       <style>{styles}</style>
       {outlineOpen && (
         <OutlinePanel
@@ -41,6 +42,9 @@ export function PromptEditor(props: PromptEditorProps) {
           formatCommands={presenter.model.formatCommands}
           onToggleOutline={toggleOutline}
           onCommand={presenter.runCommand}
+          fullViewAvailable={fullView.available}
+          fullViewActive={fullView.active}
+          onToggleFullView={fullView.toggle}
         />
         <div className="promptier-surface">
           <prompt-editor ref={editor.attach} />

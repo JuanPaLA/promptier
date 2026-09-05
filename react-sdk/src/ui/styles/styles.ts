@@ -20,6 +20,16 @@ export const styles = `
   color: #24292f;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+.promptier-editor:fullscreen {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+.promptier-editor::backdrop {
+  background: #fff;
+}
 .promptier-editor,
 .promptier-editor * {
   box-sizing: border-box;
@@ -44,7 +54,8 @@ export const styles = `
   flex: 0 0 auto;
 }
 .promptier-outline-toggle,
-.promptier-command-button {
+.promptier-command-button,
+.promptier-full-view-toggle {
   min-width: 2rem;
   height: 2rem;
   padding: 0 0.5rem;
@@ -56,7 +67,8 @@ export const styles = `
   cursor: pointer;
 }
 .promptier-outline-toggle:hover,
-.promptier-command-button:hover:not(:disabled) {
+.promptier-command-button:hover:not(:disabled),
+.promptier-full-view-toggle:hover {
   border-color: var(--promptier-border);
   background: #fff;
 }
@@ -68,6 +80,20 @@ export const styles = `
 .promptier-command-button:disabled {
   cursor: default;
   opacity: 0.45;
+}
+.promptier-full-view-toggle {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
+.promptier-full-view-icon {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 .promptier-command-bar {
   display: flex;
