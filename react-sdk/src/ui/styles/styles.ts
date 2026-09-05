@@ -42,7 +42,10 @@ export const styles = `
   flex-direction: column;
 }
 .promptier-header {
+  position: relative;
   display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
   min-height: var(--promptier-bar-height);
   align-items: center;
   gap: 0.5rem;
@@ -55,6 +58,8 @@ export const styles = `
 }
 .promptier-outline-toggle,
 .promptier-command-button,
+.promptier-copy-button,
+.promptier-mode-button,
 .promptier-full-view-toggle {
   min-width: 2rem;
   height: 2rem;
@@ -67,12 +72,15 @@ export const styles = `
   cursor: pointer;
 }
 .promptier-outline-toggle:hover,
+.promptier-copy-button:hover:not(:disabled),
+.promptier-mode-button:hover,
 .promptier-command-button:hover:not(:disabled),
 .promptier-full-view-toggle:hover {
   border-color: var(--promptier-border);
   background: #fff;
 }
-.promptier-command-button[aria-pressed="true"] {
+.promptier-command-button[aria-pressed="true"],
+.promptier-mode-button[aria-pressed="true"] {
   border-color: #93c5fd;
   background: var(--promptier-active);
   font-weight: 700;
@@ -83,9 +91,71 @@ export const styles = `
 }
 .promptier-full-view-toggle {
   flex: 0 0 auto;
-  margin-inline-start: auto;
 }
-.promptier-full-view-icon {
+.promptier-editing-actions,
+.promptier-header-trailing,
+.promptier-view-controls,
+.promptier-mode-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.promptier-editing-actions {
+  flex-wrap: wrap;
+}
+.promptier-header-trailing {
+  margin-inline-start: auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.promptier-view-controls,
+.promptier-editing-actions {
+  padding-inline-start: 0.5rem;
+  border-inline-start: 1px solid var(--promptier-border);
+}
+.promptier-view-controls {
+  flex-wrap: wrap;
+}
+.promptier-copy-feedback:not(:empty) {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 0.5rem);
+  right: 0.5rem;
+  width: 14rem;
+  max-width: calc(100% - 1rem);
+  padding: 0.5rem;
+  border: 1px solid var(--promptier-border);
+  border-radius: 0.35rem;
+  background: #fff;
+  box-shadow: 0 2px 6px #0002;
+  font-size: 0.8rem;
+}
+.promptier-raw-surface {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  resize: none;
+  overflow: auto;
+  padding: 0.75rem;
+  border: 0;
+  background: #fff;
+  color: inherit;
+  font: 0.875rem/1.6 ui-monospace, Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.promptier-editor :focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+.promptier-surface[hidden] {
+  display: none;
+}
+.promptier-full-view-icon,
+.promptier-header-icon {
   display: block;
   width: 1rem;
   height: 1rem;
@@ -101,6 +171,7 @@ export const styles = `
 }
 .promptier-command-group {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.2rem;
 }

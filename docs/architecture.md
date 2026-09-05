@@ -260,6 +260,15 @@ to a section's depth.
   service, core commands, ProseMirror, or context. The root component keeps
   local-only composition state such as outline visibility and renders the
   Custom Element inline.
+  - Curated/Raw mode is local presentation state, defaulting to Curated. Raw
+    displays the current canonical `snapshot.prompt` as read-only text; it is
+    the normalized serialization, not the original input byte for byte. The
+    header's Copy action copies this same string in either mode. The curated
+    element stays mounted while hidden so switching preserves its session.
+    Formatting and outline controls are hidden in Raw; the prior outline
+    preference returns in Curated. Neither switching nor copying writes the
+    document. Header composes navigation, editing, document, and view action
+    groups; clipboard operations and feedback state live in the React wrapper.
   - It used to be a *controlled* binding (`content`/`onChange(content)`), which
     forced every React host to hold `PromptContent` — leaking the document model
     into the one place the SDK exists to keep it out of. It then swung to

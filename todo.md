@@ -9,11 +9,11 @@ one of its parameters.
 [] Show estimated token count.
 [] Make every outside section header an outline entry.
 [] Show raw content editor.
-[] Open the editor in full screen.
+[X] Open the editor in full screen.
 
 # UI
 [] use square borders. not rounded. foooter backgground should be the same of header.
-
+[] change format buttons hover behaviour. 
 
 # DOUBTS
 [] Use of tailwind within react layer.

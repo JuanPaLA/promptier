@@ -4,6 +4,7 @@ import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
 
 export class PromptEditorVM {
   private constructor(
+    readonly prompt: string,
     readonly formatCommands: readonly CommandItemVM[],
     readonly outlineItems: readonly OutlineItemVM[],
     readonly charsCount: number,
@@ -18,6 +19,7 @@ export class PromptEditorVM {
     const [outlineItems, outlinePathsById] =
         PromptEditorVM.buildOutlineItems(outline(snapshot.content));
     return new PromptEditorVM(
+        snapshot.prompt,
         commandItems,
         outlineItems,
         snapshot.prompt.length,
