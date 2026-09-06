@@ -209,12 +209,13 @@ strategy remains cheap to add — it is just no longer canonical.
 ## Prompt structure
 
 `prompt/structure/` derives structural readings from a document.
-`buildOutline(content)` produces one `OutlineEntry` per section with its tag as
-`id`, its raw title, nesting depth, and ephemeral structural `path`; the public
-API keeps the shorter `outline` name. The path addresses the current tree for
-commands such as navigation while `id` remains a readable derived anchor. It is
-a fold like `serialize`: anything holding a
-`PromptContent` can derive one without a live editor.
+`buildOutline(content)` produces one `OutlineEntry` per section and heading in
+document order; the public API keeps the shorter `outline` name. Entries are
+discriminated by `kind`. Sections retain their tag as `id`, while headings carry
+their markdown level and a plain-text title derived from their inline content.
+Every entry has an ephemeral structural `path`, which addresses the current
+tree for commands such as navigation. It is a fold like `serialize`: anything
+holding a `PromptContent` can derive one without a live editor.
 
 That is why it is **not** on the element. A method there would imply the editor
 owns the answer, and the next consumer that wants an outline is a server
@@ -222,9 +223,11 @@ rendering a stored prompt, not a mounted view. Callers who do have an editor
 read `element.content` and fold it themselves.
 
 Entries carry no display text beyond the raw title: an empty title stays empty
-and the placeholder is the UI's decision, in the UI's language. Headings are
-excluded for now — folding them in means deciding how a heading's level relates
-to a section's depth.
+and the placeholder is the UI's decision, in the UI's language. Section
+containment and heading rank combine deterministically: a section increments
+the depth of its contents by one, and a heading adds `level - 1` within that
+container. Heading navigation reveals any collapsed containing sections before
+moving the selection.
 
 ## Consumption chain
 

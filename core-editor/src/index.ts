@@ -3,7 +3,11 @@ export type { PromptEditorElement } from './PromptEditorElement';
 export { serialize } from './prompt/serialization/serialize';
 export { parse } from './prompt/serialization/parse';
 export { buildOutline as outline } from './prompt/structure/buildOutline';
-export type { OutlineEntry } from './prompt/structure/OutlineEntry';
+export type {
+  HeadingOutlineEntry,
+  OutlineEntry,
+  SectionOutlineEntry,
+} from './prompt/structure/OutlineEntry';
 export type {
   Block,
   BlockType,
@@ -41,4 +45,4 @@ export type {
   EditorState,
 } from './editor/commands/EditorState';
 export type { FormatCommand } from './editor/commands/FormatCommand';
-export type { NavigateCommand } from './editor/commands/NavigateCommand';
+export type { NavigateCommand, NavigateTarget } from './editor/commands/NavigateCommand';

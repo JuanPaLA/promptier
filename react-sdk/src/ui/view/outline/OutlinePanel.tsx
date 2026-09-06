@@ -23,12 +23,13 @@ export function OutlinePanel({ items, onSelect, onToggle }: OutlinePanelProps) {
       </header>
       <div className="promptier-outline-list">
         {items.length === 0 && (
-          <p className="promptier-outline-empty">No sections yet.</p>
+          <p className="promptier-outline-empty">No outline entries yet.</p>
         )}
         {items.map((item) => (
           <button
             key={item.id}
             className="promptier-outline-entry"
+            data-kind={item.kind}
             type="button"
             style={{ paddingInlineStart: `${0.75 + item.depth}rem` }}
             onClick={() => onSelect(item.id)}

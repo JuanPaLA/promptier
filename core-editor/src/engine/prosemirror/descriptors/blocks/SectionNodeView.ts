@@ -1,6 +1,7 @@
 import { Node as ProseMirrorNode } from 'prosemirror-model';
 import { NodeView, ViewMutationRecord } from 'prosemirror-view';
 import { sectionTagName } from '../../../../prompt/serialization/sectionTag';
+import { REVEAL_CONTAINING_SECTIONS_EVENT } from '../../commands/NavigateCommands'
 
 const COLLAPSED_CLASS = 'prompt-section-collapsed';
 
@@ -42,6 +43,9 @@ export class SectionNodeView implements NodeView {
     this.contentDOM.className = 'prompt-section-content';
 
     this.dom.append(this.toggle, this.tagHint, this.contentDOM);
+    this.dom.addEventListener(REVEAL_CONTAINING_SECTIONS_EVENT, (event) => {
+      if (event.target !== this.dom) this.setCollapsed(false);
+    });
     this.renderIdentity(node);
   }
 

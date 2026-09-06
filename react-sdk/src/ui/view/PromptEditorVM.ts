@@ -1,4 +1,10 @@
-import { type CommandState, type EditorCommand, outline, type OutlineEntry } from 'core-editor'
+import {
+  type CommandState,
+  type EditorCommand,
+  type NavigateTarget,
+  outline,
+  type OutlineEntry,
+} from 'core-editor'
 
 import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
 
@@ -10,13 +16,13 @@ export class PromptEditorVM {
     readonly charsCount: number,
     readonly wordCount: number,
     private readonly editorCommandsById: ReadonlyMap<string, EditorCommand>,
-    private readonly outlinePathsById: ReadonlyMap<string, readonly number[]>,
+    private readonly outlineTargetsById: ReadonlyMap<string, NavigateTarget>,
   ) {}
 
   static from(snapshot: PromptEditorSnapshot): PromptEditorVM {
     const [commandItems, editorCommandsById] =
         PromptEditorVM.buildCommandItems(snapshot.state?.commands ?? []);
-    const [outlineItems, outlinePathsById] =
+    const [outlineItems, outlineTargetsById] =
         PromptEditorVM.buildOutlineItems(outline(snapshot.content));
     return new PromptEditorVM(
         snapshot.prompt,
@@ -25,7 +31,7 @@ export class PromptEditorVM {
         snapshot.prompt.length,
         snapshot.prompt.split(" ").length,
         editorCommandsById,
-        outlinePathsById,
+        outlineTargetsById,
     );
   }
 
@@ -33,8 +39,8 @@ export class PromptEditorVM {
     return this.editorCommandsById.get(id);
   }
 
-  outlinePathFor(id: string): readonly number[] | undefined {
-    return this.outlinePathsById.get(id);
+  outlineTargetFor(id: string): NavigateTarget | undefined {
+    return this.outlineTargetsById.get(id);
   }
 
   private static buildCommandItems(
@@ -53,14 +59,14 @@ export class PromptEditorVM {
 
   private static buildOutlineItems(
     entries: readonly OutlineEntry[],
-  ): [readonly OutlineItemVM[], Map<string, readonly number[]>] {
-    const pathsById = new Map<string, readonly number[]>();
+  ): [readonly OutlineItemVM[], Map<string, NavigateTarget>] {
+    const targetsById = new Map<string, NavigateTarget>();
     const items = entries.map((entry) => {
       const item = OutlineItemVM.from(entry);
-      pathsById.set(item.id, entry.path);
+      targetsById.set(item.id, { kind: entry.kind, path: entry.path });
       return item;
     });
-    return [items, pathsById];
+    return [items, targetsById];
   }
 }
 
@@ -105,13 +111,15 @@ export class OutlineItemVM {
     readonly id: string,
     readonly label: string,
     readonly depth: number,
+    readonly kind: OutlineEntry['kind'],
   ) {}
 
   static from(entry: OutlineEntry): OutlineItemVM {
     return new OutlineItemVM(
-      `section:${entry.path.join('.')}`,
-      entry.title || '(untitled section)',
+      `${entry.kind}:${entry.path.join('.')}`,
+      entry.title || `(untitled ${entry.kind})`,
       entry.depth,
+      entry.kind,
     );
   }
 }

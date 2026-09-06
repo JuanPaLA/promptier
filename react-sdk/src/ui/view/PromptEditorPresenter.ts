@@ -44,9 +44,9 @@ export class PromptEditorPresenter extends PresenterBase<
   };
 
   selectOutlineItem = (id: string): void => {
-    const path = this.model.outlinePathFor(id);
-    if (!path) return;
-    this.editor.run({ type: 'navigate', target: { kind: 'section', path } });
+    const target = this.model.outlineTargetFor(id);
+    if (!target) return;
+    this.editor.run({ type: 'navigate', target });
   };
 
   private setPrompt = (prompt: string | undefined): void => {

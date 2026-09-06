@@ -1,5 +1,5 @@
 import type { Block } from '../model/Block';
-import type { SectionBlock } from '../model/blocks/SectionBlock';
+import type { HeadingBlock } from '../model/blocks/HeadingBlock';
 import type { PromptContent } from '../model/PromptContent';
 import { sectionTagName } from '../serialization';
 import type { OutlineEntry } from './OutlineEntry';
@@ -9,20 +9,37 @@ export function buildOutline(content: PromptContent): OutlineEntry[] {
 }
 
 function entriesIn(
-  blocks: Block[],
-  depth: number,
-  parentPath: readonly number[],
+    blocks: Block[],
+    depth: number,
+    parentPath: readonly number[],
 ): OutlineEntry[] {
   return blocks.flatMap((block, index) => {
-    if (!isSection(block)) return [];
     const path = [...parentPath, index];
-    return [
-      { id: sectionTagName(block.title), title: block.title, depth, path },
-      ...entriesIn(block.children, depth + 1, path),
-    ];
+    if (block.blockType === 'heading') {
+      return [{
+        kind: 'heading',
+        title: headingTitle(block),
+        level: block.level,
+        depth: depth + block.level - 1,
+        path,
+      }];
+    }
+    if (block.blockType === 'section') {
+      return [
+        {
+          kind: 'section',
+          id: sectionTagName(block.title),
+          title: block.title,
+          depth: depth,
+          path,
+        },
+        ...entriesIn(block.children, depth + 1, path),
+      ];
+    }
+    return [];
   });
 }
 
-function isSection(block: Block): block is SectionBlock {
-  return block.blockType === 'section';
+function headingTitle(heading: HeadingBlock): string {
+  return heading.content.map((segment) => segment.text).join('');
 }

@@ -7,13 +7,14 @@ one of its parameters.
 [] Add Quote block element.
 [] Move blocks through prompt.
 [] Show estimated token count.
-[] Make every outside section header an outline entry.
+[X] Make every heading inside or outside a section an outline entry.
 [X] Show raw content editor.
 [X] Open the editor in full screen.
 
 # UI
 [] use square borders. not rounded. foooter backgground should be the same of header.
-[] change format buttons hover behaviour. 
+[] change format buttons hover behaviour.
+[] eliminar el tag al lado de section. 
 
 # DOUBTS
 [] Use of tailwind within react layer.

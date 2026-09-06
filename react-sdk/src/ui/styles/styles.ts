@@ -252,6 +252,9 @@ export const styles = `
 .promptier-outline-entry:hover {
   background: var(--promptier-subtle);
 }
+.promptier-outline-entry[data-kind="section"] {
+  font-weight: 600;
+}
 .promptier-surface {
   min-width: 0;
   min-height: 0;
