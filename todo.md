@@ -12,7 +12,7 @@ one of its parameters.
 [X] Open the editor in full screen.
 
 # UI
-[] use square borders. not rounded. foooter backgground should be the same of header.
+[X] use square borders. not rounded. foooter backgground should be the same of header.
 [] change format buttons hover behaviour.
 [] eliminar el tag al lado de section. 
 
