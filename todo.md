@@ -14,7 +14,7 @@ one of its parameters.
 # UI
 [X] use square borders. not rounded. foooter backgground should be the same of header.
 [] change format buttons hover behaviour.
-[] eliminar el tag al lado de section. 
+[X] eliminar el tag al lado de section.
 
 # DOUBTS
 [] Use of tailwind within react layer.
