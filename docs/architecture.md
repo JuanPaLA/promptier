@@ -29,7 +29,8 @@ plays, so a reader can tell ProseMirror-only code from translation code:
 
 ```
 engine/prosemirror/
-├─ proseMirrorEditor.ts     the adapter — implements the port; the only root file
+├─ proseMirrorEditor.ts     the adapter — implements the port
+├─ proseMirrorConfiguration.ts  shared descriptor, schema and mapper composition
 ├─ descriptors/             the engine definition: what can exist, how it behaves
 │  ├─ promptSchema.ts       schema factory over explicit descriptor registries
 │  ├─ blocks/               BlockDescriptor + BlockRegistry
@@ -66,7 +67,7 @@ registries:
 
 - `ParagraphBlock`, `HeadingBlock` — leaf text blocks; they carry inline
   content as `BlockContent` (a list of `TextSegment`s, each with optional
-  `Format` marks: bold, code).
+  `Format` marks: bold, italic, code).
 - `CodeBlock` — literal text with an optional `language`. Carries a plain
   `code` string rather than `BlockContent`: code has no segments to format, and
   its whitespace is significant. It is also the format's escape hatch — markup
@@ -116,16 +117,38 @@ registries compose duplicate key bindings in declaration order, so one
 contribution returning `false` delegates to the next instead of overwriting it.
 `blockContentMapper` centralizes the inline translation (domain `TextSegment`
 formats ⇄ ProseMirror marks) so block descriptors delegate instead of each
-reimplementing it.
+reimplementing it. A mark may also contribute its own shadow-root CSS through
+`editorStyles`; the style installer aggregates those contributions without
+knowing any concrete format.
 
-`proseMirrorEditor.ts` is the descriptor composition root as well as the command
-composition root. It registers every concrete descriptor once, builds one shared
-schema and mapper from those registries, and passes the resulting objects into
-each mounted editor session. Adding a domain block or format extends the
-corresponding exhaustive registration map; registry, schema, mapper and editor
-algorithms stay unchanged. Prompt serialization and React presentation remain
-separate exhaustive seams and may require their own contribution for a new
-domain type.
+`proseMirrorConfiguration.ts` is the descriptor composition root. It registers
+every concrete descriptor once and builds one shared schema and mapper from
+those registries. `proseMirrorEditor.ts` remains the command composition root
+and passes the configured objects into each mounted editor session. Adding a
+domain block or format extends the corresponding exhaustive registration map;
+registry, schema, mapper and editor algorithms stay unchanged. Prompt
+serialization and React presentation remain separate exhaustive seams and
+require their own contribution for a new domain type.
+
+### Adding an inline format
+
+Inline formats have three deliberately separate contributions so the pure
+format bundle never imports ProseMirror and core never imports React:
+
+1. Add the identifier to `prompt/model/Format.ts`.
+2. Add an `InlineFormatCodec` under `prompt/serialization/formats/` and register
+   it in the exhaustive `inlineFormatCodecs` map. The shared parser, serializer,
+   escaping and nesting algorithms consume this registry.
+3. Add a `MarkDescriptor` under
+   `engine/prosemirror/descriptors/marks/` and register it in the exhaustive
+   `markDescriptors` map. Formatting commands are derived from this registry.
+4. Add a `FormatPresentation` under `react-sdk/src/ui/formats/` and register it
+   in the exhaustive `formatPresentations` map. The view model and toolbar are
+   format-agnostic.
+
+Only the closed domain vocabulary and these three composition maps change. A
+new format must not add branches to parsing, serialization, command execution,
+mapping, view-model projection or toolbar rendering.
 
 ### Editing operations
 
@@ -251,9 +274,10 @@ moving the selection.
     editor and carry their enabled state plus active state when that concept
     applies. `statechange` fires after transactions and programmatic document
     writes.
-- `react-sdk` exposes `<PromptEditor value onChange />` and owns the React editor
+  - `react-sdk` exposes `<PromptEditor value onChange />` and owns the React editor
   interface: shell layout, the collapsible outline, command view models,
-  accessibility and focus behavior. It adds no editor *semantics*. Its private
+  accessibility and focus behavior. It adds no editor *semantics*. Format labels
+  and glyphs come from an exhaustive presentation registry. Its private
   `PromptEditorService` normalizes Custom Element properties/events into a
   cached snapshot. `PromptEditorPresenter` is the single reactive owner that
   reconciles `value` / `onChange` and exposes actions. `PromptEditorVM`

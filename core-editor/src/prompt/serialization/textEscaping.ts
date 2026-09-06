@@ -7,18 +7,29 @@
  * uniformity buys a backtick-carrying code segment plus a simpler parser.
  */
 
-const ESCAPABLE = '\\*`';
-
-export function isEscapable(char: string): boolean {
-  return ESCAPABLE.includes(char);
+export interface InlineEscapeRules {
+  isEscapable(character: string): boolean;
 }
 
-export function escapeInlineText(text: string): string {
-  return text.replace(/[\\*`]/g, (char) => `\\${char}`);
+export function escapeInlineText(text: string, rules: InlineEscapeRules): string {
+  return [...text]
+    .map((character) => (rules.isEscapable(character) ? `\\${character}` : character))
+    .join('');
 }
 
-export function unescapeInlineText(text: string): string {
-  return text.replace(/\\([\\*`])/g, '$1');
+export function unescapeInlineText(text: string, rules: InlineEscapeRules): string {
+  let result = '';
+  let index = 0;
+  while (index < text.length) {
+    if (text[index] === '\\' && rules.isEscapable(text[index + 1] ?? '')) {
+      result += text[index + 1];
+      index += 2;
+      continue;
+    }
+    result += text[index];
+    index += 1;
+  }
+  return result;
 }
 
 /**

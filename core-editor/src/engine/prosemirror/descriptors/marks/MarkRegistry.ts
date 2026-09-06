@@ -42,6 +42,12 @@ export class MarkRegistry {
     );
   }
 
+  editorStyles(): readonly string[] {
+    return this.descriptors.flatMap((descriptor) =>
+      descriptor.editorStyles ? [descriptor.editorStyles] : [],
+    );
+  }
+
   inputRules(schema: Schema): readonly InputRule[] {
     return this.descriptors.flatMap((descriptor) => descriptor.inputRules?.(schema) ?? []);
   }

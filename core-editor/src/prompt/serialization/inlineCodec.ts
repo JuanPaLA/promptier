@@ -1,8 +1,18 @@
 import type { BlockContent, TextSegment } from '../model/BlockContent';
 import type { Format } from '../model/Format';
-import { escapeInlineText, isEscapable, unescapeInlineText } from './textEscaping';
+import type { InlineFormatCodec } from './formats/InlineFormatCodec';
+import { inlineFormatRegistry } from './formats/inlineFormatCodecs';
+import { escapeInlineText, unescapeInlineText } from './textEscaping';
 
 export function parseInline(text: string): BlockContent {
+  return parseInlineText(text);
+}
+
+export function serializeInline(content: BlockContent): string {
+  return content.map(segmentToText).join('');
+}
+
+function parseInlineText(text: string): BlockContent {
   const segments: TextSegment[] = [];
   let plain = '';
   let index = 0;
@@ -13,33 +23,23 @@ export function parseInline(text: string): BlockContent {
   }
 
   while (index < text.length) {
-    if (text[index] === '\\' && isEscapable(text[index + 1] ?? '')) {
+    if (
+      text[index] === '\\' &&
+      inlineFormatRegistry.isEscapable(text[index + 1] ?? '')
+    ) {
       plain += text[index + 1];
       index += 2;
       continue;
     }
 
-    if (text.startsWith('**', index)) {
-      const end = findDelimiter(text, index + 2, '**');
+    const codec = inlineFormatRegistry.openingAt(text, index);
+    if (codec) {
+      const contentStart = index + codec.openingDelimiter.length;
+      const end = findClosingDelimiter(text, contentStart, codec);
       if (end !== -1) {
         flush();
-        for (const segment of parseInline(text.slice(index + 2, end))) {
-          pushSegment(segments, withFormat(segment, 'bold'));
-        }
-        index = end + 2;
-        continue;
-      }
-    }
-
-    if (text[index] === '`') {
-      const end = findDelimiter(text, index + 1, '`');
-      if (end !== -1) {
-        flush();
-        pushSegment(segments, {
-          text: unescapeInlineText(text.slice(index + 1, end)),
-          formats: ['code'],
-        });
-        index = end + 1;
+        appendFormattedContent(segments, text.slice(contentStart, end), codec);
+        index = end + codec.closingDelimiter.length;
         continue;
       }
     }
@@ -52,19 +52,37 @@ export function parseInline(text: string): BlockContent {
   return segments;
 }
 
-export function serializeInline(content: BlockContent): string {
-  return content.map(segmentToText).join('');
+function appendFormattedContent(
+  segments: TextSegment[],
+  text: string,
+  codec: InlineFormatCodec,
+): void {
+  if (codec.contentMode === 'literal') {
+    pushSegment(segments, {
+      text: unescapeInlineText(text, inlineFormatRegistry),
+      formats: [codec.format],
+    });
+    return;
+  }
+
+  for (const segment of parseInlineText(text)) {
+    pushSegment(segments, withFormat(segment, codec.format));
+  }
 }
 
-/** The next unescaped `delimiter` at or after `from`, or -1. */
-function findDelimiter(text: string, from: number, delimiter: string): number {
+/** The next unescaped closing delimiter at or after `from`, or -1. */
+function findClosingDelimiter(
+  text: string,
+  from: number,
+  codec: InlineFormatCodec,
+): number {
   let index = from;
   while (index < text.length) {
-    if (text[index] === '\\') {
+    if (text[index] === '\\' && inlineFormatRegistry.isEscapable(text[index + 1] ?? '')) {
       index += 2;
       continue;
     }
-    if (text.startsWith(delimiter, index)) return index;
+    if (text.startsWith(codec.closingDelimiter, index)) return index;
     index += 1;
   }
   return -1;
@@ -82,10 +100,10 @@ function pushSegment(segments: TextSegment[], segment: TextSegment): void {
 }
 
 function withFormat(segment: TextSegment, format: Format): TextSegment {
-  const formats = [...new Set([...(segment.formats ?? []), format])].sort(
-    (left, right) => FORMAT_RANK[left] - FORMAT_RANK[right],
-  );
-  return { text: segment.text, formats };
+  return {
+    text: segment.text,
+    formats: inlineFormatRegistry.canonicalize([...(segment.formats ?? []), format]),
+  };
 }
 
 function sameFormats(left: Format[] | undefined, right: Format[] | undefined): boolean {
@@ -95,19 +113,8 @@ function sameFormats(left: Format[] | undefined, right: Format[] | undefined): b
 }
 
 function segmentToText(segment: TextSegment): string {
-  return FORMAT_ORDER.filter((format) => segment.formats?.includes(format)).reduce(
-    (inner, format) => FORMAT_WRAP[format](inner),
-    escapeInlineText(segment.text),
+  return inlineFormatRegistry.nestingOrder(segment.formats ?? []).reduce(
+    (inner, codec) => `${codec.openingDelimiter}${inner}${codec.closingDelimiter}`,
+    escapeInlineText(segment.text, inlineFormatRegistry),
   );
 }
-
-/** Schema declaration order, which is the order ProseMirror reports marks in. */
-const FORMAT_RANK: Record<Format, number> = { bold: 0, code: 1 };
-
-/** Nesting order for a multi-format segment, innermost first: code inside bold. */
-const FORMAT_ORDER: Format[] = ['code', 'bold'];
-
-const FORMAT_WRAP: Record<Format, (inner: string) => string> = {
-  bold: (inner) => `**${inner}**`,
-  code: (inner) => `\`${inner}\``,
-};

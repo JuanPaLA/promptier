@@ -16,19 +16,16 @@ import type { PromptContent } from '../../prompt/model/PromptContent';
 import { EditorCommandRegistry } from './commands/EditorCommandRegistry';
 import { FormatCommands } from './commands/FormatCommands';
 import { NavigateCommands } from './commands/NavigateCommands';
-import { BlockRegistry } from './descriptors/blocks/BlockRegistry';
-import { codeBlockDescriptor } from './descriptors/blocks/codeBlockDescriptor';
-import { headingDescriptor } from './descriptors/blocks/headingDescriptor';
-import { orderedListDescriptor } from './descriptors/blocks/orderedListDescriptor';
-import { paragraphDescriptor } from './descriptors/blocks/paragraphDescriptor';
-import { sectionDescriptor } from './descriptors/blocks/sectionDescriptor';
-import { unorderedListDescriptor } from './descriptors/blocks/unorderedListDescriptor';
-import { boldDescriptor } from './descriptors/marks/boldDescriptor';
-import { codeDescriptor } from './descriptors/marks/codeDescriptor';
-import { MarkRegistry } from './descriptors/marks/MarkRegistry';
-import { createPromptSchema } from './descriptors/promptSchema';
-import { PromptDocumentMapper } from './mapping/PromptDocumentMapper';
+import type { BlockRegistry } from './descriptors/blocks/BlockRegistry';
+import type { MarkRegistry } from './descriptors/marks/MarkRegistry';
+import type { PromptDocumentMapper } from './mapping/PromptDocumentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
+import {
+  blockRegistry,
+  documentMapper,
+  markRegistry,
+  promptSchema,
+} from './proseMirrorConfiguration';
 import { EditorStateReader } from './state/EditorStateReader';
 
 export function createProseMirrorEditor(
@@ -145,20 +142,3 @@ class ProseMirrorEditor implements PromptEditor {
     this.stateListeners.forEach((listener) => listener(state));
   }
 }
-
-const blockRegistry = new BlockRegistry({
-  paragraph: paragraphDescriptor,
-  heading: headingDescriptor,
-  codeBlock: codeBlockDescriptor,
-  orderedList: orderedListDescriptor,
-  unorderedList: unorderedListDescriptor,
-  section: sectionDescriptor,
-});
-
-const markRegistry = new MarkRegistry({
-  bold: boldDescriptor,
-  code: codeDescriptor,
-});
-
-const promptSchema = createPromptSchema(blockRegistry, markRegistry);
-const documentMapper = new PromptDocumentMapper(promptSchema, blockRegistry);

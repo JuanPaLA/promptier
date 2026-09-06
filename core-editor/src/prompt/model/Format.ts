@@ -1,1 +1,1 @@
-export type Format = 'bold' | 'code';
+export type Format = 'bold' | 'italic' | 'code';

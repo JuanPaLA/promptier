@@ -29,6 +29,7 @@ The set is closed — exactly what the block and mark registries can express.
 | Unordered list | `- item` on consecutive lines |
 | Code block | ```` ```lang ```` … ```` ``` ```` |
 | Bold | `**text**` |
+| Italic | `_text_` |
 | Inline code | `` `text` `` |
 
 ```
@@ -68,7 +69,7 @@ stays text.
 Escapes keep the codec total: any text a block can hold survives the round trip,
 including text that looks like markup.
 
-- `\`, `*` and `` ` `` are backslash-escaped inside text.
+- `\`, `*`, `_` and `` ` `` are backslash-escaped inside text.
 - A paragraph opening with `# `, `- `, `1. `, or consisting of nothing
   but a tag is prefixed with `\`.
 

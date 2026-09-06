@@ -7,6 +7,7 @@ import {
 } from 'core-editor'
 
 import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
+import { formatPresentationRegistry } from '../formats/formatPresentations';
 
 export class PromptEditorVM {
   private constructor(
@@ -81,28 +82,14 @@ export class CommandItemVM {
 
   static from(state: CommandState): CommandItemVM | null {
     if (state.command.type !== 'format') return null;
-    const common = {
-      disabled: !state.enabled,
-      active: state.active ?? false,
-    };
-    switch (state.command.format) {
-      case 'bold':
-        return new CommandItemVM(
-          `[${state.command.type}].${state.command.format}`,
-          'Bold',
-          'B',
-          common.disabled,
-          common.active,
-        );
-      case 'code':
-        return new CommandItemVM(
-          'format.code',
-          'Inline code',
-          '</>',
-          common.disabled,
-          common.active,
-        );
-    }
+    const presentation = formatPresentationRegistry.get(state.command.format);
+    return new CommandItemVM(
+      `format.${state.command.format}`,
+      presentation.label,
+      presentation.glyph,
+      !state.enabled,
+      state.active ?? false,
+    );
   }
 }
 

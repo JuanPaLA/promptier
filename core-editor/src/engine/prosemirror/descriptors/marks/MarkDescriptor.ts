@@ -15,6 +15,7 @@ import type { Format } from '../../../../prompt/model/Format';
 export interface MarkDescriptor<F extends Format = Format> {
   readonly format: F;
   readonly markSpec: MarkSpec;
+  readonly editorStyles?: string;
   keymap?(schema: Schema): Record<string, Command>;
   inputRules?(schema: Schema): InputRule[];
 }
