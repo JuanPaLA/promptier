@@ -113,8 +113,13 @@ function sameFormats(left: Format[] | undefined, right: Format[] | undefined): b
 }
 
 function segmentToText(segment: TextSegment): string {
-  return inlineFormatRegistry.nestingOrder(segment.formats ?? []).reduce(
+  const codecs = inlineFormatRegistry.nestingOrder(segment.formats ?? []);
+  const literal = codecs.find((codec) => codec.contentMode === 'literal');
+  const escaping = literal
+    ? { isEscapable: (character: string) => character === '\\' || codecs.some((codec) => codec.escapeCharacters.includes(character)) }
+    : inlineFormatRegistry;
+  return codecs.reduce(
     (inner, codec) => `${codec.openingDelimiter}${inner}${codec.closingDelimiter}`,
-    escapeInlineText(segment.text, inlineFormatRegistry),
+    escapeInlineText(segment.text, escaping),
   );
 }

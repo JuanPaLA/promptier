@@ -48,3 +48,8 @@ describe('inline format codecs', () => {
     expect(parseInline(serializeInline(content))).toEqual(content);
   });
 });
+
+it('round-trips literal delimiters inside nested code formatting', () => {
+  const content: BlockContent = [{ text: '<dialog_format_rules> **x** ` \\', formats: ['bold', 'italic', 'code'] }];
+  expect(parseInline(serializeInline(content))).toEqual(content);
+});

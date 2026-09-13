@@ -1,3 +1,4 @@
+import { ReferencePicker } from './ReferencePicker';
 import type { CommandItemVM } from '../PromptEditorVM';
 import { CommandsToolBar } from './CommandsToolBar';
 import { CopyButton } from '../../components/buttons/CopyButton';
@@ -8,6 +9,7 @@ export interface EditorHeaderProps extends ViewControlsProps {
   readonly outlineOpen: boolean;
   readonly formatCommands: readonly CommandItemVM[];
   readonly blockCommands: readonly CommandItemVM[];
+  readonly referenceCommands?: readonly CommandItemVM[];
   readonly onToggleOutline: () => void;
   readonly onCommand: (id: string) => void;
   readonly copyStatus: CopyStatus;
@@ -15,7 +17,7 @@ export interface EditorHeaderProps extends ViewControlsProps {
 }
 
 export function Header({
-  outlineOpen, formatCommands, blockCommands, onToggleOutline, onCommand,
+  outlineOpen, formatCommands, blockCommands, referenceCommands = [], onToggleOutline, onCommand,
   copyStatus, onCopy, ...viewControls
 }: EditorHeaderProps) {
   return (
@@ -39,6 +41,7 @@ export function Header({
                 ]}
                 onAction={onCommand}
               />
+              <ReferencePicker items={referenceCommands} onAction={onCommand} />
             </div>
           </>
         )}

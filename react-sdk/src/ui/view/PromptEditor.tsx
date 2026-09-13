@@ -1,3 +1,4 @@
+/// <reference path="../../custom-elements.d.ts" />
 import { usePresenter } from '@nbottarini/react-presenter';
 import { useRef, useState } from 'react';
 
@@ -49,6 +50,7 @@ export function PromptEditor(props: PromptEditorProps) {
           outlineOpen={outlineOpen}
           formatCommands={presenter.model.formatCommands}
           blockCommands={presenter.model.blockCommands}
+          referenceCommands={presenter.model.referenceCommands}
           onToggleOutline={toggleOutline}
           onCommand={presenter.runCommand}
           fullViewAvailable={fullView.available}

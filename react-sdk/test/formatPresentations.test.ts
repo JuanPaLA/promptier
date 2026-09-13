@@ -88,3 +88,17 @@ describe('block presentations', () => {
     });
   });
 });
+
+describe('reference presentations', () => {
+  it('keeps references in their picker and retains command enablement', () => {
+    const command = { type: 'reference.insert', text: '<rules>' } as const;
+    const model = PromptEditorVM.from({
+      prompt: '', content: { blocks: [] },
+      state: { commands: [{ command, enabled: false }] },
+    });
+    expect(model.blockCommands).toEqual([]);
+    expect(model.formatCommands).toEqual([]);
+    expect(model.referenceCommands).toEqual([expect.objectContaining({ label: '<rules>', disabled: true })]);
+    expect(model.commandFor(model.referenceCommands[0].id)).toEqual(command);
+  });
+});

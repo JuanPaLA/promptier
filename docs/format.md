@@ -59,7 +59,7 @@ Responde en **markdown**.
 A section has no stored id. Its title slugifies to a tag
 (`sectionTagName`), and that tag is simultaneously the serialized element, the
 outline anchor and the id. Two sections whose titles slugify alike are
-indistinguishable — accepted until cross-references need real identity.
+indistinguishable by tag; references to that tag are reported as ambiguous.
 
 A tag opens a section only when it is **balanced, block-level, and alone on its
 line**. An inline `<thinking>` inside a sentence stays text, and an unclosed tag
@@ -114,3 +114,17 @@ Deliberate, and covered by tests:
   paragraph; `BlockContent` cannot hold a line break.
 - **Code spans keep their spaces.** CommonMark strips one leading and trailing
   space; we do not.
+
+## Section references
+
+An inline code span whose entire content is an opening tag, such as
+`<dialog_format_rules>`, is a section reference candidate. Backticks keep it
+inline content even on a line by itself; references never declare sections.
+Resolution is separate from parsing and searches the whole document, including
+nested and later sections. Exactly one matching tag resolves; zero matches are
+missing and multiple matches are ambiguous. Renaming or deleting a target does
+not rewrite reference text.
+
+Inline code now emits underscores and asterisks literally, keeping referenced
+opening tags exact. Backslashes and backticks remain escaped. Previously emitted
+escaped code spans remain accepted and normalize to this spelling.

@@ -1,10 +1,11 @@
+import { referenceStyles } from '../plugins/referenceDecorations';
 /** Installs the editor's fixed structural styles inside its private DOM root. */
 export function installEditorStyles(
   root: ShadowRoot,
   extensionStyles: readonly string[] = [],
 ): void {
   const style = root.ownerDocument.createElement('style');
-  style.textContent = [CSS, ...extensionStyles].join('\n');
+  style.textContent = [CSS, referenceStyles, ...extensionStyles].join('\n');
   root.append(style);
 }
 

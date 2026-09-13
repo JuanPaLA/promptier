@@ -376,3 +376,20 @@ and SSR can import it.
 
 `exports` points at TS source so the dev loop stays buildless; `publishConfig`
 swaps in `dist` at publish time.
+
+### Derived references
+
+References currently remain code-formatted `TextSegment`s in storage.
+`prompt/references/` owns a pure resolver contract and its first implementation,
+section resolution. The parser does not consult reference targets or editor
+context. Ordinary code remains ordinary code; only a full opening-tag code span
+is a section candidate. Duplicate tags are ambiguous, not interchangeable targets.
+
+The engine composes resolvers into a reference decoration plugin independently
+of the code mark descriptor. Decorations are recomputed after document changes,
+with navigation for resolved targets and feedback for missing/ambiguous targets.
+They do not enter document serialization. `reference.insert` validates its target
+and inserts a code span; its command states provide the React section picker.
+A future slash menu can invoke the same command. Future reference kinds can add
+resolvers, target variants and picker entries without changing the text parser;
+tool context and syntax are intentionally not implemented yet.

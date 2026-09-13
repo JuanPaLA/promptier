@@ -1,3 +1,6 @@
+import { sectionReferences } from '../../prompt/references/sectionReferences';
+import { ReferenceCommands } from './commands/ReferenceCommands';
+import { referenceDecorations } from './plugins/referenceDecorations';
 import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
 import { inputRules } from 'prosemirror-inputrules';
@@ -35,12 +38,14 @@ export function createProseMirrorEditor(
 ): PromptEditor {
   const formatCommands = new FormatCommands(markRegistry.all().map(({ format }) => format));
   const blockCommands = new BlockCommands(blockRegistry, documentMapper);
+  const referenceCommands = new ReferenceCommands(documentMapper);
   const commandRegistry = new EditorCommandRegistry([
     formatCommands,
     blockCommands,
     new NavigateCommands(),
+    referenceCommands,
   ]);
-  const stateReader = new EditorStateReader([formatCommands, blockCommands]);
+  const stateReader = new EditorStateReader([formatCommands, blockCommands, referenceCommands]);
 
   return new ProseMirrorEditor(
     container,
@@ -82,6 +87,7 @@ class ProseMirrorEditor implements PromptEditor {
           rules: [...this.blocks.inputRules(this.schema), ...this.marks.inputRules(this.schema)],
         }),
         appendTrailingParagraph(),
+        referenceDecorations((doc) => [sectionReferences(this.documentMapper.fromDocument(doc))]),
       ],
     });
 

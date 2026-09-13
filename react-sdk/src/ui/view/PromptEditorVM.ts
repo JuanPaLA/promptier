@@ -15,6 +15,7 @@ export class PromptEditorVM {
     readonly prompt: string,
     readonly formatCommands: readonly CommandItemVM[],
     readonly blockCommands: readonly CommandItemVM[],
+    readonly referenceCommands: readonly CommandItemVM[],
     readonly outlineItems: readonly OutlineItemVM[],
     readonly charsCount: number,
     readonly wordCount: number,
@@ -23,14 +24,15 @@ export class PromptEditorVM {
   ) {}
 
   static from(snapshot: PromptEditorSnapshot): PromptEditorVM {
-    const [formatCommandItems, blockCommandItems, editorCommandsById] =
+    const [formatCommandItems, insertionCommandItems, editorCommandsById] =
         PromptEditorVM.buildCommandItems(snapshot.state?.commands ?? []);
     const [outlineItems, outlineTargetsById] =
         PromptEditorVM.buildOutlineItems(outline(snapshot.content));
     return new PromptEditorVM(
         snapshot.prompt,
         formatCommandItems,
-        blockCommandItems,
+        insertionCommandItems.filter((item) => item.group === 'block'),
+        insertionCommandItems.filter((item) => item.group === 'reference'),
         outlineItems,
         snapshot.prompt.length,
         snapshot.prompt.split(" ").length,
@@ -51,16 +53,16 @@ export class PromptEditorVM {
     states: readonly CommandState[],
   ): [readonly CommandItemVM[], readonly CommandItemVM[], Map<string, EditorCommand>] {
     const formatItems: CommandItemVM[] = [];
-    const blockItems: CommandItemVM[] = [];
+    const insertionItems: CommandItemVM[] = [];
     const commandsById = new Map<string, EditorCommand>();
     states.forEach((state) => {
       const item = CommandItemVM.from(state);
       if (!item) return;
       if (item.group === 'format') formatItems.push(item);
-      else blockItems.push(item);
+      else insertionItems.push(item);
       commandsById.set(item.id, state.command);
     });
-    return [formatItems, blockItems, commandsById];
+    return [formatItems, insertionItems, commandsById];
   }
 
   private static buildOutlineItems(
@@ -79,7 +81,7 @@ export class PromptEditorVM {
 export class CommandItemVM {
   private constructor(
     readonly id: string,
-    readonly group: 'format' | 'block',
+    readonly group: 'format' | 'block' | 'reference',
     readonly label: string,
     readonly glyph: string,
     readonly disabled: boolean,
@@ -107,6 +109,12 @@ export class CommandItemVM {
         presentation.glyph,
         !state.enabled,
         false,
+      );
+    }
+    if (state.command.type === 'reference.insert') {
+      return new CommandItemVM(
+        `reference.insert.${state.command.text}`, 'reference', state.command.text,
+        '↗', !state.enabled, false,
       );
     }
     return null;

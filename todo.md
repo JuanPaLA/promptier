@@ -10,11 +10,15 @@ one of its parameters.
 [X] Make every heading inside or outside a section an outline entry.
 [X] Show raw content editor.
 [X] Open the editor in full screen.
+[] Slash menu with: section references | tool references | variable references
+[] Consider pebble or other render engines interpolation strategies
+[] Validate not repeated sections.
 
 # UI
 [X] use square borders. not rounded. foooter backgground should be the same of header.
 [] change format buttons hover behaviour.
 [X] eliminar el tag al lado de section.
+[] Eliminar el isert quote o generarlizalo.
 
 # DOUBTS
 [] Use of tailwind within react layer.

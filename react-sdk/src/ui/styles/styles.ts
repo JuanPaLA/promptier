@@ -281,6 +281,17 @@ export const styles = `
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.promptier-reference-picker {
+  max-width: 15rem;
+  min-width: 0;
+  padding: 0.35rem;
+  border: 1px solid var(--promptier-border, #ddd);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+}
 @media (max-width: 42rem) {
   .promptier-outline {
     width: 11rem;
