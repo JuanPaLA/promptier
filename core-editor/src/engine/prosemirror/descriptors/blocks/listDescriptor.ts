@@ -36,6 +36,15 @@ export function createListDescriptor<B extends ListBlock>(
     blockType: config.blockType,
     nodeSpec: listNodeSpec(config),
     extraNodes: { [LIST_ITEM_NODE]: itemNodeSpec() },
+    editorStyles: `
+.${config.listClass} {
+  margin: 0.5rem 0;
+  padding-left: 1.6rem;
+}
+.${config.listClass} > li {
+  margin: 0.15rem 0;
+}
+`,
 
     toProseMirrorNode: (block, schema) => {
       // Grammar requires `listItem+`; backfill one empty item for an empty list.

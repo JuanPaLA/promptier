@@ -3,6 +3,7 @@ import { createListCodec } from './listCodec';
 
 export const orderedListCodec = createListCodec<OrderedListBlock>({
   blockType: 'orderedList',
+  parsePriority: 60,
   marker: /^\d+\. (.*)$/,
   itemPrefix: (index) => `${index + 1}. `,
 });

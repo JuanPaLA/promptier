@@ -15,25 +15,25 @@ export class PromptDocumentMapper {
     if (content.blocks.length === 0) return this.schema.nodes.doc.createAndFill()!;
     return this.schema.nodes.doc.create(
       null,
-      content.blocks.map((block) => this.toBlockNode(block)),
+      content.blocks.map((block) => this.toBlock(block)),
     );
   }
 
   fromDocument(document: ProseMirrorNode): PromptContent {
     const blocks: Block[] = [];
-    document.forEach((blockNode) => blocks.push(this.fromBlockNode(blockNode)));
+    document.forEach((blockNode) => blocks.push(this.fromBlock(blockNode)));
     return { blocks };
   }
 
-  private toBlockNode(block: Block): ProseMirrorNode {
+  toBlock(block: Block): ProseMirrorNode {
     return this.blocks
       .get(block.blockType)
-      .toProseMirrorNode(block, this.schema, (child) => this.toBlockNode(child));
+      .toProseMirrorNode(block, this.schema, (child) => this.toBlock(child));
   }
 
-  private fromBlockNode(node: ProseMirrorNode): Block {
+  fromBlock(node: ProseMirrorNode): Block {
     return this.blocks
       .get(node.type.name as BlockType)
-      .fromProseMirrorNode(node, (child) => this.fromBlockNode(child));
+      .fromProseMirrorNode(node, (child) => this.fromBlock(child));
   }
 }

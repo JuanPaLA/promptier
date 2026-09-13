@@ -7,6 +7,18 @@ import type { BlockDescriptor } from './BlockDescriptor';
 export const codeBlockDescriptor: BlockDescriptor<CodeBlock> = {
   blockType: 'codeBlock',
   nodeSpec: codeBlockNodeSpec(),
+  editorStyles: `
+.prompt-code-block {
+  margin: 0.5rem 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 4px;
+  background: #f6f8fa;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+`,
 
   toProseMirrorNode: (block, schema) =>
     schema.nodes.codeBlock.create(

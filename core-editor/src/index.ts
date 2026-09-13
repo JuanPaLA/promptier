@@ -28,6 +28,9 @@ export type {
   UnorderedListBlock,
 } from './prompt/model/blocks/UnorderedListBlock';
 export type {
+  QuoteBlock,
+} from './prompt/model/blocks/QuoteBlock';
+export type {
   SectionBlock,
 } from './prompt/model/blocks/SectionBlock';
 export { sectionTagName, sectionTitleFromTag } from './prompt/serialization/sectionTag';
@@ -45,4 +48,5 @@ export type {
   EditorState,
 } from './editor/commands/EditorState';
 export type { FormatCommand } from './editor/commands/FormatCommand';
+export type { InsertBlockCommand } from './editor/commands/InsertBlockCommand';
 export type { NavigateCommand, NavigateTarget } from './editor/commands/NavigateCommand';

@@ -7,6 +7,7 @@ import { CopyStatus } from '../../components/hooks/useCopyPrompt'
 export interface EditorHeaderProps extends ViewControlsProps {
   readonly outlineOpen: boolean;
   readonly formatCommands: readonly CommandItemVM[];
+  readonly blockCommands: readonly CommandItemVM[];
   readonly onToggleOutline: () => void;
   readonly onCommand: (id: string) => void;
   readonly copyStatus: CopyStatus;
@@ -14,7 +15,7 @@ export interface EditorHeaderProps extends ViewControlsProps {
 }
 
 export function Header({
-  outlineOpen, formatCommands, onToggleOutline, onCommand,
+  outlineOpen, formatCommands, blockCommands, onToggleOutline, onCommand,
   copyStatus, onCopy, ...viewControls
 }: EditorHeaderProps) {
   return (
@@ -31,7 +32,13 @@ export function Header({
               </div>
             )}
             <div className="promptier-editing-actions">
-              <CommandsToolBar items={formatCommands} onAction={onCommand} />
+              <CommandsToolBar
+                groups={[
+                  { label: 'Insert blocks', items: blockCommands },
+                  { label: 'Formatting', items: formatCommands },
+                ]}
+                onAction={onCommand}
+              />
             </div>
           </>
         )}

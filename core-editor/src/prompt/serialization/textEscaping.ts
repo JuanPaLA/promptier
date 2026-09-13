@@ -32,23 +32,18 @@ export function unescapeInlineText(text: string, rules: InlineEscapeRules): stri
   return result;
 }
 
+export interface BlockEscapeRules {
+  isBlockStart(line: string): boolean;
+}
+
 /**
  * A paragraph whose text opens with a block marker would parse back as that
  * block. A leading backslash makes the line literal.
  */
-export function escapeBlockStart(line: string): string {
-  return startsBlock(line) ? `\\${line}` : line;
+export function escapeBlockStart(line: string, rules: BlockEscapeRules): string {
+  return rules.isBlockStart(line) ? `\\${line}` : line;
 }
 
-export function unescapeBlockStart(line: string): string {
-  return line.startsWith('\\') && startsBlock(line.slice(1)) ? line.slice(1) : line;
+export function unescapeBlockStart(line: string, rules: BlockEscapeRules): string {
+  return line.startsWith('\\') && rules.isBlockStart(line.slice(1)) ? line.slice(1) : line;
 }
-
-function startsBlock(line: string): boolean {
-  return BLOCK_MARKER.test(line) || BARE_TAG.test(line);
-}
-
-const BLOCK_MARKER = /^(#{1,3} |- |\d+\. )/;
-
-/** Only a line that is *nothing but* a tag needs escaping — see docs/format.md. */
-const BARE_TAG = /^<\/?[a-zA-Z][\w-]*>$/;

@@ -1,6 +1,8 @@
 import type { Block } from '../model/Block';
 import type { PromptContent } from '../model/PromptContent';
-import { codecFor } from '././codecs/blockCodecRegistry';
+import type { BlockSerializeContext } from './codecs/BlockCodec';
+import { blockCodecRegistry } from './codecs/blockCodecRegistry';
+import { escapeBlockStart } from './textEscaping';
 
 /**
  * Renders a document as prompt text: XML tags carry structure, markdown carries
@@ -31,5 +33,10 @@ function blocksToText(blocks: readonly Block[]): string {
 }
 
 function blockToText(block: Block): string {
-  return codecFor(block).serialize(block, blocksToText);
+  return blockCodecRegistry.forBlock(block).serialize(block, serializeContext);
 }
+
+const serializeContext: BlockSerializeContext = {
+  serializeBlocks: blocksToText,
+  escapeBlockStart: (line) => escapeBlockStart(line, blockCodecRegistry),
+};

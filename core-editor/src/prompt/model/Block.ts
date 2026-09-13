@@ -2,6 +2,7 @@ import type { CodeBlock } from './blocks/CodeBlock';
 import type { HeadingBlock } from './blocks/HeadingBlock';
 import type { OrderedListBlock } from './blocks/OrderedListBlock';
 import type { ParagraphBlock } from './blocks/ParagraphBlock';
+import type { QuoteBlock } from './blocks/QuoteBlock';
 import type { SectionBlock } from './blocks/SectionBlock';
 import type { UnorderedListBlock } from './blocks/UnorderedListBlock';
 
@@ -16,6 +17,7 @@ export type Block =
   | CodeBlock
   | OrderedListBlock
   | UnorderedListBlock
+  | QuoteBlock
   | SectionBlock;
 
 /** The tag alone, for keying registries and maps. Derived — never declared twice. */

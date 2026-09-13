@@ -7,6 +7,7 @@ type ListBlock = Extract<Block, { blockType: 'orderedList' | 'unorderedList' }>;
 
 export interface ListCodecConfig<B extends ListBlock> {
   readonly blockType: B['blockType'];
+  readonly parsePriority: number;
   readonly marker: RegExp;
   itemPrefix(index: number): string;
 }
@@ -16,6 +17,7 @@ export function createListCodec<B extends ListBlock>(
 ): BlockCodec<B> {
   return {
     blockType: config.blockType,
+    parsePriority: config.parsePriority,
     interruptsParagraph: (line) => config.marker.test(line),
 
     tryParse(cursor) {

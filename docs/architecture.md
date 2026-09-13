@@ -72,6 +72,8 @@ registries:
   `code` string rather than `BlockContent`: code has no segments to format, and
   its whitespace is significant. It is also the format's escape hatch — markup
   inside a fence is never structure.
+- `QuoteBlock` — a leaf text block whose inline content is kept distinct from
+  instructions and serialized with a blockquote marker.
 - `SectionBlock` — a titled, **recursive container** (`children: Block[]`). It
   carries **no id**: identity is derived from the title (see below).
 
@@ -90,6 +92,8 @@ ProseMirror engine needs for that type:
 | `blockType` | Discriminant; doubles as the ProseMirror node name |
 | `nodeSpec` | The node's schema entry |
 | `extraNodes?` | Auxiliary schema nodes (e.g. section's `sectionTitle`) |
+| `editorStyles?` | Shadow-root CSS owned by this block |
+| `createDefaultBlock?` | Opts the block into the insertion command catalogue |
 | `toProseMirrorNode` / `fromProseMirrorNode` | Both mapping directions |
 | `inputRules?` | Typing shortcuts (`# `, `/section `) |
 | `keymaps?` | Key bindings scoped to this block (bound before `baseKeymap`) |
@@ -104,15 +108,18 @@ Two deliberate inversions keep this cycle-free:
   `mapChild` callback provided by `PromptDocumentMapper`, instead of importing the
   mapper or registry that owns their traversal.
 
-`BlockRegistry` owns the exhaustive `BlockType → descriptor` map,
-descriptor order, lookup validation, and the aggregation of input rules,
-keymaps and node views. Unknown types fail rather than silently mapping as a
-different block. `PromptDocumentMapper` separately owns recursive document and block
-translation. Registry order matters: the first block-group node becomes the
-doc's default block (paragraph).
+`BlockRegistry` owns the exhaustive `BlockType → descriptor` map, descriptor
+order, lookup validation, default insertion blocks, and the aggregation of
+input rules, keymaps, node views and styles. Unknown types fail rather than
+silently mapping as a different block. `PromptDocumentMapper` separately owns
+recursive document and block translation. Registry order matters: the first
+block-group node becomes the doc's default block (paragraph).
 
 Marks follow the same pattern in miniature: `MarkDescriptor` +
-`MarkRegistry` provides mark specs, input rules and keymaps. Both
+`MarkRegistry` provides mark specs, input rules and keymaps. Inline delimiter
+input rules are generated from the serialization codec registry, so typing the
+canonical syntax applies the corresponding mark without format-specific editor
+logic. Both
 registries compose duplicate key bindings in declaration order, so one
 contribution returning `false` delegates to the next instead of overwriting it.
 `blockContentMapper` centralizes the inline translation (domain `TextSegment`
@@ -130,6 +137,32 @@ registry, schema, mapper and editor algorithms stay unchanged. Prompt
 serialization and React presentation remain separate exhaustive seams and
 require their own contribution for a new domain type.
 
+### Adding a block
+
+Blocks use the same contribution structure across the vertical slice:
+
+1. Add the model under `prompt/model/blocks/` and extend the closed `Block`
+   union.
+2. Add a `BlockCodec` and register it in the exhaustive `blockCodecs` map. The
+   codec declares its own parse priority and whether its syntax interrupts a
+   paragraph. The codec catalogue drives dispatch and paragraph escaping.
+3. Add a `BlockDescriptor` and register it in the exhaustive
+   `blockDescriptors` map. Mapping, input rules, keymaps, node views, styles and
+   an optional default insertion value belong to that descriptor.
+4. Add a `BlockPresentation` in `react-sdk/src/ui/blocks/` and register it in
+   the exhaustive `blockPresentations` map.
+
+`PromptTextParser` recursively reads registered blocks until a container's
+closing condition is reached. A container therefore has no knowledge of code
+fences or any other opaque block. `BlockCommands` converts the complete domain
+block carried by `{ type: 'block.insert', block }` through the shared mapper and
+inserts it after the nearest containing block. Its advertised commands are
+derived from descriptors that provide `createDefaultBlock`.
+
+Only the model union and these three composition maps change. A new block must
+not add branches to parsing, escaping, serialization, mapping, insertion,
+styling, view-model projection or toolbar rendering.
+
 ### Adding an inline format
 
 Inline formats have three deliberately separate contributions so the pure
@@ -138,7 +171,8 @@ format bundle never imports ProseMirror and core never imports React:
 1. Add the identifier to `prompt/model/Format.ts`.
 2. Add an `InlineFormatCodec` under `prompt/serialization/formats/` and register
    it in the exhaustive `inlineFormatCodecs` map. The shared parser, serializer,
-   escaping and nesting algorithms consume this registry.
+   escaping, nesting and manual-typing input-rule algorithms consume this
+   registry.
 3. Add a `MarkDescriptor` under
    `engine/prosemirror/descriptors/marks/` and register it in the exhaustive
    `markDescriptors` map. Formatting commands are derived from this registry.
@@ -166,26 +200,27 @@ these before writing an offset.
 `editor/commands/EditorCommand.ts` is the engine-independent command contract.
 Commands are small discriminated data objects: `type` names the semantic action
 and the remaining fields carry that action's input. Formatting uses
-`{ type: 'format', format }`; bold and code are two concrete commands, not two
-unrelated command types. Outline navigation uses a structural block path so a
-wrapper never has to reach into the engine DOM or treat a title-derived id as
-unique.
+`{ type: 'format', format }`; bold, italic and code are concrete commands, not
+unrelated command types. Generic insertion uses
+`{ type: 'block.insert', block }`, with the complete domain value as its payload.
+Outline navigation uses a structural block path so a wrapper never has to reach
+into the engine DOM or treat a title-derived id as unique.
 
 Execution and state reporting are independent capabilities. A
 `CommandHandler` executes one command family, while a `CommandStateProvider`
 contributes concrete commands and their current enabled/active state.
 `EditorCommandRegistry` owns execution routing, keyed by the command's `type`
 discriminant. `EditorStateReader` combines state providers into the public
-`EditorState`; it does not consult the execution registry. Formatting
-implements both capabilities, while navigation implements execution only
-because its targets come from the current outline.
+`EditorState`; it does not consult the execution registry. Formatting and block
+insertion implement both capabilities, while navigation implements execution
+only because its targets come from the current outline.
 
 `createProseMirrorEditor` is the command composition root. Adding a command
 family means implementing either or both capabilities and registering the new
 object there; the registry, state reader, editor adapter and browser packaging
 do not change. New command families belong in the public union only when their
-behavior and payload are implemented; names such as `block.insert` and
-`block.move` are design directions, not placeholder API.
+behavior and payload are implemented; `block.move` remains a design direction,
+not a placeholder API.
 
 The element imports editor creation and styles through
 `engine/index.ts`. This is an internal module boundary, not a second engine
@@ -276,8 +311,8 @@ moving the selection.
     writes.
   - `react-sdk` exposes `<PromptEditor value onChange />` and owns the React editor
   interface: shell layout, the collapsible outline, command view models,
-  accessibility and focus behavior. It adds no editor *semantics*. Format labels
-  and glyphs come from an exhaustive presentation registry. Its private
+  accessibility and focus behavior. It adds no editor *semantics*. Format and
+  block labels and glyphs come from separate exhaustive presentation registries. Its private
   `PromptEditorService` normalizes Custom Element properties/events into a
   cached snapshot. `PromptEditorPresenter` is the single reactive owner that
   reconciles `value` / `onChange` and exposes actions. `PromptEditorVM`

@@ -1,7 +1,7 @@
 import type { Block } from '../model/Block';
 import type { PromptContent } from '../model/PromptContent';
 import type { BlockParseCursor } from './codecs/BlockCodec';
-import { blockCodecs } from './codecs/blockCodecRegistry';
+import { blockCodecRegistry } from './codecs/blockCodecRegistry';
 
 export { parseInline } from './inlineCodec';
 
@@ -26,10 +26,15 @@ class PromptTextParser implements BlockParseCursor {
   constructor(private readonly lines: readonly string[]) {}
 
   readBlocks(): Block[] {
+    return this.readBlocksUntil(() => false);
+  }
+
+  readBlocksUntil(isEnd: (line: string) => boolean): Block[] {
     const blocks: Block[] = [];
 
     while (this.index < this.lines.length) {
       const line = this.lines[this.index];
+      if (isEnd(line)) break;
       if (line.trim().length === 0) {
         this.index += 1;
         continue;
@@ -45,29 +50,29 @@ class PromptTextParser implements BlockParseCursor {
     return this.lines[this.index + offset];
   }
 
-  slice(fromOffset: number, toOffset: number): readonly string[] {
-    return this.lines.slice(this.index + fromOffset, this.index + toOffset);
-  }
-
   advance(lineCount: number): void {
     this.index += lineCount;
   }
 
   isBlockBoundary(offset = 0): boolean {
     const line = this.line(offset);
-    return line !== undefined && blockCodecs.some((codec) => codec.interruptsParagraph(line));
+    return line !== undefined && this.isBlockStart(line);
   }
 
-  parseBlocks(lines: readonly string[]): Block[] {
-    return parseBlocks(lines);
+  isBlockStart(line: string): boolean {
+    return blockCodecRegistry.isBlockStart(line);
+  }
+
+  checkpoint(): number {
+    return this.index;
+  }
+
+  restore(checkpoint: number): void {
+    this.index = checkpoint;
   }
 
   private readBlock(): Block {
-    for (const codec of blockCodecs) {
-      const block = codec.tryParse(this);
-      if (block !== null) return block;
-    }
-    throw new Error('No block codec consumed the current line');
+    return blockCodecRegistry.parse(this);
   }
 }
 

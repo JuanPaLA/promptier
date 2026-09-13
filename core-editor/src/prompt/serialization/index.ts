@@ -15,6 +15,7 @@ export type { HeadingBlock } from '../model/blocks/HeadingBlock';
 export type { CodeBlock } from '../model/blocks/CodeBlock';
 export type { OrderedListBlock } from '../model/blocks/OrderedListBlock';
 export type { UnorderedListBlock } from '../model/blocks/UnorderedListBlock';
+export type { QuoteBlock } from '../model/blocks/QuoteBlock';
 export type { SectionBlock } from '../model/blocks/SectionBlock';
 export type { BlockContent, TextSegment } from '../model/BlockContent';
 export type { Format } from '../model/Format';

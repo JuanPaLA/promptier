@@ -7,12 +7,14 @@ import {
 } from 'core-editor'
 
 import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
+import { blockPresentationRegistry } from '../blocks/blockPresentations';
 import { formatPresentationRegistry } from '../formats/formatPresentations';
 
 export class PromptEditorVM {
   private constructor(
     readonly prompt: string,
     readonly formatCommands: readonly CommandItemVM[],
+    readonly blockCommands: readonly CommandItemVM[],
     readonly outlineItems: readonly OutlineItemVM[],
     readonly charsCount: number,
     readonly wordCount: number,
@@ -21,13 +23,14 @@ export class PromptEditorVM {
   ) {}
 
   static from(snapshot: PromptEditorSnapshot): PromptEditorVM {
-    const [commandItems, editorCommandsById] =
+    const [formatCommandItems, blockCommandItems, editorCommandsById] =
         PromptEditorVM.buildCommandItems(snapshot.state?.commands ?? []);
     const [outlineItems, outlineTargetsById] =
         PromptEditorVM.buildOutlineItems(outline(snapshot.content));
     return new PromptEditorVM(
         snapshot.prompt,
-        commandItems,
+        formatCommandItems,
+        blockCommandItems,
         outlineItems,
         snapshot.prompt.length,
         snapshot.prompt.split(" ").length,
@@ -46,16 +49,18 @@ export class PromptEditorVM {
 
   private static buildCommandItems(
     states: readonly CommandState[],
-  ): [readonly CommandItemVM[], Map<string, EditorCommand>] {
-    const items: CommandItemVM[] = [];
+  ): [readonly CommandItemVM[], readonly CommandItemVM[], Map<string, EditorCommand>] {
+    const formatItems: CommandItemVM[] = [];
+    const blockItems: CommandItemVM[] = [];
     const commandsById = new Map<string, EditorCommand>();
     states.forEach((state) => {
       const item = CommandItemVM.from(state);
       if (!item) return;
-      items.push(item);
+      if (item.group === 'format') formatItems.push(item);
+      else blockItems.push(item);
       commandsById.set(item.id, state.command);
     });
-    return [items, commandsById];
+    return [formatItems, blockItems, commandsById];
   }
 
   private static buildOutlineItems(
@@ -74,6 +79,7 @@ export class PromptEditorVM {
 export class CommandItemVM {
   private constructor(
     readonly id: string,
+    readonly group: 'format' | 'block',
     readonly label: string,
     readonly glyph: string,
     readonly disabled: boolean,
@@ -81,15 +87,29 @@ export class CommandItemVM {
   ) {}
 
   static from(state: CommandState): CommandItemVM | null {
-    if (state.command.type !== 'format') return null;
-    const presentation = formatPresentationRegistry.get(state.command.format);
-    return new CommandItemVM(
-      `format.${state.command.format}`,
-      presentation.label,
-      presentation.glyph,
-      !state.enabled,
-      state.active ?? false,
-    );
+    if (state.command.type === 'format') {
+      const presentation = formatPresentationRegistry.get(state.command.format);
+      return new CommandItemVM(
+        `format.${state.command.format}`,
+        'format',
+        presentation.label,
+        presentation.glyph,
+        !state.enabled,
+        state.active ?? false,
+      );
+    }
+    if (state.command.type === 'block.insert') {
+      const presentation = blockPresentationRegistry.get(state.command.block.blockType);
+      return new CommandItemVM(
+        `block.insert.${state.command.block.blockType}`,
+        'block',
+        presentation.label,
+        presentation.glyph,
+        !state.enabled,
+        false,
+      );
+    }
+    return null;
   }
 }
 

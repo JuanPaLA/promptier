@@ -15,6 +15,9 @@ export interface BlockDescriptor<B extends Block = Block> {
   readonly nodeSpec: NodeSpec;
   /** Auxiliary schema nodes this block needs besides its own (e.g. section's title). */
   readonly extraNodes?: Record<string, NodeSpec>;
+  readonly editorStyles?: string;
+  /** Makes the block available through the generic insertion command catalogue. */
+  createDefaultBlock?(): B;
   toProseMirrorNode(
     block: B,
     schema: Schema,

@@ -1,17 +1,18 @@
 import type { ParagraphBlock } from '../../model/blocks/ParagraphBlock';
 import { parseInline, serializeInline } from '../inlineCodec';
-import { escapeBlockStart, unescapeBlockStart } from '../textEscaping';
+import { unescapeBlockStart } from '../textEscaping';
 import type { BlockCodec } from './BlockCodec';
 
 export const paragraphCodec: BlockCodec<ParagraphBlock> = {
   blockType: 'paragraph',
+  parsePriority: 0,
   interruptsParagraph: () => false,
 
   tryParse(cursor) {
     const firstLine = cursor.line();
     if (firstLine === undefined || firstLine.trim().length === 0) return null;
 
-    const run = [unescapeBlockStart(firstLine)];
+    const run = [unescapeBlockStart(firstLine, cursor)];
     let offset = 1;
     while (true) {
       const line = cursor.line(offset);
@@ -24,7 +25,7 @@ export const paragraphCodec: BlockCodec<ParagraphBlock> = {
     return { blockType: 'paragraph', content: parseInline(run.join(' ')) };
   },
 
-  serialize(paragraph) {
-    return escapeBlockStart(serializeInline(paragraph.content));
+  serialize(paragraph, context) {
+    return context.escapeBlockStart(serializeInline(paragraph.content));
   },
 };

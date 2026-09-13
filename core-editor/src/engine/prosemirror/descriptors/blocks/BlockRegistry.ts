@@ -37,6 +37,22 @@ export class BlockRegistry {
     return descriptor;
   }
 
+  has(blockType: string): blockType is BlockType {
+    return this.descriptorsByType.has(blockType as BlockType);
+  }
+
+  defaultBlocks(): readonly Block[] {
+    return this.descriptors.flatMap((descriptor) =>
+      descriptor.createDefaultBlock ? [descriptor.createDefaultBlock()] : [],
+    );
+  }
+
+  editorStyles(): readonly string[] {
+    return this.descriptors.flatMap((descriptor) =>
+      descriptor.editorStyles ? [descriptor.editorStyles] : [],
+    );
+  }
+
   inputRules(schema: Schema): readonly InputRule[] {
     return this.descriptors.flatMap((descriptor) => descriptor.inputRules?.(schema) ?? []);
   }

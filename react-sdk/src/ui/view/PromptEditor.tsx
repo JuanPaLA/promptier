@@ -48,6 +48,7 @@ export function PromptEditor(props: PromptEditorProps) {
           onCopy={clipboard.copy}
           outlineOpen={outlineOpen}
           formatCommands={presenter.model.formatCommands}
+          blockCommands={presenter.model.blockCommands}
           onToggleOutline={toggleOutline}
           onCommand={presenter.runCommand}
           fullViewAvailable={fullView.available}

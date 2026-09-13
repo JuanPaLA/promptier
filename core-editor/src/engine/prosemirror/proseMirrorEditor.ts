@@ -13,6 +13,7 @@ import type {
 import type { EditorCommand } from '../../editor/commands/EditorCommand';
 import type { EditorState } from '../../editor/commands/EditorState';
 import type { PromptContent } from '../../prompt/model/PromptContent';
+import { BlockCommands } from './commands/BlockCommands';
 import { EditorCommandRegistry } from './commands/EditorCommandRegistry';
 import { FormatCommands } from './commands/FormatCommands';
 import { NavigateCommands } from './commands/NavigateCommands';
@@ -33,8 +34,13 @@ export function createProseMirrorEditor(
   initialContent: PromptContent,
 ): PromptEditor {
   const formatCommands = new FormatCommands(markRegistry.all().map(({ format }) => format));
-  const commandRegistry = new EditorCommandRegistry([formatCommands, new NavigateCommands()]);
-  const stateReader = new EditorStateReader([formatCommands]);
+  const blockCommands = new BlockCommands(blockRegistry, documentMapper);
+  const commandRegistry = new EditorCommandRegistry([
+    formatCommands,
+    blockCommands,
+    new NavigateCommands(),
+  ]);
+  const stateReader = new EditorStateReader([formatCommands, blockCommands]);
 
   return new ProseMirrorEditor(
     container,

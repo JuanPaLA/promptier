@@ -1,9 +1,9 @@
 # FEATURES
-[] Insert block command.
+[X] Insert block command.
 [] Define state tools references. A coded formated string value should be parsed back as a tool name reference or as as
 one of its parameters.
 [] Every section should be added to state.sections. Any section could be referenced in any other part of the prompmt.
-[] Add Quote block element.
+[X] Add Quote block element.
 [] Move blocks through prompt.
 [] Show estimated token count.
 [X] Add more text formats commands: underline, strikethrough, highlight...

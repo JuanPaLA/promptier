@@ -3,6 +3,7 @@ import type { BlockCodec } from './BlockCodec';
 
 export const codeBlockCodec: BlockCodec<CodeBlock> = {
   blockType: 'codeBlock',
+  parsePriority: 100,
   interruptsParagraph: (line) => FENCE_OPEN.test(line),
 
   tryParse(cursor) {

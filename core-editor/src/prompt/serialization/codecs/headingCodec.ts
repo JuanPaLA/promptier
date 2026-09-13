@@ -4,6 +4,7 @@ import type { BlockCodec } from './BlockCodec';
 
 export const headingCodec: BlockCodec<HeadingBlock> = {
   blockType: 'heading',
+  parsePriority: 80,
   interruptsParagraph: (line) => HEADING.test(line),
 
   tryParse(cursor) {

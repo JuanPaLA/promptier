@@ -7,6 +7,18 @@ import type { BlockDescriptor } from './BlockDescriptor';
 export const headingDescriptor: BlockDescriptor<HeadingBlock> = {
   blockType: 'heading',
   nodeSpec: headingNodeSpec(),
+  editorStyles: `
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  margin: 1rem 0 0.5rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.ProseMirror h1 { font-size: 1.75rem; }
+.ProseMirror h2 { font-size: 1.5rem; }
+.ProseMirror h3 { font-size: 1.25rem; }
+`,
   toProseMirrorNode: (block, schema) =>
     schema.nodes.heading.create({ level: block.level }, blockContentToNodes(block.content, schema)),
   fromProseMirrorNode: (node) => ({

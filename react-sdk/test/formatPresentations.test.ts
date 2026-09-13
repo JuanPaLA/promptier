@@ -53,3 +53,38 @@ describe('format presentations', () => {
     ]);
   });
 });
+
+describe('block presentations', () => {
+  it('projects descriptor-provided insertion commands without block-specific logic', () => {
+    const viewModel = PromptEditorVM.from({
+      prompt: '',
+      content: { blocks: [] },
+      state: {
+        commands: [
+          {
+            command: {
+              type: 'block.insert',
+              block: { blockType: 'quote', content: [] },
+            },
+            enabled: true,
+          },
+        ],
+      },
+    });
+
+    expect(viewModel.blockCommands).toEqual([
+      expect.objectContaining({
+        id: 'block.insert.quote',
+        group: 'block',
+        label: 'Quote',
+        glyph: '“',
+        disabled: false,
+        active: false,
+      }),
+    ]);
+    expect(viewModel.commandFor('block.insert.quote')).toEqual({
+      type: 'block.insert',
+      block: { blockType: 'quote', content: [] },
+    });
+  });
+});

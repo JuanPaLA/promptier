@@ -27,6 +27,7 @@ The set is closed — exactly what the block and mark registries can express.
 | Paragraph | a run of plain lines |
 | Ordered list | `1. item` on consecutive lines |
 | Unordered list | `- item` on consecutive lines |
+| Quote | `> text` on consecutive lines |
 | Code block | ```` ```lang ```` … ```` ``` ```` |
 | Bold | `**text**` |
 | Italic | `_text_` |
@@ -70,7 +71,7 @@ Escapes keep the codec total: any text a block can hold survives the round trip,
 including text that looks like markup.
 
 - `\`, `*`, `_` and `` ` `` are backslash-escaped inside text.
-- A paragraph opening with `# `, `- `, `1. `, or consisting of nothing
+- A paragraph opening with `# `, `- `, `1. `, `> `, or consisting of nothing
   but a tag is prefixed with `\`.
 
 Escapes are processed **everywhere, including inside code spans**. CommonMark
@@ -79,8 +80,8 @@ buys a code segment that can carry a backtick, plus a simpler parser.
 
 ## Degradation
 
-Anything outside the grammar becomes literal text — blockquotes, tables, links,
-images, headings deeper than `###`. **Nothing is ever dropped**, because silent
+Anything outside the grammar becomes literal text — tables, links, images,
+headings deeper than `###`. **Nothing is ever dropped**, because silent
 loss would make "just give me a string" untrustworthy.
 
 The escape hatch for literal markup is a code fence: tags inside a fence never

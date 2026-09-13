@@ -3,7 +3,9 @@ import type { MarkSpec, Schema } from 'prosemirror-model';
 import type { Command } from 'prosemirror-state';
 
 import type { Format } from '../../../../prompt/model/Format';
+import type { InlineFormatRegistry } from '../../../../prompt/serialization/formats/InlineFormatRegistry';
 import { combineKeymaps } from '../combineKeymaps';
+import { createInlineFormatInputRules } from './inlineFormatInputRules';
 import type { MarkDescriptor } from './MarkDescriptor';
 
 export type MarkDescriptorMap = {
@@ -14,7 +16,10 @@ export class MarkRegistry {
   private readonly descriptors: readonly MarkDescriptor[];
   private readonly descriptorsByFormat = new Map<Format, MarkDescriptor>();
 
-  constructor(descriptorsByFormat: MarkDescriptorMap) {
+  constructor(
+    descriptorsByFormat: MarkDescriptorMap,
+    private readonly formats: InlineFormatRegistry,
+  ) {
     this.descriptors = Object.entries(descriptorsByFormat).map(([registeredFormat, descriptor]) => {
       if (descriptor.format !== registeredFormat) {
         throw new Error(
@@ -49,7 +54,10 @@ export class MarkRegistry {
   }
 
   inputRules(schema: Schema): readonly InputRule[] {
-    return this.descriptors.flatMap((descriptor) => descriptor.inputRules?.(schema) ?? []);
+    return [
+      ...createInlineFormatInputRules(schema, this.formats),
+      ...this.descriptors.flatMap((descriptor) => descriptor.inputRules?.(schema) ?? []),
+    ];
   }
 
   keymap(schema: Schema): Record<string, Command> {
