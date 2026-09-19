@@ -18,7 +18,10 @@ one of its parameters.
 [X] use square borders. not rounded. foooter backgground should be the same of header.
 [] change format buttons hover behaviour.
 [X] eliminar el tag al lado de section.
-[] Eliminar el isert quote o generarlizalo.
+[] Eliminar el insert quote o generarlizalo.
+[] Generelizar menu de insercion de referencias.
+
+
 
 # DOUBTS
 [] Use of tailwind within react layer.

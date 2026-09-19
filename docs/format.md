@@ -70,7 +70,11 @@ stays text.
 Escapes keep the codec total: any text a block can hold survives the round trip,
 including text that looks like markup.
 
-- `\`, `*`, `_` and `` ` `` are backslash-escaped inside text.
+- `\`, `*`, `_` and `` ` `` are backslash-escaped inside text, except that
+  complete opening and closing tags keep their underscores literal.
+- Outside code spans, `\>` escapes a closing angle bracket. The serializer
+  uses this when formatting across segments would otherwise spell a literal
+  tag (for example, `<a_b_\>` preserves an italic `b` between `<a` and `>`).
 - A paragraph opening with `# `, `- `, `1. `, `> `, or consisting of nothing
   but a tag is prefixed with `\`.
 
@@ -117,13 +121,24 @@ Deliberate, and covered by tests:
 
 ## Section references
 
-An inline code span whose entire content is an opening tag, such as
-`<dialog_format_rules>`, is a section reference candidate. Backticks keep it
-inline content even on a line by itself; references never declare sections.
-Resolution is separate from parsing and searches the whole document, including
-nested and later sections. Exactly one matching tag resolves; zero matches are
-missing and multiple matches are ambiguous. Renaming or deleting a target does
-not rewrite reference text.
+Opening and closing tags in ordinary inline content, such as
+`Follow <dialog_format_rules>.` or `See </dialog_format_rules>.`, are recognized
+as section mentions without requiring backticks. Complete tags are literal
+inline text: their underscores never introduce italic formatting, regardless
+of whether a target exists. Resolution is separate from parsing and searches
+the whole document, including nested and later sections. Exactly one matching
+tag becomes a navigable reference; zero matches remain plain text and multiple
+matches are marked ambiguous. Both tag forms navigate to the same section.
+Renaming or deleting a target does not rewrite reference text.
+
+Structural parsing takes precedence: balanced tags alone on their lines still
+declare sections. A standalone paragraph containing a tag is escaped by the
+serializer to preserve it as content. Code blocks and section titles are not
+scanned for references. Mentions can cross ordinary inline formatting boundaries.
+
+Legacy code spans containing exactly one tag remain reference candidates,
+including their missing/ambiguous feedback. Code spans with other content stay
+literal. The reference picker now inserts ordinary text.
 
 Inline code now emits underscores and asterisks literally, keeping referenced
 opening tags exact. Backslashes and backticks remain escaped. Previously emitted

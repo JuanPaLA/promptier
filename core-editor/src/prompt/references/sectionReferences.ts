@@ -6,7 +6,7 @@ export function sectionReferences(content: PromptContent): ReferenceResolver {
   const sections = buildOutline(content).filter((entry) => entry.kind === 'section');
   return {
     resolve(text) {
-      const match = /^<([a-zA-Z][\w-]*)>$/.exec(text);
+      const match = /^<\/?([a-zA-Z][\w-]*)>$/.exec(text);
       if (!match) return null;
       const matches = sections.filter((entry) => entry.id === match[1]);
       return {

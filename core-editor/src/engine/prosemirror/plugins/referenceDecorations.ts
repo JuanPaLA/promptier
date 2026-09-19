@@ -2,6 +2,7 @@ import type { Node as ProseMirrorNode } from 'prosemirror-model';
 import { Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet, type EditorView } from 'prosemirror-view';
 import type { ReferenceResolver } from '../../../prompt/references/ReferenceResolver';
+import { sectionTagMentions } from '../../../prompt/serialization/sectionTagSyntax';
 import { NavigateCommands } from '../commands/NavigateCommands';
 
 export function referenceDecorations(resolveDocument: (doc: ProseMirrorNode) => readonly ReferenceResolver[]): Plugin {
@@ -12,21 +13,27 @@ export function referenceDecorations(resolveDocument: (doc: ProseMirrorNode) => 
       if (!node.isTextblock || node.type.spec.code || node.type.name === 'sectionTitle') return;
       let text = '';
       let start = 0;
+      let code = false;
       function flush() {
-        const reference = resolvers.map((resolver) => resolver.resolve(text)).find(Boolean);
-        if (reference) {
+        const mentions = code ? [{ text, offset: 0 }] : [...sectionTagMentions(text)].map((match) => ({ text: match[0], offset: match.index! }));
+        for (const mention of mentions) {
+          const reference = resolvers.map((resolver) => resolver.resolve(mention.text)).find(Boolean);
+          if (!reference || (!code && reference.status === 'missing')) continue;
           const label = reference.status === 'resolved' ? `Go to ${reference.text}`
             : `${reference.status === 'missing' ? 'Missing' : 'Ambiguous'} ${reference.kind} reference: ${reference.text}`;
-          result.push(Decoration.inline(start, start + text.length, {
+          result.push(Decoration.inline(start + mention.offset, start + mention.offset + mention.text.length, {
             class: `promptier-reference promptier-reference-${reference.status}`,
-            'data-reference': text, title: label, 'aria-label': label,
+            'data-reference': mention.text, title: label, 'aria-label': label,
             ...(reference.target ? { role: 'link', tabindex: '0' } : {}),
           }));
         }
         text = '';
       }
       node.forEach((child, offset) => {
-        if (child.isText && child.marks.some((mark) => mark.type.name === 'code')) {
+        if (child.isText) {
+          const childCode = child.marks.some((mark) => mark.type.name === 'code');
+          if (childCode !== code) flush();
+          code = childCode;
           if (!text) start = position + 1 + offset;
           text += child.text;
         } else flush();

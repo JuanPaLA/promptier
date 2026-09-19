@@ -47,6 +47,19 @@ describe('inline format codecs', () => {
 
     expect(parseInline(serializeInline(content))).toEqual(content);
   });
+
+  it.each(['<dialog_format_rules>', '</dialog_format_rules>'])('preserves literal tag spelling: %s', (tag) => {
+    expect(parseInline(`See ${tag}.`)).toEqual([{ text: `See ${tag}.` }]);
+    expect(serializeInline([{ text: `See ${tag}.` }])).toBe(`See ${tag}.`);
+    expect(parseInline(`_See ${tag}._`)).toEqual([{ text: `See ${tag}.`, formats: ['italic'] }]);
+    expect(serializeInline(parseInline(`<dialog\\_format\\_rules>`))).toBe('<dialog_format_rules>');
+  });
+
+  it('does not swallow formatting that happens to spell a tag across segments', () => {
+    const content: BlockContent = [{ text: '<a' }, { text: 'b', formats: ['italic'] }, { text: '>' }];
+    expect(parseInline(serializeInline(content))).toEqual(content);
+    expect(serializeInline(parseInline(serializeInline(content)))).toBe(serializeInline(content));
+  });
 });
 
 it('round-trips literal delimiters inside nested code formatting', () => {

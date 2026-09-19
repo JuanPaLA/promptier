@@ -18,7 +18,8 @@ export class ReferenceCommands implements CommandHandler<InsertReferenceCommand>
     if (!canInsert(view.state) || sectionReferences(content).resolve(command.text)?.status !== 'resolved') return false;
     const code = view.state.schema.marks.code;
     const { schema, selection } = view.state;
-    const nodes = [schema.text(command.text, [code.create()])];
+    const marks = (view.state.storedMarks ?? selection.$from.marks()).filter((mark) => mark.type !== code);
+    const nodes = [schema.text(command.text, marks)];
     if (needsSeparator(selection.$from.nodeBefore, 'before')) nodes.unshift(schema.text(' '));
     if (needsSeparator(selection.$to.nodeAfter, 'after')) nodes.push(schema.text(' '));
     const transaction = view.state.tr.replaceSelection(new Slice(Fragment.from(nodes), 0, 0));

@@ -95,6 +95,18 @@ describe('format contributions', () => {
     expect(result.handled).toBe(false);
     expect(result.state.doc.textContent).toBe('\\_literal');
   });
+
+  it.each(['See <dialog_format', 'See </dialog_format', '_See <dialog'])('keeps underscores literal while typing %s', (before) => {
+    const result = typeTextWithInputRules(plainDocument(before), '_');
+    expect(result.handled).toBe(false);
+    expect(result.state.doc.textContent).toBe(before);
+  });
+
+  it('still applies italic after a completed tag', () => {
+    const result = typeTextWithInputRules(plainDocument('See <dialog_format_rules> _emphasis'), '_');
+    expect(result.handled).toBe(true);
+    expect(result.state.doc.lastChild!.lastChild!.marks[0].type.name).toBe('italic');
+  });
 });
 
 function typeTextWithInputRules(

@@ -4,6 +4,7 @@ import type { EditorState, Transaction } from 'prosemirror-state';
 
 import type { InlineFormatCodec } from '../../../../prompt/serialization/formats/InlineFormatCodec';
 import type { InlineFormatRegistry } from '../../../../prompt/serialization/formats/InlineFormatRegistry';
+import { hasUnfinishedSectionTag } from '../../../../prompt/serialization/sectionTagSyntax';
 
 export function createInlineFormatInputRules(
   schema: Schema,
@@ -36,6 +37,9 @@ function applyFormat(
 ): Transaction | null {
   const content = match[1];
   if (!content || isEscaped(state, start)) return null;
+  const position = state.doc.resolve(start);
+  const before = position.parent.textBetween(0, position.parentOffset);
+  if (hasUnfinishedSectionTag(before) || hasUnfinishedSectionTag(before + match[0])) return null;
 
   const existingText = state.doc.textBetween(start, end, '', '\ufffc');
   if (!match[0].startsWith(existingText)) return null;

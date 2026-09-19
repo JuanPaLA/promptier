@@ -379,17 +379,21 @@ swaps in `dist` at publish time.
 
 ### Derived references
 
-References currently remain code-formatted `TextSegment`s in storage.
+References remain ordinary `TextSegment`s in storage; legacy code-formatted
+references are also supported.
 `prompt/references/` owns a pure resolver contract and its first implementation,
 section resolution. The parser does not consult reference targets or editor
-context. Ordinary code remains ordinary code; only a full opening-tag code span
-is a section candidate. Duplicate tags are ambiguous, not interchangeable targets.
+context. Complete opening and closing tags are literal inline tokens, protecting
+their underscores from markdown parsing. Ordinary text is scanned for tag
+mentions across formatting boundaries; legacy code spans must contain exactly
+one tag. Unknown plain mentions remain text, while legacy missing references
+retain their feedback. Duplicate tags are ambiguous, not interchangeable targets.
 
 The engine composes resolvers into a reference decoration plugin independently
 of the code mark descriptor. Decorations are recomputed after document changes,
 with navigation for resolved targets and feedback for missing/ambiguous targets.
 They do not enter document serialization. `reference.insert` validates its target
-and inserts a code span; its command states provide the React section picker.
+and inserts ordinary text; its command states provide the React section picker.
 A future slash menu can invoke the same command. Future reference kinds can add
 resolvers, target variants and picker entries without changing the text parser;
 tool context and syntax are intentionally not implemented yet.
