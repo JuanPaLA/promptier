@@ -1,6 +1,7 @@
 import type { QuoteBlock } from '../../model/blocks/QuoteBlock';
 import { parseInline, serializeInline } from '../inlineCodec';
 import type { BlockCodec } from './BlockCodec';
+import { TemplateSyntax } from '../../templates/TemplateSyntax';
 
 export const quoteCodec: BlockCodec<QuoteBlock> = {
   blockType: 'quote',
@@ -22,12 +23,12 @@ export const quoteCodec: BlockCodec<QuoteBlock> = {
     }
 
     cursor.advance(offset);
-    return { blockType: 'quote', content: parseInline(lines.join(' ')) };
+    return { blockType: 'quote', content: parseInline(new TemplateSyntax().joinLines(lines)) };
   },
 
   serialize(quote) {
-    return `> ${serializeInline(quote.content)}`;
+    return new TemplateSyntax().logicalLines(serializeInline(quote.content)).map((line) => `> ${line}`).join('\n');
   },
 };
 
-const QUOTE = /^> (.*)$/;
+const QUOTE = /^> ([\s\S]*)$/;

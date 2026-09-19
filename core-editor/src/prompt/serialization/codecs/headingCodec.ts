@@ -26,4 +26,4 @@ export const headingCodec: BlockCodec<HeadingBlock> = {
   },
 };
 
-const HEADING = /^(#{1,3}) (.*)$/;
+const HEADING = /^(#{1,3}) ([\s\S]*)$/;

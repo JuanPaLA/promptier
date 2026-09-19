@@ -107,6 +107,10 @@ describe('format contributions', () => {
     expect(result.handled).toBe(true);
     expect(result.state.doc.lastChild!.lastChild!.marks[0].type.name).toBe('italic');
   });
+
+  it.each(['Hello {{ cliente.nombre_completo', '{% if cliente.nombre_completo', '{# nombre_completo', '{% verbatim %}nombre_completo'])('does not consume underscores inside template syntax: %s', (before) => {
+    expect(typeTextWithInputRules(plainDocument(before), '_').handled).toBe(false);
+  });
 });
 
 function typeTextWithInputRules(

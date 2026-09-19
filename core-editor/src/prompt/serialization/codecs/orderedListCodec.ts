@@ -4,6 +4,6 @@ import { createListCodec } from './listCodec';
 export const orderedListCodec = createListCodec<OrderedListBlock>({
   blockType: 'orderedList',
   parsePriority: 60,
-  marker: /^\d+\. (.*)$/,
+  marker: /^\d+\. ([\s\S]*)$/,
   itemPrefix: (index) => `${index + 1}. `,
 });

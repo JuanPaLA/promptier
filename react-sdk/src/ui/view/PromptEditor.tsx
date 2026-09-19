@@ -28,7 +28,7 @@ export function PromptEditor(props: PromptEditorProps) {
 
   const presenter = usePresenter(
     (onChange) => new PromptEditorPresenter(onChange, editor),
-    { value: props.value, onChange: props.onChange },
+    { value: props.value, onChange: props.onChange, variableSchema: props.variableSchema },
   );
 
   return (
@@ -51,6 +51,7 @@ export function PromptEditor(props: PromptEditorProps) {
           formatCommands={presenter.model.formatCommands}
           blockCommands={presenter.model.blockCommands}
           referenceCommands={presenter.model.referenceCommands}
+          variableCommands={presenter.model.variableCommands}
           onToggleOutline={toggleOutline}
           onCommand={presenter.runCommand}
           fullViewAvailable={fullView.available}

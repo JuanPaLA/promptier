@@ -252,7 +252,8 @@ ProseMirror implementation.
 
 `prompt/serialization/` holds the one serialization: `serialize` and `parse`, pure and
 DOM-free. XML tags carry structure, markdown carries everything inside — what a
-host stores *is* what a model reads.
+host stores is the prompt source. Hosts using templates render it with their
+own engine before passing the result to a model.
 `roundTrip.test.ts` enforces them.
 
 There is deliberately **no second rendering**. `toMarkdown`/`toXml` used to
@@ -397,3 +398,28 @@ and inserts ordinary text; its command states provide the React section picker.
 A future slash menu can invoke the same command. Future reference kinds can add
 resolvers, target variants and picker entries without changing the text parser;
 tool context and syntax are intentionally not implemented yet.
+
+### Template variables
+
+`prompt/variables/VariableSchema` defines the supported JSON Schema vocabulary.
+`VariableCatalog` resolves paths and enumerates declared entries; `VariableAnalysis`
+combines that catalog with lexical template tokens to derive references. These
+classes are pure capabilities with no editor or browser dependencies.
+
+`prompt/templates/TemplateSyntax` recognizes opaque template regions, including
+quoted delimiters, comments and verbatim content. The format codec uses it to
+preserve template source through Markdown parsing and serialization.
+`TemplateInlineContent` retains only formatting shared across an entire template
+token, preventing marks inside an expression from becoming executable source.
+
+The engine's `VariableDecorations` owns a per-session catalog and derived
+decorations; a metadata-only transaction refreshes it on schema replacement.
+`VariableCommands` handles insertion and publishes the picker entries.
+`TemplateFormatting` enforces the token formatting rule through appended mark
+transactions. The editor applies the whole transaction chain before reporting
+content, so consumers never observe an intermediate malformed expression.
+
+`variableSchema` travels through the React presenter/service and the Custom
+Element to the editor session. It is not part of `PromptContent`, prompt text,
+or undo history. React only projects command states and metadata into the picker.
+See [variables.md](variables.md) for integration examples and scope.

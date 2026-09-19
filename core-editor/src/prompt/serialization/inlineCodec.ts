@@ -4,13 +4,15 @@ import type { InlineFormatCodec } from './formats/InlineFormatCodec';
 import { inlineFormatRegistry } from './formats/inlineFormatCodecs';
 import { escapeInlineText, unescapeInlineText } from './textEscaping';
 import { sectionTagAt, sectionTagMentions } from './sectionTagSyntax';
+import { TemplateSyntax } from '../templates/TemplateSyntax';
+import { TemplateInlineContent } from '../templates/TemplateInlineContent';
 
 export function parseInline(text: string): BlockContent {
   return parseInlineText(text);
 }
 
 export function serializeInline(content: BlockContent): string {
-  const segments = content.map(segmentToText);
+  const segments = new TemplateInlineContent().normalize(content).map(segmentToText);
   const text = segments.join('');
   const boundaries: number[] = [];
   let end = 0;
@@ -19,7 +21,9 @@ export function serializeInline(content: BlockContent): string {
     boundaries.push(end);
   }
   // Formatting delimiters across segments can accidentally spell a literal tag.
+  const tokens = templateSyntax.tokens(text);
   return text.replace(/<\/?[a-zA-Z][\w-]*>/g, (tag: string, start: number) =>
+    tokens.some((token) => token.start <= start && token.end > start) ? tag :
     boundaries.some((boundary) => boundary > start && boundary < start + tag.length)
       ? `${tag.slice(0, -1)}\\>` : tag,
   );
@@ -36,6 +40,12 @@ function parseInlineText(text: string): BlockContent {
   }
 
   while (index < text.length) {
+    const template = templateSyntax.at(text, index);
+    if (template) {
+      plain += template.text;
+      index = template.end;
+      continue;
+    }
     if (text.startsWith('\\>', index)) {
       plain += '>';
       index += 2;
@@ -84,7 +94,7 @@ function appendFormattedContent(
 ): void {
   if (codec.contentMode === 'literal') {
     pushSegment(segments, {
-      text: unescapeInlineText(text, inlineFormatRegistry),
+      text: templateSyntax.transformOutside(text, (literal) => unescapeInlineText(literal, inlineFormatRegistry)),
       formats: [codec.format],
     });
     return;
@@ -103,6 +113,11 @@ function findClosingDelimiter(
 ): number {
   let index = from;
   while (index < text.length) {
+    const template = templateSyntax.at(text, index);
+    if (template) {
+      index = template.end;
+      continue;
+    }
     if (codec.contentMode !== 'literal') {
       if (text.startsWith('\\>', index)) {
         index += 2;
@@ -156,9 +171,12 @@ function segmentToText(segment: TextSegment): string {
     : inlineFormatRegistry;
   return codecs.reduce(
     (inner, codec) => `${codec.openingDelimiter}${inner}${codec.closingDelimiter}`,
-    literal ? escapeInlineText(segment.text, escaping) : escapeTextAroundTags(segment.text),
+    templateSyntax.transformOutside(segment.text, (text) =>
+      literal ? escapeInlineText(text, escaping) : escapeTextAroundTags(text)),
   );
 }
+
+const templateSyntax = new TemplateSyntax();
 
 function escapeTextAroundTags(text: string): string {
   let result = '';

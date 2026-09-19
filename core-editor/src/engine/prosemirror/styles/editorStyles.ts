@@ -10,6 +10,13 @@ export function installEditorStyles(
 }
 
 const CSS = `
+.ProseMirror .promptier-variable {
+  background: #ecfdf5; color: #047857; border-bottom: 1px solid #6ee7b7;
+  border-radius: 3px; padding: 1px 2px;
+}
+.ProseMirror .promptier-variable-unknown { background: #fffbeb; color: #92400e; border-color: #d97706; }
+.ProseMirror .promptier-variable-unverified { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+.ProseMirror .promptier-variable:focus { outline: 2px solid #059669; }
 :host {
   display: block;
   width: 100%;
@@ -33,6 +40,7 @@ const CSS = `
   box-sizing: border-box;
 }
 .prompt-editor-surface > .ProseMirror {
+  white-space: pre-wrap;
   height: 100%;
   overflow: auto;
   outline: none;

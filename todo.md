@@ -15,11 +15,11 @@ one of its parameters.
 [] Validate not repeated sections.
 
 # UI
-[X] use square borders. not rounded. foooter backgground should be the same of header.
 [] change format buttons hover behaviour.
-[X] eliminar el tag al lado de section.
 [] Eliminar el insert quote o generarlizalo.
-[] Generelizar menu de insercion de referencias.
+[] Reorder menu: Generelizar menu de insercion de referencias.
+[X] eliminar el tag al lado de section.
+[X] use square borders. not rounded. foooter backgground should be the same of header.
 
 
 

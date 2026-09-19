@@ -1,8 +1,9 @@
 # The prompt text format
 
 The one serialization the editor reads and writes. XML tags carry structure,
-markdown carries everything inside. What a host stores **is** what a model
-reads — there is no separate "export" rendering.
+markdown carries everything inside. What a host stores is the prompt source —
+there is no separate editor "export" rendering. Hosts using template variables
+render that source with their template engine before passing it to a model.
 
 `serialize(content)` and `parse(text)` in `core-editor/src/prompt/serialization/` are
 the only implementations. Both are pure and DOM-free.
@@ -114,8 +115,8 @@ Deliberate, and covered by tests:
   serialization and was then dropped on the way back in, so a round trip lost a
   line. A block with its own delimiters — a code fence, a section's tags — is
   never blank by this test, so a fence full of spaces survives.
-- **Hard-wrapped paragraphs reflow.** Consecutive plain lines join into one
-  paragraph; `BlockContent` cannot hold a line break.
+- **Hard-wrapped paragraphs reflow**, except when the paragraph contains template
+  syntax: those paragraphs retain line breaks so template source is not reflowed.
 - **Code spans keep their spaces.** CommonMark strips one leading and trailing
   space; we do not.
 
@@ -143,3 +144,29 @@ literal. The reference picker now inserts ordinary text.
 Inline code now emits underscores and asterisks literally, keeping referenced
 opening tags exact. Backslashes and backticks remain escaped. Previously emitted
 escaped code spans remain accepted and normalize to this spelling.
+
+## Template variables
+
+`{{ name }}` and `{{ object.property }}` are recognized as variable references.
+Whitespace around a path is accepted and preserved; the picker inserts
+`{{ path }}`. A host supplies `variableSchema` separately from prompt content.
+Changing the schema affects suggestions and diagnostics, never serialization.
+See [variables.md](variables.md) for the public contract and limitations.
+
+Template expressions (`{{ ... }}`), statements (`{% ... %}`), comments
+(`{# ... #}`), and `verbatim` regions are lexically protected from Markdown
+parsing and escaping. Quoted strings and nested brackets are respected when
+finding a closing delimiter. Multiline tokens retain their contents, including
+blank lines. Incomplete tokens retain the text already typed. Existing block
+normalization still applies outside these regions; this is not a byte-preserving
+editor for arbitrary Pebble templates.
+
+Formatting can surround a complete token. Formatting applied to only part of a
+token is removed, retaining only formats shared by its entire source; incomplete
+tokens are unformatted. This prevents serialization from inserting Markdown
+inside executable template syntax. The codec normalizes such partial formatting
+in supplied `PromptContent`, and the editor enforces it during editing.
+
+Code fences and inline code do not disable Pebble interpolation: simple
+variables there are recognized too. Comments and `verbatim` do suppress variable
+recognition. The editor does not evaluate expressions or validate control flow.

@@ -3,6 +3,7 @@ import { Plugin } from 'prosemirror-state';
 import { Decoration, DecorationSet, type EditorView } from 'prosemirror-view';
 import type { ReferenceResolver } from '../../../prompt/references/ReferenceResolver';
 import { sectionTagMentions } from '../../../prompt/serialization/sectionTagSyntax';
+import { TemplateSyntax } from '../../../prompt/templates/TemplateSyntax';
 import { NavigateCommands } from '../commands/NavigateCommands';
 
 export function referenceDecorations(resolveDocument: (doc: ProseMirrorNode) => readonly ReferenceResolver[]): Plugin {
@@ -15,8 +16,10 @@ export function referenceDecorations(resolveDocument: (doc: ProseMirrorNode) => 
       let start = 0;
       let code = false;
       function flush() {
+        const templateTokens = new TemplateSyntax().tokens(text);
         const mentions = code ? [{ text, offset: 0 }] : [...sectionTagMentions(text)].map((match) => ({ text: match[0], offset: match.index! }));
         for (const mention of mentions) {
+          if (templateTokens.some((token) => token.start <= mention.offset && token.end > mention.offset)) continue;
           const reference = resolvers.map((resolver) => resolver.resolve(mention.text)).find(Boolean);
           if (!reference || (!code && reference.status === 'missing')) continue;
           const label = reference.status === 'resolved' ? `Go to ${reference.text}`

@@ -102,3 +102,16 @@ describe('reference presentations', () => {
     expect(model.commandFor(model.referenceCommands[0].id)).toEqual(command);
   });
 });
+
+describe('variable presentations', () => {
+  it('keeps variable commands and metadata in a separate picker', () => {
+    const command = { type: 'variable.insert', path: 'cliente.nombre' } as const;
+    const model = PromptEditorVM.from({ prompt: '', content: { blocks: [] }, state: { commands: [{
+      command, enabled: true,
+      variable: { path: command.path, types: ['string'], required: false, insertable: true, description: 'Nombre del cliente' },
+    }] } });
+    expect(model.variableCommands).toEqual([expect.objectContaining({ label: 'cliente.nombre (string)', description: 'Nombre del cliente — Optional', disabled: false })]);
+    expect(model.referenceCommands).toEqual([]);
+    expect(model.commandFor(model.variableCommands[0].id)).toEqual(command);
+  });
+});

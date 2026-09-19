@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { PromptEditor } from 'react-sdk';
+import { PromptEditor, type VariableSchema } from 'react-sdk';
 
 const INITIAL_PROMPT = [
   'Eres un asistente de soporte.',
+  'Personaliza la respuesta para {{ cliente.nombre_completo }}.',
   '',
   '<objetivos>',
   'Resolver la consulta en el menor número de turnos.',
@@ -26,6 +27,7 @@ const INITIAL_PROMPT = [
 /** A host page: it supplies prompt text, receives prompt text, and saves it. */
 export function EditorPlayground() {
   const [prompt, setPrompt] = useState(INITIAL_PROMPT);
+  const [schemaEnabled, setSchemaEnabled] = useState(true);
 
   return (
     <main
@@ -43,10 +45,14 @@ export function EditorPlayground() {
         <p style={{ margin: '0.35rem 0 0', color: '#57606a' }}>
           This page owns persistence. The React SDK owns the editor interface.
         </p>
+        <label>
+          <input type="checkbox" checked={schemaEnabled} onChange={(event) => setSchemaEnabled(event.target.checked)} />
+          Provide variable schema
+        </label>
       </header>
 
       <div style={{ height: '75vh', minHeight: '30rem' }}>
-        <PromptEditor value={prompt} onChange={setPrompt} />
+        <PromptEditor value={prompt} onChange={setPrompt} variableSchema={schemaEnabled ? VARIABLE_SCHEMA : undefined} />
       </div>
 
       <footer
@@ -61,3 +67,23 @@ export function EditorPlayground() {
     </main>
   );
 }
+
+const VARIABLE_SCHEMA: VariableSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    cliente: {
+      type: 'object', additionalProperties: false,
+      properties: {
+        nombre_completo: { type: ['string', 'null'], description: 'Nombre conocido del cliente' },
+        vip: { type: 'boolean', description: 'Indica si el cliente tiene atención preferente' },
+      },
+    },
+    empresa: { type: 'string', description: 'Nombre de la empresa', title: 'Empresa' },
+    productos: {
+      type: 'array', description: 'Productos disponibles; los recorridos se incorporarán más adelante',
+      items: { type: 'object', properties: { nombre: { type: 'string' }, precio: { type: 'number' } } },
+    },
+  },
+  required: ['empresa'],
+};

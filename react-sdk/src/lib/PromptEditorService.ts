@@ -4,6 +4,7 @@ import {
   type EditorState,
   type PromptContent,
   type PromptEditorElement,
+  type VariableSchema,
 } from 'core-editor';
 
 type PromptEditorListener = () => void;
@@ -19,6 +20,7 @@ export interface PromptEditorSnapshot {
 export class PromptEditorService {
   private element: PromptEditorElement | null = null;
   private pendingPrompt: string | null = null;
+  private variableSchema: VariableSchema | undefined;
   private snapshot: PromptEditorSnapshot = EMPTY_SNAPSHOT;
   private readonly listeners = new Set<PromptEditorListener>();
 
@@ -36,6 +38,7 @@ export class PromptEditorService {
     this.element = element;
     element.addEventListener('change', this.handleEditorChange);
     element.addEventListener('statechange', this.handleEditorChange);
+    element.variableSchema = this.variableSchema;
     if (this.pendingPrompt !== null) {
       element.value = this.pendingPrompt;
       this.pendingPrompt = null;
@@ -53,6 +56,12 @@ export class PromptEditorService {
 
   run(command: EditorCommand): boolean {
     return this.element?.run(command) ?? false;
+  }
+
+  setVariableSchema(schema: VariableSchema | undefined): void {
+    this.variableSchema = schema;
+    if (this.element) this.element.variableSchema = schema;
+    this.publishSnapshot();
   }
 
   getSnapshot(): PromptEditorSnapshot {

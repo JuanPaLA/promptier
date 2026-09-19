@@ -4,6 +4,7 @@ import type { PromptEditor } from './editor/PromptEditor'
 import { createProseMirrorEditor, installEditorStyles } from './engine'
 import type { PromptContent } from './prompt/model/PromptContent'
 import { parse, serialize } from './prompt/serialization'
+import type { VariableSchema } from './prompt/variables/VariableSchema';
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
@@ -11,6 +12,7 @@ const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
 export interface PromptEditorElement extends HTMLElement {
   content: PromptContent;
   value: string;
+  variableSchema: VariableSchema | undefined;
   run(command: EditorCommand): boolean;
   getState(): EditorState | null;
 }
@@ -36,6 +38,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     private readonly editorContainer: HTMLElement;
     private editor: PromptEditor | null = null;
     private pendingContent: PromptContent = { blocks: [] };
+    private pendingVariableSchema: VariableSchema | undefined;
     private sessionSubscriptions: Array<() => void> = [];
 
     constructor() {
@@ -64,12 +67,23 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       this.content = parse(text);
     }
 
+    get variableSchema(): VariableSchema | undefined {
+      return this.pendingVariableSchema;
+    }
+
+    set variableSchema(schema: VariableSchema | undefined) {
+      this.pendingVariableSchema = schema;
+      this.editor?.setVariableSchema(schema);
+    }
+
     connectedCallback(): void {
       if (this.editor) return;
       this.upgradeProperty('value');
       this.upgradeProperty('content');
+      this.upgradeProperty('variableSchema');
       const session = createProseMirrorEditor(this.editorContainer, this.pendingContent);
       this.editor = session;
+      session.setVariableSchema(this.pendingVariableSchema);
       this.sessionSubscriptions = [
         session.onChange((content) => {
           this.pendingContent = content;
@@ -99,7 +113,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     }
 
     /** Replays a property assigned before the browser upgraded this element. */
-    private upgradeProperty(name: 'value' | 'content'): void {
+    private upgradeProperty(name: 'value' | 'content' | 'variableSchema'): void {
       if (!Object.prototype.hasOwnProperty.call(this, name)) return;
       const properties = this as unknown as Record<string, unknown>;
       const pending = properties[name];

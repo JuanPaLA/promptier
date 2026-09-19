@@ -51,3 +51,5 @@ export type { FormatCommand } from './editor/commands/FormatCommand';
 export type { InsertBlockCommand } from './editor/commands/InsertBlockCommand';
 export type { NavigateCommand, NavigateTarget } from './editor/commands/NavigateCommand';
 export type { InsertReferenceCommand } from './editor/commands/InsertReferenceCommand';
+export type { InsertVariableCommand } from './editor/commands/InsertVariableCommand';
+export type { VariableSchema, VariableType, VariableDefinition } from './prompt/variables/VariableSchema';

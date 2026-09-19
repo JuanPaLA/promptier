@@ -1,6 +1,10 @@
 import { sectionReferences } from '../../prompt/references/sectionReferences';
 import { ReferenceCommands } from './commands/ReferenceCommands';
 import { referenceDecorations } from './plugins/referenceDecorations';
+import { VariableDecorations } from './plugins/VariableDecorations';
+import { VariableCommands } from './commands/VariableCommands';
+import { TemplateFormatting } from './plugins/TemplateFormatting';
+import type { VariableSchema } from '../../prompt/variables/VariableSchema';
 import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
 import { inputRules } from 'prosemirror-inputrules';
@@ -39,13 +43,16 @@ export function createProseMirrorEditor(
   const formatCommands = new FormatCommands(markRegistry.all().map(({ format }) => format));
   const blockCommands = new BlockCommands(blockRegistry, documentMapper);
   const referenceCommands = new ReferenceCommands(documentMapper);
+  const variables = new VariableDecorations();
+  const variableCommands = new VariableCommands(() => variables.catalog);
   const commandRegistry = new EditorCommandRegistry([
     formatCommands,
     blockCommands,
     new NavigateCommands(),
     referenceCommands,
+    variableCommands,
   ]);
-  const stateReader = new EditorStateReader([formatCommands, blockCommands, referenceCommands]);
+  const stateReader = new EditorStateReader([formatCommands, blockCommands, referenceCommands, variableCommands]);
 
   return new ProseMirrorEditor(
     container,
@@ -56,6 +63,7 @@ export function createProseMirrorEditor(
     markRegistry,
     commandRegistry,
     stateReader,
+    variables,
   );
 }
 
@@ -73,6 +81,7 @@ class ProseMirrorEditor implements PromptEditor {
     private readonly marks: MarkRegistry,
     private readonly commands: EditorCommandRegistry,
     private readonly stateReader: EditorStateReader,
+    private readonly variables: VariableDecorations,
   ) {
     const state = ProseMirrorState.create({
       schema: this.schema,
@@ -88,6 +97,8 @@ class ProseMirrorEditor implements PromptEditor {
         }),
         appendTrailingParagraph(),
         referenceDecorations((doc) => [sectionReferences(this.documentMapper.fromDocument(doc))]),
+        this.variables.plugin,
+        new TemplateFormatting().plugin,
       ],
     });
 
@@ -139,9 +150,9 @@ class ProseMirrorEditor implements PromptEditor {
   }
 
   private apply(transaction: Transaction): void {
-    const newState = this.view.state.apply(transaction);
+    const { state: newState, transactions } = this.view.state.applyTransaction(transaction);
     this.view.updateState(newState);
-    if (transaction.docChanged) {
+    if (transactions.some((applied) => applied.docChanged)) {
       const content = this.documentMapper.fromDocument(newState.doc);
       this.listeners.forEach((listener) => listener(content));
     }
@@ -152,5 +163,9 @@ class ProseMirrorEditor implements PromptEditor {
   private notifyStateChanged(): void {
     const state = this.stateReader.read(this.view.state);
     this.stateListeners.forEach((listener) => listener(state));
+  }
+
+  setVariableSchema(schema: VariableSchema | undefined): void {
+    this.variables.setSchema(this.view, schema);
   }
 }

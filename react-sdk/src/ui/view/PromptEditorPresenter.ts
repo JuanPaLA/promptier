@@ -5,10 +5,12 @@ import {
   type Unsubscribe,
 } from '../../lib/PromptEditorService';
 import { PromptEditorVM } from './PromptEditorVM';
+import type { VariableSchema } from 'core-editor';
 
 export interface PromptEditorPresenterProps {
   readonly value?: string;
   readonly onChange?: (value: string) => void;
+  readonly variableSchema?: VariableSchema;
 }
 
 export class PromptEditorPresenter extends PresenterBase<
@@ -21,6 +23,7 @@ export class PromptEditorPresenter extends PresenterBase<
   constructor(onChange: ChangeFunc, private readonly editor: PromptEditorService) {
     super(onChange);
     this.propChanged('value', this.setPrompt);
+    this.propChanged('variableSchema', this.setVariableSchema);
   }
 
   protected initModel(): PromptEditorVM {
@@ -30,6 +33,7 @@ export class PromptEditorPresenter extends PresenterBase<
   start(): void {
     this.editorSubscription = this.editor.subscribe(this.handleEditorChange);
     this.setPrompt(this.props.value);
+    this.setVariableSchema(this.props.variableSchema);
     this.refreshViewModel();
   }
 
@@ -53,6 +57,10 @@ export class PromptEditorPresenter extends PresenterBase<
     if (prompt === undefined || prompt === this.lastReportedPrompt) return;
     this.lastReportedPrompt = prompt;
     this.editor.setPrompt(prompt);
+  };
+
+  private setVariableSchema = (schema: VariableSchema | undefined): void => {
+    this.editor.setVariableSchema(schema);
   };
 
   private handleEditorChange = (): void => {

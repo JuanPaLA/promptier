@@ -1,9 +1,10 @@
 import type { Mark, Node as ProseMirrorNode, Schema } from 'prosemirror-model';
 import type { BlockContent, TextSegment } from '../../../prompt/model/BlockContent';
 import type { Format } from '../../../prompt/model/Format';
+import { TemplateInlineContent } from '../../../prompt/templates/TemplateInlineContent';
 
 export function blockContentToNodes(content: BlockContent, schema: Schema): ProseMirrorNode[] {
-  return content
+  return new TemplateInlineContent().normalize(content)
     .filter((segment) => segment.text.length > 0)
     .map((segment) => schema.text(segment.text, formatsToMarks(segment.formats, schema)));
 }

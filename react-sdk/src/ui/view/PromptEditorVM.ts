@@ -16,6 +16,7 @@ export class PromptEditorVM {
     readonly formatCommands: readonly CommandItemVM[],
     readonly blockCommands: readonly CommandItemVM[],
     readonly referenceCommands: readonly CommandItemVM[],
+    readonly variableCommands: readonly CommandItemVM[],
     readonly outlineItems: readonly OutlineItemVM[],
     readonly charsCount: number,
     readonly wordCount: number,
@@ -33,6 +34,7 @@ export class PromptEditorVM {
         formatCommandItems,
         insertionCommandItems.filter((item) => item.group === 'block'),
         insertionCommandItems.filter((item) => item.group === 'reference'),
+        insertionCommandItems.filter((item) => item.group === 'variable'),
         outlineItems,
         snapshot.prompt.length,
         snapshot.prompt.split(" ").length,
@@ -81,11 +83,12 @@ export class PromptEditorVM {
 export class CommandItemVM {
   private constructor(
     readonly id: string,
-    readonly group: 'format' | 'block' | 'reference',
+    readonly group: 'format' | 'block' | 'reference' | 'variable',
     readonly label: string,
     readonly glyph: string,
     readonly disabled: boolean,
     readonly active: boolean,
+    readonly description: string = '',
   ) {}
 
   static from(state: CommandState): CommandItemVM | null {
@@ -115,6 +118,15 @@ export class CommandItemVM {
       return new CommandItemVM(
         `reference.insert.${state.command.text}`, 'reference', state.command.text,
         '↗', !state.enabled, false,
+      );
+    }
+    if (state.command.type === 'variable.insert') {
+      const variable = state.variable;
+      const type = variable?.types.join(' | ') || 'unspecified';
+      return new CommandItemVM(
+        `variable.insert.${state.command.path}`, 'variable', `${state.command.path} (${type})`,
+        '{{ }}', !state.enabled, false,
+        [variable?.title, variable?.description, variable?.required ? 'Required' : 'Optional'].filter(Boolean).join(' — '),
       );
     }
     return null;

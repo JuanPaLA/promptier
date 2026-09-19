@@ -2,6 +2,7 @@ import type { ParagraphBlock } from '../../model/blocks/ParagraphBlock';
 import { parseInline, serializeInline } from '../inlineCodec';
 import { unescapeBlockStart } from '../textEscaping';
 import type { BlockCodec } from './BlockCodec';
+import { TemplateSyntax } from '../../templates/TemplateSyntax';
 
 export const paragraphCodec: BlockCodec<ParagraphBlock> = {
   blockType: 'paragraph',
@@ -22,7 +23,7 @@ export const paragraphCodec: BlockCodec<ParagraphBlock> = {
     }
 
     cursor.advance(offset);
-    return { blockType: 'paragraph', content: parseInline(run.join(' ')) };
+    return { blockType: 'paragraph', content: parseInline(new TemplateSyntax().joinLines(run)) };
   },
 
   serialize(paragraph, context) {

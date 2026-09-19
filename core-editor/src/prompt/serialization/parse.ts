@@ -2,6 +2,7 @@ import type { Block } from '../model/Block';
 import type { PromptContent } from '../model/PromptContent';
 import type { BlockParseCursor } from './codecs/BlockCodec';
 import { blockCodecRegistry } from './codecs/blockCodecRegistry';
+import { TemplateSyntax } from '../templates/TemplateSyntax';
 
 export { parseInline } from './inlineCodec';
 
@@ -77,5 +78,5 @@ class PromptTextParser implements BlockParseCursor {
 }
 
 function splitLines(text: string): string[] {
-  return text.replace(/\r\n?/g, '\n').split('\n');
+  return new TemplateSyntax().logicalLines(text.replace(/\r\n?/g, '\n'));
 }
