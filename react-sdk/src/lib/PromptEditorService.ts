@@ -21,6 +21,8 @@ export class PromptEditorService {
   private element: PromptEditorElement | null = null;
   private pendingPrompt: string | null = null;
   private variableSchema: VariableSchema | undefined;
+  private variableValidation = false;
+  private variableContext: unknown;
   private snapshot: PromptEditorSnapshot = EMPTY_SNAPSHOT;
   private readonly listeners = new Set<PromptEditorListener>();
 
@@ -39,6 +41,8 @@ export class PromptEditorService {
     element.addEventListener('change', this.handleEditorChange);
     element.addEventListener('statechange', this.handleEditorChange);
     element.variableSchema = this.variableSchema;
+    element.variableValidation = this.variableValidation;
+    element.variableContext = this.variableContext;
     if (this.pendingPrompt !== null) {
       element.value = this.pendingPrompt;
       this.pendingPrompt = null;
@@ -62,6 +66,16 @@ export class PromptEditorService {
     this.variableSchema = schema;
     if (this.element) this.element.variableSchema = schema;
     this.publishSnapshot();
+  }
+
+  setVariableValidation(enabled: boolean): void {
+    this.variableValidation = enabled;
+    if (this.element) this.element.variableValidation = enabled;
+  }
+
+  setVariableContext(context: unknown): void {
+    this.variableContext = context;
+    if (this.element) this.element.variableContext = context;
   }
 
   getSnapshot(): PromptEditorSnapshot {

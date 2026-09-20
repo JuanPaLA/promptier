@@ -10,6 +10,7 @@ export interface PromptEditor {
   getContent(): PromptContent;
   setContent(content: PromptContent): void;
   setVariableSchema(schema: VariableSchema | undefined): void;
+  setVariableValidation(enabled: boolean): void;
   onChange(listener: EditorChangeListener): () => void;
   run(command: EditorCommand): boolean;
   getState(): EditorState;

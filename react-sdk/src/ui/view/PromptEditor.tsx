@@ -22,13 +22,14 @@ export function PromptEditor(props: PromptEditorProps) {
   const [editor] = useState(() => new PromptEditorService());
   const [outlineOpen, setOutlineOpen] = useState(true);
   const [viewMode, setViewMode] = useState<EditorViewMode>('curated');
+  const [variableValidation, setVariableValidation] = useState(false);
   const clipboard = useCopyPrompt(() => editor.getSnapshot().prompt);
   const fullView = useFullscreen(editorRoot);
   const toggleOutline = () => setOutlineOpen((open) => !open);
 
   const presenter = usePresenter(
     (onChange) => new PromptEditorPresenter(onChange, editor),
-    { value: props.value, onChange: props.onChange, variableSchema: props.variableSchema },
+    { value: props.value, onChange: props.onChange, variableSchema: props.variableSchema, variableContext: props.variableContext },
   );
 
   return (
@@ -52,11 +53,17 @@ export function PromptEditor(props: PromptEditorProps) {
           blockCommands={presenter.model.blockCommands}
           referenceCommands={presenter.model.referenceCommands}
           variableCommands={presenter.model.variableCommands}
+          variableValidation={variableValidation}
+          variableContext={props.variableContext}
           onToggleOutline={toggleOutline}
           onCommand={presenter.runCommand}
           fullViewAvailable={fullView.available}
           fullViewActive={fullView.active}
           onToggleFullView={fullView.toggle}
+          onVariableValidationChange={(enabled) => {
+            setVariableValidation(enabled);
+            editor.setVariableValidation(enabled);
+          }}
         />
         <div className="promptier-surface" hidden={viewMode === 'raw'}>
           <prompt-editor ref={editor.attach} />

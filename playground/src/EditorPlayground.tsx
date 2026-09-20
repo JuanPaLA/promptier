@@ -24,10 +24,14 @@ const INITIAL_PROMPT = [
   '</reglas_de_dialogo>',
 ].join('\n');
 
+const VARIABLE_CONTEXT = {
+  cliente: { nombre_completo: 'Ada Lovelace', vip: true },
+  empresa: 'Promptier',
+};
+
 /** A host page: it supplies prompt text, receives prompt text, and saves it. */
 export function EditorPlayground() {
   const [prompt, setPrompt] = useState(INITIAL_PROMPT);
-  const [schemaEnabled, setSchemaEnabled] = useState(true);
 
   return (
     <main
@@ -45,14 +49,10 @@ export function EditorPlayground() {
         <p style={{ margin: '0.35rem 0 0', color: '#57606a' }}>
           This page owns persistence. The React SDK owns the editor interface.
         </p>
-        <label>
-          <input type="checkbox" checked={schemaEnabled} onChange={(event) => setSchemaEnabled(event.target.checked)} />
-          Provide variable schema
-        </label>
       </header>
 
       <div style={{ height: '75vh', minHeight: '30rem' }}>
-        <PromptEditor value={prompt} onChange={setPrompt} variableSchema={schemaEnabled ? VARIABLE_SCHEMA : undefined} />
+        <PromptEditor value={prompt} onChange={setPrompt} variableSchema={VARIABLE_SCHEMA} variableContext={VARIABLE_CONTEXT} />
       </div>
 
       <footer

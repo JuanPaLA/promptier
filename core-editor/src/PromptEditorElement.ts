@@ -13,6 +13,8 @@ export interface PromptEditorElement extends HTMLElement {
   content: PromptContent;
   value: string;
   variableSchema: VariableSchema | undefined;
+  variableValidation: boolean;
+  variableContext: unknown;
   run(command: EditorCommand): boolean;
   getState(): EditorState | null;
 }
@@ -39,6 +41,8 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     private editor: PromptEditor | null = null;
     private pendingContent: PromptContent = { blocks: [] };
     private pendingVariableSchema: VariableSchema | undefined;
+    private pendingVariableValidation = false;
+    private pendingVariableContext: unknown;
     private sessionSubscriptions: Array<() => void> = [];
 
     constructor() {
@@ -76,14 +80,34 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       this.editor?.setVariableSchema(schema);
     }
 
+    get variableValidation(): boolean {
+      return this.pendingVariableValidation;
+    }
+
+    set variableValidation(enabled: boolean) {
+      this.pendingVariableValidation = enabled;
+      this.editor?.setVariableValidation(enabled);
+    }
+
+    get variableContext(): unknown {
+      return this.pendingVariableContext;
+    }
+
+    set variableContext(context: unknown) {
+      this.pendingVariableContext = context;
+    }
+
     connectedCallback(): void {
       if (this.editor) return;
       this.upgradeProperty('value');
       this.upgradeProperty('content');
       this.upgradeProperty('variableSchema');
+      this.upgradeProperty('variableValidation');
+      this.upgradeProperty('variableContext');
       const session = createProseMirrorEditor(this.editorContainer, this.pendingContent);
       this.editor = session;
       session.setVariableSchema(this.pendingVariableSchema);
+      session.setVariableValidation(this.pendingVariableValidation);
       this.sessionSubscriptions = [
         session.onChange((content) => {
           this.pendingContent = content;
@@ -113,7 +137,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     }
 
     /** Replays a property assigned before the browser upgraded this element. */
-    private upgradeProperty(name: 'value' | 'content' | 'variableSchema'): void {
+    private upgradeProperty(name: 'value' | 'content' | 'variableSchema' | 'variableValidation' | 'variableContext'): void {
       if (!Object.prototype.hasOwnProperty.call(this, name)) return;
       const properties = this as unknown as Record<string, unknown>;
       const pending = properties[name];

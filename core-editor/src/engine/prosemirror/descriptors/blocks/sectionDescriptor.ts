@@ -12,6 +12,9 @@ export const SECTION_TITLE_NODE = 'sectionTitle';
 export const sectionDescriptor: BlockDescriptor<SectionBlock> = {
   blockType: 'section',
   nodeSpec: sectionNodeSpec(),
+  createDefaultBlock: () => ({
+    blockType: 'section', title: 'Untitled section', children: [{ blockType: 'paragraph', content: [] }],
+  }),
   extraNodes: { [SECTION_TITLE_NODE]: titleNodeSpec() },
   editorStyles: `
 .prompt-section {

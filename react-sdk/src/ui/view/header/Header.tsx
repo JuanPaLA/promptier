@@ -1,5 +1,5 @@
-import { ReferencePicker } from './ReferencePicker';
-import { VariablePicker } from './VariablePicker';
+import { ActionMenu } from './ActionMenu';
+import { EditorSettings } from './EditorSettings';
 import type { CommandItemVM } from '../PromptEditorVM';
 import { CommandsToolBar } from './CommandsToolBar';
 import { CopyButton } from '../../components/buttons/CopyButton';
@@ -12,15 +12,18 @@ export interface EditorHeaderProps extends ViewControlsProps {
   readonly blockCommands: readonly CommandItemVM[];
   readonly referenceCommands?: readonly CommandItemVM[];
   readonly variableCommands?: readonly CommandItemVM[];
+  readonly variableValidation: boolean;
+  readonly variableContext: unknown;
   readonly onToggleOutline: () => void;
   readonly onCommand: (id: string) => void;
   readonly copyStatus: CopyStatus;
   readonly onCopy: () => void;
+  readonly onVariableValidationChange: (enabled: boolean) => void;
 }
 
 export function Header({
-  outlineOpen, formatCommands, blockCommands, referenceCommands = [], variableCommands = [], onToggleOutline, onCommand,
-  copyStatus, onCopy, ...viewControls
+  outlineOpen, formatCommands, blockCommands, referenceCommands = [], variableCommands = [], variableValidation,
+  variableContext, onToggleOutline, onCommand, copyStatus, onCopy, onVariableValidationChange, ...viewControls
 }: EditorHeaderProps) {
   return (
     <header className="promptier-header">
@@ -36,21 +39,24 @@ export function Header({
               </div>
             )}
             <div className="promptier-editing-actions">
-              <CommandsToolBar
-                groups={[
-                  { label: 'Insert blocks', items: blockCommands },
-                  { label: 'Formatting', items: formatCommands },
-                ]}
-                onAction={onCommand}
-              />
-              <ReferencePicker items={referenceCommands} onAction={onCommand} />
-              <VariablePicker items={variableCommands} onAction={onCommand} />
+              <CommandsToolBar groups={[
+                { label: 'Formatting', items: formatCommands },
+                { label: 'Blocks', items: blockCommands },
+              ]} onAction={onCommand} />
+              <div className="promptier-reference-actions">
+                <ActionMenu label="References" glyph="↗" groups={[
+                  { label: 'Sections', items: referenceCommands },
+                  { label: 'Variables', items: variableCommands },
+                ]} onAction={onCommand} />
+              </div>
             </div>
           </>
         )}
         <div className="promptier-header-trailing">
           <CopyButton status={copyStatus} onCopy={onCopy} />
           <ViewControls {...viewControls} />
+          <EditorSettings variableValidation={variableValidation} variableContext={variableContext}
+            onVariableValidationChange={onVariableValidationChange} />
         </div>
       </div>
     </header>

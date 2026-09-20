@@ -9,6 +9,7 @@ import type { VariableSchema } from '../../../prompt/variables/VariableSchema';
 export class VariableDecorations {
   private readonly key = new PluginKey<DecorationSet>('variables');
   private currentCatalog = new VariableCatalog();
+  private validationEnabled = false;
   readonly plugin: Plugin<DecorationSet>;
 
   constructor() {
@@ -30,7 +31,13 @@ export class VariableDecorations {
     view.dispatch(view.state.tr.setMeta(this.key, true).setMeta('addToHistory', false));
   }
 
+  setValidation(view: EditorView, enabled: boolean): void {
+    this.validationEnabled = enabled;
+    view.dispatch(view.state.tr.setMeta(this.key, true).setMeta('addToHistory', false));
+  }
+
   private decorations(doc: ProseMirrorNode): DecorationSet {
+    if (!this.validationEnabled) return DecorationSet.empty;
     const blocks: Array<{ text: string; position: number; offset: number }> = [];
     let documentText = '';
     doc.descendants((node, position) => {

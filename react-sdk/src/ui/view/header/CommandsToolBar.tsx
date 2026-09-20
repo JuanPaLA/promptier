@@ -20,21 +20,24 @@ export function CommandsToolBar({ groups, onAction }: CommandsToolBarProps) {
           role="group"
           aria-label={label}
         >
-          {items.map((item) => (
-            <button
-              key={item.id}
-              className="promptier-command-button"
-              type="button"
-              title={item.label}
-              aria-label={item.label}
-              aria-pressed={item.active}
-              disabled={item.disabled}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => onAction(item.id)}
-            >
-              {item.glyph}
-            </button>
-          ))}
+          <span className="promptier-command-group-label" aria-hidden="true">{label}</span>
+          <div className="promptier-command-group-actions">
+            {items.map((item) => (
+              <button
+                key={item.id}
+                className="promptier-command-button"
+                type="button"
+                title={item.label}
+                aria-label={item.label}
+                aria-pressed={item.active}
+                disabled={item.disabled}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => onAction(item.id)}
+              >
+                {item.glyph}
+              </button>
+            ))}
+          </div>
         </div>
       ))}
     </div>

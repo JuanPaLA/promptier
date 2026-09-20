@@ -168,4 +168,8 @@ class ProseMirrorEditor implements PromptEditor {
   setVariableSchema(schema: VariableSchema | undefined): void {
     this.variables.setSchema(this.view, schema);
   }
+
+  setVariableValidation(enabled: boolean): void {
+    this.variables.setValidation(this.view, enabled);
+  }
 }

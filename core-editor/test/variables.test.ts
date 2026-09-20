@@ -110,6 +110,7 @@ describe('variable editor integration', () => {
   it('updates schema decorations without document changes, selection changes or undo entries', () => {
     const variables = new VariableDecorations();
     const harness = new EditorHarness('Hello {{ cliente.nombre_completo }}.', variables);
+    variables.setValidation(harness.view, true);
     const original = harness.state.doc;
     const selection = harness.state.selection;
     expect(harness.statuses()).toEqual(['unverified']);
@@ -155,6 +156,7 @@ describe('variable editor integration', () => {
   it('recognizes variables in code, keeps comments literal across blocks and remains conservative around directives', () => {
     const variables = new VariableDecorations();
     const harness = new EditorHarness('```\n{{ cliente.vip }}\n```\n\n{% for item in productos %}\n\n{{ item.nombre }}\n\n{% endfor %}', variables);
+    variables.setValidation(harness.view, true);
     variables.setSchema(harness.view, schema);
     expect(harness.statuses()).toEqual(['unverified', 'unverified']);
   });
@@ -175,8 +177,19 @@ describe('variable editor integration', () => {
     const a = new EditorHarness('{{ cliente.vip }}', first);
     const b = new EditorHarness('{{ cliente.vip }}', second);
     first.setSchema(a.view, schema);
+    first.setValidation(a.view, true);
+    second.setValidation(b.view, true);
     expect(a.statuses()).toEqual(['recognized']);
     expect(b.statuses()).toEqual(['unverified']);
+  });
+
+  it('retains variable insertion while validation is disabled', () => {
+    const variables = new VariableDecorations();
+    const harness = new EditorHarness('{{ cliente.vip }}', variables);
+    variables.setSchema(harness.view, schema);
+    expect(harness.statuses()).toEqual([]);
+    expect(new VariableCommands(() => variables.catalog).commandStates(harness.state)
+      .some(({ command, enabled }) => command.type === 'variable.insert' && command.path === 'cliente.vip' && enabled)).toBe(true);
   });
 });
 

@@ -3,6 +3,7 @@ import { EditorState as ProseMirrorState, type Transaction } from 'prosemirror-s
 import { describe, expect, it, vi } from 'vitest';
 
 import type { InsertBlockCommand } from '../src/editor/commands/InsertBlockCommand';
+import type { CommandState } from '../src/editor/commands/CommandState';
 import { BlockCommands } from '../src/engine/prosemirror/commands/BlockCommands';
 import {
   blockRegistry,
@@ -65,12 +66,11 @@ describe('block extension seams', () => {
     const commands = new BlockCommands(blockRegistry, documentMapper);
     const state = stateWithParagraph();
 
-    expect(commands.commandStates(state)).toEqual([
-      {
-        command: { type: 'block.insert', block: { blockType: 'quote', content: [] } },
-        enabled: true,
-      },
+    const insertionStates = commands.commandStates(state).filter(isBlockInsertionState);
+    expect(insertionStates.map(({ command }) => command.block.blockType)).toEqual([
+      'paragraph', 'heading', 'codeBlock', 'orderedList', 'unorderedList', 'quote', 'section',
     ]);
+    expect(insertionStates.every(({ enabled }) => enabled)).toBe(true);
     expect(blockRegistry.editorStyles().join('\n')).toContain('.prompt-quote');
   });
 
@@ -101,6 +101,10 @@ describe('block extension seams', () => {
     expect(focus).toHaveBeenCalledOnce();
   });
 });
+
+function isBlockInsertionState(state: CommandState): state is CommandState & { command: InsertBlockCommand } {
+  return state.command.type === 'block.insert';
+}
 
 function stateWithParagraph(): ProseMirrorState {
   return ProseMirrorState.create({

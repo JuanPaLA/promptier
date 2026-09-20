@@ -7,6 +7,7 @@ import type { BlockDescriptor } from './BlockDescriptor';
 export const headingDescriptor: BlockDescriptor<HeadingBlock> = {
   blockType: 'heading',
   nodeSpec: headingNodeSpec(),
+  createDefaultBlock: () => ({ blockType: 'heading', level: 2, content: [] }),
   editorStyles: `
 .ProseMirror h1,
 .ProseMirror h2,

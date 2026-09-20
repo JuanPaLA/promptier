@@ -7,6 +7,7 @@ import type { BlockDescriptor } from './BlockDescriptor';
 export const codeBlockDescriptor: BlockDescriptor<CodeBlock> = {
   blockType: 'codeBlock',
   nodeSpec: codeBlockNodeSpec(),
+  createDefaultBlock: () => ({ blockType: 'codeBlock', code: '' }),
   editorStyles: `
 .prompt-code-block {
   margin: 0.5rem 0;

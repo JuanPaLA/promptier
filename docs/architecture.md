@@ -420,6 +420,10 @@ transactions. The editor applies the whole transaction chain before reporting
 content, so consumers never observe an intermediate malformed expression.
 
 `variableSchema` travels through the React presenter/service and the Custom
-Element to the editor session. It is not part of `PromptContent`, prompt text,
-or undo history. React only projects command states and metadata into the picker.
+Element to the editor session. `variableValidation` follows the same route and
+controls only the decoration plugin; disabling it leaves the catalog and
+insertion commands available. `variableContext` is retained by the host wrapper
+for the read-only Settings inspection panel and never enters the document or the
+engine. None of these values are part of `PromptContent`, prompt text, or undo
+history. React projects command states and metadata into the header menus.
 See [variables.md](variables.md) for integration examples and scope.

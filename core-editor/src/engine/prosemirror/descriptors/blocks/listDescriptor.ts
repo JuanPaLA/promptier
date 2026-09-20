@@ -35,6 +35,7 @@ export function createListDescriptor<B extends ListBlock>(
   return {
     blockType: config.blockType,
     nodeSpec: listNodeSpec(config),
+    createDefaultBlock: () => ({ blockType: config.blockType, items: [] }) as unknown as B,
     extraNodes: { [LIST_ITEM_NODE]: itemNodeSpec() },
     editorStyles: `
 .${config.listClass} {
