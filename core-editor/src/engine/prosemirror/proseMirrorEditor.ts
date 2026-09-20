@@ -28,6 +28,7 @@ import type { BlockRegistry } from './descriptors/blocks/BlockRegistry';
 import type { MarkRegistry } from './descriptors/marks/MarkRegistry';
 import type { PromptDocumentMapper } from './mapping/PromptDocumentMapper';
 import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
+import { inlineListPaste } from './plugins/inlineListPaste';
 import {
   blockRegistry,
   documentMapper,
@@ -95,6 +96,7 @@ class ProseMirrorEditor implements PromptEditor {
         inputRules({
           rules: [...this.blocks.inputRules(this.schema), ...this.marks.inputRules(this.schema)],
         }),
+        inlineListPaste(),
         appendTrailingParagraph(),
         referenceDecorations((doc) => [sectionReferences(this.documentMapper.fromDocument(doc))]),
         this.variables.plugin,

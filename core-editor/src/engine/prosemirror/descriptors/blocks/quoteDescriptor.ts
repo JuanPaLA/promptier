@@ -15,6 +15,7 @@ export const quoteDescriptor: BlockDescriptor<QuoteBlock> = {
   padding: 0.25rem 0 0.25rem 0.75rem;
   border-left: 3px solid #d0d7de;
   color: #57606a;
+  white-space: pre-wrap;
 }
 `,
 
@@ -39,12 +40,22 @@ export const quoteDescriptor: BlockDescriptor<QuoteBlock> = {
       );
     }),
   ],
+
+  keymaps: (schema) => ({
+    'Shift-Enter': (state, dispatch) => {
+      const { $from, $to } = state.selection;
+      if ($from.parent.type !== schema.nodes.quote || !$from.sameParent($to)) return false;
+      dispatch?.(state.tr.insertText('\n').scrollIntoView());
+      return true;
+    },
+  }),
 };
 
 function quoteNodeSpec(): NodeSpec {
   return {
     group: 'block',
     content: 'text*',
+    whitespace: 'pre',
     defining: true,
     toDOM: () => ['blockquote', { class: 'prompt-quote' }, 0] as const,
     parseDOM: [{ tag: 'blockquote' }],

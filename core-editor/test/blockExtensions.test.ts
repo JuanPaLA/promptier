@@ -1,5 +1,6 @@
 import type { EditorView } from 'prosemirror-view';
-import { EditorState as ProseMirrorState, type Transaction } from 'prosemirror-state';
+import { EditorState as ProseMirrorState, TextSelection, type Transaction } from 'prosemirror-state';
+import { Fragment, Slice } from 'prosemirror-model';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { InsertBlockCommand } from '../src/editor/commands/InsertBlockCommand';
@@ -12,6 +13,8 @@ import {
 } from '../src/engine/prosemirror/proseMirrorConfiguration';
 import type { PromptContent } from '../src/prompt/model/PromptContent';
 import { blockCodecRegistry } from '../src/prompt/serialization/codecs/blockCodecRegistry';
+import { quoteDescriptor } from '../src/engine/prosemirror/descriptors/blocks/quoteDescriptor';
+import { inlineListPaste } from '../src/engine/prosemirror/plugins/inlineListPaste';
 import { parse } from '../src/prompt/serialization/parse';
 import { serialize } from '../src/prompt/serialization/serialize';
 
@@ -34,6 +37,40 @@ describe('block extension seams', () => {
 
     expect(serialize(content)).toBe('> **_important_**');
     expect(parse(serialize(content))).toEqual(content);
+  });
+
+  it('keeps Shift-Enter inside a quote as a new quoted line', () => {
+    let state = ProseMirrorState.create({
+      schema: promptSchema,
+      doc: documentMapper.toDocument({ blocks: [{ blockType: 'quote', content: [{ text: 'first' }] }] }),
+    });
+    state = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 6)));
+    const shiftEnter = quoteDescriptor.keymaps!(promptSchema)['Shift-Enter'];
+
+    expect(shiftEnter(state, (transaction) => { state = state.apply(transaction); })).toBe(true);
+    state = state.apply(state.tr.insertText('second'));
+
+    expect(serialize(documentMapper.fromDocument(state.doc))).toBe('> first\n> second');
+  });
+
+  it('pastes text at the selection inside a list item', () => {
+    let state = ProseMirrorState.create({
+      schema: promptSchema,
+      doc: documentMapper.toDocument({
+        blocks: [{ blockType: 'unorderedList', items: [[{ text: 'before after' }]] }],
+      }),
+    });
+    state = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 8)));
+    const view = {
+      get state() { return state; },
+      dispatch(transaction: Transaction) { state = state.apply(transaction); },
+    } as unknown as EditorView;
+    const slice = new Slice(Fragment.from(promptSchema.nodes.paragraph.create(null, promptSchema.text('pasted'))), 0, 0);
+    const event = { clipboardData: { getData: () => 'pasted' } } as unknown as ClipboardEvent;
+
+    const plugin = inlineListPaste();
+    expect(plugin.props.handlePaste!.call(plugin, view, event, slice)).toBe(true);
+    expect(serialize(documentMapper.fromDocument(state.doc))).toBe('- beforepasted after');
   });
 
   it('derives paragraph escaping from registered block codecs', () => {

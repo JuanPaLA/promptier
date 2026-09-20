@@ -91,6 +91,22 @@ describe('section references', () => {
     expect(parse(serialize(content))).toEqual(content);
   });
 
+  it('inserts a section reference inside a list item', () => {
+    let state = EditorState.create({
+      schema: promptSchema,
+      doc: documentMapper.toDocument(parse('- Follow these rules.\n\n' + section)),
+    });
+    state = state.apply(state.tr.setSelection(TextSelection.create(state.doc, 8)));
+    const view = {
+      get state() { return state; },
+      dispatch(transaction: Transaction) { state = state.apply(transaction); },
+      focus() {},
+    } as unknown as EditorView;
+
+    expect(new ReferenceCommands(documentMapper).run(view, { type: 'reference.insert', text: '<dialog_format_rules>' })).toBe(true);
+    expect(serialize(documentMapper.fromDocument(state.doc))).toContain('- Follow <dialog_format_rules> these rules.');
+  });
+
   it('keeps unknown tags plain, marks duplicates ambiguous, and excludes code examples', () => {
     const text = 'See <missing> and </dialog_format_rules>. `use <dialog_format_rules>`\n\n```\n<dialog_format_rules>\n```\n\n' + section + '\n\n' + section;
     const plugin = referenceDecorations((doc) => [sectionReferences(documentMapper.fromDocument(doc))]);
