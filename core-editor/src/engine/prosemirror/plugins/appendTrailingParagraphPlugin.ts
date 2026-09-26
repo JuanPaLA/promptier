@@ -1,7 +1,7 @@
 import { Plugin } from 'prosemirror-state';
 import { caretInLastBlock, insertBlockAt } from '../editing/blockTransactions';
 
-export function appendTrailingParagraph(): Plugin {
+export function appendTrailingParagraphPlugin(): Plugin {
   return new Plugin({
     props: {
       handleClick(view, _pos, event) {

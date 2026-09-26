@@ -23,18 +23,9 @@ component (`BlockDescriptor.ts`, `SectionNodeView.ts`, `PromptEditorField.tsx`).
 camelCase ⟺ it exports values or functions (`sectionDescriptor.ts`,
 `promptSchema.ts`, `documentMapper.ts`).
 
-**Stepdown rule.** Public surface first, helpers below it, in call order. Prefer
-`function` declarations over `const` arrows for module-level helpers — hoisting
-is what makes the ordering possible. A `const` may sit below a function that
-reads it *at call time*; it may not if the function runs during module
-evaluation (that's a TDZ error). `prompt/serialization/serialize.ts` is the reference.
+**Stepdown rule.** Public surface first, helpers below it, in call order. Prefer OOP.
 
-**Comments.** Explain what the code cannot. Keep ProseMirror lore that isn't
-derivable from the code (`a PM command called without dispatch is a dry run`) and
-the reason a non-obvious choice was made. Don't restate the architecture — that
-belongs in `docs/architecture.md`, and duplicating it there guarantees drift.
-When a comment exists to explain position arithmetic, extract a named operation
-in `engine/prosemirror/editing/` instead.
+**Comments.** Oly explain what the code cannot. But ensure the code is the most cleand and expressive possible.
 
 ## Commands
 

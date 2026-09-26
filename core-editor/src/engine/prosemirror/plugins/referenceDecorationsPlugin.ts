@@ -6,7 +6,7 @@ import { sectionTagMentions } from '../../../prompt/serialization/sectionTagSynt
 import { TemplateSyntax } from '../../../prompt/templates/TemplateSyntax';
 import { NavigateCommands } from '../commands/NavigateCommands';
 
-export function referenceDecorations(resolveDocument: (doc: ProseMirrorNode) => readonly ReferenceResolver[]): Plugin {
+export function referenceDecorationsPlugin(resolveDocument: (doc: ProseMirrorNode) => readonly ReferenceResolver[]): Plugin {
   function decorations(doc: ProseMirrorNode): DecorationSet {
     const resolvers = resolveDocument(doc);
     const result: Decoration[] = [];

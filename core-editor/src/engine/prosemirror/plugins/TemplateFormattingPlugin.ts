@@ -3,7 +3,7 @@ import { Plugin } from 'prosemirror-state';
 import { TemplateInlineContent } from '../../../prompt/templates/TemplateInlineContent';
 import { blockContentFromNode, blockContentToNodes } from '../mapping/blockContentMapper';
 
-export class TemplateFormatting {
+export class TemplateFormattingPlugin {
   readonly plugin = new Plugin({
     appendTransaction: (transactions, _, state) => {
       if (!transactions.some((transaction) => transaction.docChanged)) return null;

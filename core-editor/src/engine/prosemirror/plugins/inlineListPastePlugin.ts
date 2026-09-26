@@ -1,7 +1,7 @@
 import { Plugin } from 'prosemirror-state';
 
 /** Keeps clipboard text inline when its insertion point is a list item. */
-export function inlineListPaste(): Plugin {
+export function inlineListPastePlugin(): Plugin {
   return new Plugin({
     props: {
       handlePaste(view, event, slice) {

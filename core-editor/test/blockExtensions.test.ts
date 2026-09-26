@@ -14,7 +14,7 @@ import {
 import type { PromptContent } from '../src/prompt/model/PromptContent';
 import { blockCodecRegistry } from '../src/prompt/serialization/codecs/blockCodecRegistry';
 import { quoteDescriptor } from '../src/engine/prosemirror/descriptors/blocks/quoteDescriptor';
-import { inlineListPaste } from '../src/engine/prosemirror/plugins/inlineListPaste';
+import { inlineListPastePlugin } from '../src/engine/prosemirror/plugins/inlineListPastePlugin';
 import { parse } from '../src/prompt/serialization/parse';
 import { serialize } from '../src/prompt/serialization/serialize';
 
@@ -68,7 +68,7 @@ describe('block extension seams', () => {
     const slice = new Slice(Fragment.from(promptSchema.nodes.paragraph.create(null, promptSchema.text('pasted'))), 0, 0);
     const event = { clipboardData: { getData: () => 'pasted' } } as unknown as ClipboardEvent;
 
-    const plugin = inlineListPaste();
+    const plugin = inlineListPastePlugin();
     expect(plugin.props.handlePaste!.call(plugin, view, event, slice)).toBe(true);
     expect(serialize(documentMapper.fromDocument(state.doc))).toBe('- beforepasted after');
   });

@@ -1,30 +1,21 @@
 # FEATURES
-[X] Insert block command.
-[] Define state tools references. A coded formated string value should be parsed back as a tool name reference or as as
-one of its parameters.
-[X] Add Quote block element.
+[] Inyect tools references.
 [] Move blocks through prompt.
+[] Navigate thorugh keyboard commands: 
 [] Show estimated token count.
-[X] Add more text formats commands: underline, strikethrough, highlight...
-[X] Make every heading inside or outside a section an outline entry.
-[X] Show raw content editor.
-[X] Open the editor in full screen.
 [] Slash menu with: section references | tool references | variable references
-[] Consider pebble or other render engines interpolation strategies
 [] Validate not repeated sections.
+[] Extend headers levesl until 4 o 5.
+[X] Consider pebble or other render engines interpolation strategies
+[] Define keyboard shortcuts/commands for every action. And display them
 
 # UI
 [] change format buttons hover behaviour.
-[] Eliminar el insert quote o generarlizalo.
-[] Reorder menu: Generelizar menu de insercion de referencias.
-[] menu settings [modal/menu]: variables: validate references on|off; explore references; 
-[] menu insert []
-[X] eliminar el tag al lado de section.
-[X] use square borders. not rounded. foooter backgground should be the same of header.
-
-
 
 # DOUBTS
 [] Use of tailwind within react layer.
 [] Why react-sdk/src/custom-elements.d.ts defines a PromptEditorElement element and not then one wrapping it?
 [] Core Clean code
+
+# TECH DEBT
+[] POO and Clean code whole refactor. Cohesive codebase.

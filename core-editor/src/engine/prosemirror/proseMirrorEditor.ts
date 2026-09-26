@@ -1,9 +1,9 @@
 import { sectionReferences } from '../../prompt/references/sectionReferences';
 import { ReferenceCommands } from './commands/ReferenceCommands';
-import { referenceDecorations } from './plugins/referenceDecorations';
-import { VariableDecorations } from './plugins/VariableDecorations';
+import { referenceDecorationsPlugin } from './plugins/referenceDecorationsPlugin';
+import { VariableDecorationsPlugin } from './plugins/VariableDecorationsPlugin';
 import { VariableCommands } from './commands/VariableCommands';
-import { TemplateFormatting } from './plugins/TemplateFormatting';
+import { TemplateFormattingPlugin } from './plugins/TemplateFormattingPlugin';
 import type { VariableSchema } from '../../prompt/variables/VariableSchema';
 import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
@@ -27,8 +27,8 @@ import { NavigateCommands } from './commands/NavigateCommands';
 import type { BlockRegistry } from './descriptors/blocks/BlockRegistry';
 import type { MarkRegistry } from './descriptors/marks/MarkRegistry';
 import type { PromptDocumentMapper } from './mapping/PromptDocumentMapper';
-import { appendTrailingParagraph } from './plugins/appendTrailingParagraph';
-import { inlineListPaste } from './plugins/inlineListPaste';
+import { appendTrailingParagraphPlugin } from './plugins/appendTrailingParagraphPlugin';
+import { inlineListPastePlugin } from './plugins/inlineListPastePlugin';
 import {
   blockRegistry,
   documentMapper,
@@ -44,7 +44,7 @@ export function createProseMirrorEditor(
   const formatCommands = new FormatCommands(markRegistry.all().map(({ format }) => format));
   const blockCommands = new BlockCommands(blockRegistry, documentMapper);
   const referenceCommands = new ReferenceCommands(documentMapper);
-  const variables = new VariableDecorations();
+  const variables = new VariableDecorationsPlugin();
   const variableCommands = new VariableCommands(() => variables.catalog);
   const commandRegistry = new EditorCommandRegistry([
     formatCommands,
@@ -82,7 +82,7 @@ class ProseMirrorEditor implements PromptEditor {
     private readonly marks: MarkRegistry,
     private readonly commands: EditorCommandRegistry,
     private readonly stateReader: EditorStateReader,
-    private readonly variables: VariableDecorations,
+    private readonly variables: VariableDecorationsPlugin,
   ) {
     const state = ProseMirrorState.create({
       schema: this.schema,
@@ -96,11 +96,11 @@ class ProseMirrorEditor implements PromptEditor {
         inputRules({
           rules: [...this.blocks.inputRules(this.schema), ...this.marks.inputRules(this.schema)],
         }),
-        inlineListPaste(),
-        appendTrailingParagraph(),
-        referenceDecorations((doc) => [sectionReferences(this.documentMapper.fromDocument(doc))]),
+        inlineListPastePlugin(),
+        appendTrailingParagraphPlugin(),
+        referenceDecorationsPlugin((doc) => [sectionReferences(this.documentMapper.fromDocument(doc))]),
         this.variables.plugin,
-        new TemplateFormatting().plugin,
+        new TemplateFormattingPlugin().plugin,
       ],
     });
 

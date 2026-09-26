@@ -6,7 +6,7 @@ import { VariableAnalysis } from '../../../prompt/variables/VariableAnalysis';
 import { VariableCatalog } from '../../../prompt/variables/VariableCatalog';
 import type { VariableSchema } from '../../../prompt/variables/VariableSchema';
 
-export class VariableDecorations {
+export class VariableDecorationsPlugin {
   private readonly key = new PluginKey<DecorationSet>('variables');
   private currentCatalog = new VariableCatalog();
   private validationEnabled = false;

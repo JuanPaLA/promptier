@@ -6,9 +6,9 @@ import { VariableCatalog } from '../src/prompt/variables/VariableCatalog';
 import { VariableAnalysis } from '../src/prompt/variables/VariableAnalysis';
 import type { VariableSchema } from '../src/prompt/variables/VariableSchema';
 import { TemplateSyntax } from '../src/prompt/templates/TemplateSyntax';
-import { VariableDecorations } from '../src/engine/prosemirror/plugins/VariableDecorations';
+import { VariableDecorationsPlugin } from '../src/engine/prosemirror/plugins/VariableDecorationsPlugin';
 import { VariableCommands } from '../src/engine/prosemirror/commands/VariableCommands';
-import { TemplateFormatting } from '../src/engine/prosemirror/plugins/TemplateFormatting';
+import { TemplateFormattingPlugin } from '../src/engine/prosemirror/plugins/TemplateFormattingPlugin';
 import { documentMapper, promptSchema } from '../src/engine/prosemirror/proseMirrorConfiguration';
 import { parse } from '../src/prompt/serialization/parse';
 import { serialize } from '../src/prompt/serialization/serialize';
@@ -108,7 +108,7 @@ describe('template syntax and variable analysis', () => {
 
 describe('variable editor integration', () => {
   it('updates schema decorations without document changes, selection changes or undo entries', () => {
-    const variables = new VariableDecorations();
+    const variables = new VariableDecorationsPlugin();
     const harness = new EditorHarness('Hello {{ cliente.nombre_completo }}.', variables);
     variables.setValidation(harness.view, true);
     const original = harness.state.doc;
@@ -127,7 +127,7 @@ describe('variable editor integration', () => {
   });
 
   it('inserts at the selection and supports undo and redo', () => {
-    const variables = new VariableDecorations();
+    const variables = new VariableDecorationsPlugin();
     const harness = new EditorHarness('Hello friend.', variables);
     variables.setSchema(harness.view, schema);
     harness.select(7, 13);
@@ -143,7 +143,7 @@ describe('variable editor integration', () => {
   });
 
   it('does not insert inside an expression or section title', () => {
-    const variables = new VariableDecorations();
+    const variables = new VariableDecorationsPlugin();
     const harness = new EditorHarness('{{ cliente.vip }}\n\n<section>\nText\n</section>', variables);
     variables.setSchema(harness.view, schema);
     const commands = new VariableCommands(() => variables.catalog);
@@ -154,7 +154,7 @@ describe('variable editor integration', () => {
   });
 
   it('recognizes variables in code, keeps comments literal across blocks and remains conservative around directives', () => {
-    const variables = new VariableDecorations();
+    const variables = new VariableDecorationsPlugin();
     const harness = new EditorHarness('```\n{{ cliente.vip }}\n```\n\n{% for item in productos %}\n\n{{ item.nombre }}\n\n{% endfor %}', variables);
     variables.setValidation(harness.view, true);
     variables.setSchema(harness.view, schema);
@@ -162,7 +162,7 @@ describe('variable editor integration', () => {
   });
 
   it('keeps template source intact when formatting part of a name, without moving selection', () => {
-    const harness = new EditorHarness('{{ cliente.nombre_completo }}', new VariableDecorations());
+    const harness = new EditorHarness('{{ cliente.nombre_completo }}', new VariableDecorationsPlugin());
     harness.select(12, 27);
     const selection = harness.state.selection;
     harness.view.dispatch(harness.state.tr.addMark(12, 27, promptSchema.marks.bold.create()));
@@ -172,8 +172,8 @@ describe('variable editor integration', () => {
   });
 
   it('keeps schemas independent between instances', () => {
-    const first = new VariableDecorations();
-    const second = new VariableDecorations();
+    const first = new VariableDecorationsPlugin();
+    const second = new VariableDecorationsPlugin();
     const a = new EditorHarness('{{ cliente.vip }}', first);
     const b = new EditorHarness('{{ cliente.vip }}', second);
     first.setSchema(a.view, schema);
@@ -184,7 +184,7 @@ describe('variable editor integration', () => {
   });
 
   it('retains variable insertion while validation is disabled', () => {
-    const variables = new VariableDecorations();
+    const variables = new VariableDecorationsPlugin();
     const harness = new EditorHarness('{{ cliente.vip }}', variables);
     variables.setSchema(harness.view, schema);
     expect(harness.statuses()).toEqual([]);
@@ -198,8 +198,8 @@ class EditorHarness {
   readonly view: EditorView;
   changed = 0;
 
-  constructor(text: string, private readonly variables: VariableDecorations) {
-    this.state = EditorState.create({ schema: promptSchema, doc: documentMapper.toDocument(parse(text)), plugins: [history(), variables.plugin, new TemplateFormatting().plugin] });
+  constructor(text: string, private readonly variables: VariableDecorationsPlugin) {
+    this.state = EditorState.create({ schema: promptSchema, doc: documentMapper.toDocument(parse(text)), plugins: [history(), variables.plugin, new TemplateFormattingPlugin().plugin] });
     const harness = this;
     this.view = {
       get state() { return harness.state; },
