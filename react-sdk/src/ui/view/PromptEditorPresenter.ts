@@ -5,13 +5,14 @@ import {
   type Unsubscribe,
 } from '../../lib/PromptEditorService';
 import { PromptEditorVM } from './PromptEditorVM';
-import type { VariableSchema } from 'core-editor';
+import type { ToolDefinition, VariableSchema } from 'core-editor';
 
 export interface PromptEditorPresenterProps {
   readonly value?: string;
   readonly onChange?: (value: string) => void;
   readonly variableSchema?: VariableSchema;
   readonly variableContext?: unknown;
+  readonly tools?: readonly ToolDefinition[];
 }
 
 export class PromptEditorPresenter extends PresenterBase<
@@ -26,6 +27,7 @@ export class PromptEditorPresenter extends PresenterBase<
     this.propChanged('value', this.setPrompt);
     this.propChanged('variableSchema', this.setVariableSchema);
     this.propChanged('variableContext', this.setVariableContext);
+    this.propChanged('tools', this.setTools);
   }
 
   protected initModel(): PromptEditorVM {
@@ -37,6 +39,7 @@ export class PromptEditorPresenter extends PresenterBase<
     this.setPrompt(this.props.value);
     this.setVariableSchema(this.props.variableSchema);
     this.setVariableContext(this.props.variableContext);
+    this.setTools(this.props.tools);
     this.refreshViewModel();
   }
 
@@ -68,6 +71,10 @@ export class PromptEditorPresenter extends PresenterBase<
 
   private setVariableContext = (context: unknown): void => {
     this.editor.setVariableContext(context);
+  };
+
+  private setTools = (tools: readonly ToolDefinition[] | undefined): void => {
+    this.editor.setTools(tools ?? []);
   };
 
   private handleEditorChange = (): void => {

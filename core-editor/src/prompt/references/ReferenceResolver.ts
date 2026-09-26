@@ -4,10 +4,12 @@ export interface ReferenceTarget {
 }
 
 export interface ResolvedReference {
-  readonly kind: string;
+  readonly kind: 'section' | 'tool' | 'parameter';
   readonly text: string;
   readonly status: 'resolved' | 'missing' | 'ambiguous';
   readonly target?: ReferenceTarget;
+  /** Describes a referenced target that lives outside the document. */
+  readonly detail?: string;
 }
 
 export interface ReferenceResolver {

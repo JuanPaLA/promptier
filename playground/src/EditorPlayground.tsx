@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PromptEditor, type VariableSchema } from 'react-sdk';
+import { PromptEditor, type ToolDefinition, type VariableSchema } from 'react-sdk';
 
 const INITIAL_PROMPT = [
   'Eres un asistente de soporte.',
@@ -8,6 +8,12 @@ const INITIAL_PROMPT = [
   '<objetivos>',
   'Resolver la consulta en el menor número de turnos.',
   '</objetivos>',
+  '',
+  '<herramientas>',
+  'Antes de hablar de un envío, consulta `buscar_pedido` con el `pedido_id` que indique el usuario.',
+  '',
+  'Si el problema persiste, registra el caso con `crear_reclamo()` y completa `crear_reclamo.motivo`.',
+  '</herramientas>',
   '',
   '<reglas_de_dialogo>',
   '<reglas_de_formato>',
@@ -52,7 +58,7 @@ export function EditorPlayground() {
       </header>
 
       <div style={{ height: '75vh', minHeight: '30rem' }}>
-        <PromptEditor value={prompt} onChange={setPrompt} variableSchema={VARIABLE_SCHEMA} variableContext={VARIABLE_CONTEXT} />
+        <PromptEditor value={prompt} onChange={setPrompt} variableSchema={VARIABLE_SCHEMA} variableContext={VARIABLE_CONTEXT} tools={TOOLS} />
       </div>
 
       <footer
@@ -87,3 +93,35 @@ const VARIABLE_SCHEMA: VariableSchema = {
   },
   required: ['empresa'],
 };
+
+const TOOLS: ToolDefinition[] = [
+  {
+    name: 'buscar_pedido',
+    description: 'Consulta el estado y el seguimiento de un pedido',
+    parameters: {
+      type: 'object',
+      required: ['pedido_id'],
+      properties: {
+        pedido_id: { type: 'string', description: 'Identificador del pedido' },
+      },
+    },
+  },
+  {
+    name: 'crear_reclamo',
+    description: 'Registra un reclamo para que lo atienda una persona',
+    parameters: {
+      type: 'object',
+      required: ['pedido_id', 'motivo'],
+      properties: {
+        pedido_id: { type: 'string', description: 'Pedido afectado' },
+        motivo: { type: 'string', description: 'Resumen del problema' },
+        contacto: {
+          type: 'object',
+          properties: {
+            canal: { type: 'string', description: 'Canal preferido para responder' },
+          },
+        },
+      },
+    },
+  },
+];

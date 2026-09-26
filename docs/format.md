@@ -145,6 +145,16 @@ Inline code now emits underscores and asterisks literally, keeping referenced
 opening tags exact. Backslashes and backticks remain escaped. Previously emitted
 escaped code spans remain accepted and normalize to this spelling.
 
+## Tool references
+
+Inline code whose entire content names a host-supplied tool (`` `get_weather` ``,
+`` `get_weather()` ``) or one of its declared parameters (`` `location` ``,
+`` `get_weather.location` ``) is recognized as a tool reference. Recognition adds
+no syntax: the text remains ordinary inline code, and inline code already emits
+underscores literally, so the prompt carries the tool's exact name. A host
+supplies `tools` separately from prompt content. Changing them affects
+decorations and suggestions, never serialization. See [tools.md](tools.md).
+
 ## Template variables
 
 `{{ name }}` and `{{ object.property }}` are recognized as variable references.

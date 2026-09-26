@@ -5,6 +5,7 @@ import { createProseMirrorEditor, installEditorStyles } from './engine'
 import type { PromptContent } from './prompt/model/PromptContent'
 import { parse, serialize } from './prompt/serialization'
 import type { VariableSchema } from './prompt/variables/VariableSchema';
+import type { ToolDefinition } from './prompt/tools/ToolDefinition';
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
@@ -15,6 +16,7 @@ export interface PromptEditorElement extends HTMLElement {
   variableSchema: VariableSchema | undefined;
   variableValidation: boolean;
   variableContext: unknown;
+  tools: readonly ToolDefinition[];
   run(command: EditorCommand): boolean;
   getState(): EditorState | null;
 }
@@ -43,6 +45,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     private pendingVariableSchema: VariableSchema | undefined;
     private pendingVariableValidation = false;
     private pendingVariableContext: unknown;
+    private pendingTools: readonly ToolDefinition[] = [];
     private sessionSubscriptions: Array<() => void> = [];
 
     constructor() {
@@ -97,6 +100,15 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       this.pendingVariableContext = context;
     }
 
+    get tools(): readonly ToolDefinition[] {
+      return this.pendingTools;
+    }
+
+    set tools(tools: readonly ToolDefinition[]) {
+      this.pendingTools = tools;
+      this.editor?.setTools(tools);
+    }
+
     connectedCallback(): void {
       if (this.editor) return;
       this.upgradeProperty('value');
@@ -104,10 +116,12 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       this.upgradeProperty('variableSchema');
       this.upgradeProperty('variableValidation');
       this.upgradeProperty('variableContext');
+      this.upgradeProperty('tools');
       const session = createProseMirrorEditor(this.editorContainer, this.pendingContent);
       this.editor = session;
       session.setVariableSchema(this.pendingVariableSchema);
       session.setVariableValidation(this.pendingVariableValidation);
+      session.setTools(this.pendingTools);
       this.sessionSubscriptions = [
         session.onChange((content) => {
           this.pendingContent = content;
@@ -137,7 +151,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     }
 
     /** Replays a property assigned before the browser upgraded this element. */
-    private upgradeProperty(name: 'value' | 'content' | 'variableSchema' | 'variableValidation' | 'variableContext'): void {
+    private upgradeProperty(name: 'value' | 'content' | 'variableSchema' | 'variableValidation' | 'variableContext' | 'tools'): void {
       if (!Object.prototype.hasOwnProperty.call(this, name)) return;
       const properties = this as unknown as Record<string, unknown>;
       const pending = properties[name];

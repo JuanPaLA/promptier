@@ -1,4 +1,5 @@
 import type { InsertReferenceCommand } from './InsertReferenceCommand';
+import type { InsertToolCommand } from './InsertToolCommand';
 import type { InsertVariableCommand } from './InsertVariableCommand';
 import type { FormatCommand } from './FormatCommand';
 import type { InsertBlockCommand } from './InsertBlockCommand';
@@ -9,5 +10,6 @@ export type EditorCommand =
     InsertBlockCommand |
     NavigateCommand |
     InsertReferenceCommand |
-    InsertVariableCommand
+    InsertVariableCommand |
+    InsertToolCommand
 ;

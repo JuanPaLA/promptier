@@ -6,7 +6,7 @@ import { parse } from '../src/prompt/serialization/parse';
 import { serialize } from '../src/prompt/serialization/serialize';
 import { sectionReferences } from '../src/prompt/references/sectionReferences';
 import { ReferenceCommands } from '../src/engine/prosemirror/commands/ReferenceCommands';
-import { referenceDecorationsPlugin } from '../src/engine/prosemirror/plugins/referenceDecorationsPlugin';
+import { ReferenceDecorationsPlugin } from '../src/engine/prosemirror/plugins/ReferenceDecorationsPlugin';
 import { documentMapper, promptSchema } from '../src/engine/prosemirror/proseMirrorConfiguration';
 
 const section = '<dialog_format_rules>\nExplain clearly.\n</dialog_format_rules>';
@@ -32,15 +32,15 @@ describe('section references', () => {
   });
 
   it('decorates plain mentions and legacy full code spans and refreshes after replacement', () => {
-    const plugin = referenceDecorationsPlugin((doc) => [sectionReferences(documentMapper.fromDocument(doc))]);
+    const plugin = new ReferenceDecorationsPlugin(documentMapper).plugin;
     const initial = '`<dialog_format_rules>` and <dialog_format_rules> and `ordinary`\n\n' + section;
     const state = EditorState.create({ doc: documentMapper.toDocument(parse(initial)), plugins: [plugin] });
     const marks = plugin.getState(state)!.find();
     expect(marks).toHaveLength(2);
-    expect((marks[0].type as any).attrs.class).toContain('resolved');
+    expect((marks[0] as any).type.attrs.class).toContain('resolved');
     const replacement = documentMapper.toDocument(parse('`<dialog_format_rules>`'));
     const next = state.apply(state.tr.replaceWith(0, state.doc.content.size, replacement.content));
-    expect((plugin.getState(next)!.find()[0].type as any).attrs.class).toContain('missing');
+    expect((plugin.getState(next)!.find()[0] as any).type.attrs.class).toContain('missing');
   });
 
   it('inserts at the selection without creating sections, clears code typing, and supports undo/redo', () => {
@@ -84,7 +84,7 @@ describe('section references', () => {
   it('resolves opening and closing mentions in headings, lists, quotes and nested sections', () => {
     const text = '# Follow <dialog_format_rules>\n\n- See </dialog_format_rules>\n\n> <dialog_format_rules>\n\n<outer>\n' + section + '\n</outer>';
     const content = parse(text);
-    const plugin = referenceDecorationsPlugin((doc) => [sectionReferences(documentMapper.fromDocument(doc))]);
+    const plugin = new ReferenceDecorationsPlugin(documentMapper).plugin;
     const state = EditorState.create({ doc: documentMapper.toDocument(content), plugins: [plugin] });
     expect(plugin.getState(state)!.find()).toHaveLength(3);
     expect(sectionReferences(content).resolve('</dialog_format_rules>')).toMatchObject({ status: 'resolved', target: { path: [3, 0] } });
@@ -109,15 +109,15 @@ describe('section references', () => {
 
   it('keeps unknown tags plain, marks duplicates ambiguous, and excludes code examples', () => {
     const text = 'See <missing> and </dialog_format_rules>. `use <dialog_format_rules>`\n\n```\n<dialog_format_rules>\n```\n\n' + section + '\n\n' + section;
-    const plugin = referenceDecorationsPlugin((doc) => [sectionReferences(documentMapper.fromDocument(doc))]);
+    const plugin = new ReferenceDecorationsPlugin(documentMapper).plugin;
     const state = EditorState.create({ doc: documentMapper.toDocument(parse(text)), plugins: [plugin] });
     const decorations = plugin.getState(state)!.find();
     expect(decorations).toHaveLength(1);
-    expect((decorations[0].type as any).attrs.class).toContain('ambiguous');
+    expect((decorations[0] as any).type.attrs.class).toContain('ambiguous');
   });
 
   it('updates plain mentions as targets appear, change names, or disappear', () => {
-    const plugin = referenceDecorationsPlugin((doc) => [sectionReferences(documentMapper.fromDocument(doc))]);
+    const plugin = new ReferenceDecorationsPlugin(documentMapper).plugin;
     let state = EditorState.create({ doc: documentMapper.toDocument(parse('See <dialog_format_rules>.')), plugins: [plugin] });
     for (const [suffix, count] of [['', 0], [section, 1], [section.replace(/dialog_format_rules/g, 'other'), 0], ['', 0]] as const) {
       const doc = documentMapper.toDocument(parse('See <dialog_format_rules>.\n\n' + suffix));
@@ -131,7 +131,7 @@ describe('section references', () => {
     const paragraph = content.blocks[0];
     if (paragraph.blockType !== 'paragraph') throw new Error('Expected paragraph');
     paragraph.content.splice(0, paragraph.content.length, { text: 'See <dialog_' }, { text: 'format', formats: ['bold'] }, { text: '_rules>.' });
-    const plugin = referenceDecorationsPlugin((doc) => [sectionReferences(documentMapper.fromDocument(doc))]);
+    const plugin = new ReferenceDecorationsPlugin(documentMapper).plugin;
     const state = EditorState.create({ doc: documentMapper.toDocument(content), plugins: [plugin] });
     const decorations = plugin.getState(state)!.find();
     expect(decorations).toHaveLength(1);
@@ -153,7 +153,7 @@ describe('section references', () => {
   });
 
   it.each(['<dialog_format_rules>', '</dialog_format_rules>'])('navigates from a plain %s mention without editing the document', (text) => {
-    const plugin = referenceDecorationsPlugin((doc) => [sectionReferences(documentMapper.fromDocument(doc))]);
+    const plugin = new ReferenceDecorationsPlugin(documentMapper).plugin;
     let state = EditorState.create({ doc: documentMapper.toDocument(parse('See ' + text + '.\n\n' + section)), plugins: [plugin] });
     const before = state.doc;
     let prevented = false;

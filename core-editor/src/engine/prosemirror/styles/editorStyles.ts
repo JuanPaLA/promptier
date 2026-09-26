@@ -1,4 +1,4 @@
-import { referenceStyles } from '../plugins/referenceDecorationsPlugin';
+import { referenceStyles } from '../plugins/ReferenceDecorationsPlugin';
 /** Installs the editor's fixed structural styles inside its private DOM root. */
 export function installEditorStyles(
   root: ShadowRoot,

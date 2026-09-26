@@ -17,6 +17,7 @@ export class PromptEditorVM {
     readonly blockCommands: readonly CommandItemVM[],
     readonly referenceCommands: readonly CommandItemVM[],
     readonly variableCommands: readonly CommandItemVM[],
+    readonly toolCommands: readonly CommandItemVM[],
     readonly outlineItems: readonly OutlineItemVM[],
     readonly charsCount: number,
     readonly wordCount: number,
@@ -35,6 +36,7 @@ export class PromptEditorVM {
         insertionCommandItems.filter((item) => item.group === 'block'),
         insertionCommandItems.filter((item) => item.group === 'reference'),
         insertionCommandItems.filter((item) => item.group === 'variable'),
+        insertionCommandItems.filter((item) => item.group === 'tool'),
         outlineItems,
         snapshot.prompt.length,
         snapshot.prompt.split(" ").length,
@@ -83,7 +85,7 @@ export class PromptEditorVM {
 export class CommandItemVM {
   private constructor(
     readonly id: string,
-    readonly group: 'format' | 'block' | 'reference' | 'variable',
+    readonly group: 'format' | 'block' | 'reference' | 'variable' | 'tool',
     readonly label: string,
     readonly glyph: string,
     readonly disabled: boolean,
@@ -127,6 +129,18 @@ export class CommandItemVM {
         `variable.insert.${state.command.path}`, 'variable', `${state.command.path} (${type})`,
         '{{ }}', !state.enabled, false,
         [variable?.title, variable?.description, variable?.required ? 'Required' : 'Optional'].filter(Boolean).join(' — '),
+      );
+    }
+    if (state.command.type === 'tool.insert') {
+      const { tool, parameter } = state.command;
+      if (parameter === undefined) {
+        return new CommandItemVM(`tool.insert.${tool}`, 'tool', tool, 'ƒ', !state.enabled, false, state.tool?.description);
+      }
+      const type = state.parameter?.types.join(' | ') || 'unspecified';
+      return new CommandItemVM(
+        `tool.insert.${tool}.${parameter}`, 'tool', `${tool}.${parameter} (${type})`,
+        '·', !state.enabled, false,
+        [state.parameter?.title, state.parameter?.description, state.parameter?.required ? 'Required' : 'Optional'].filter(Boolean).join(' — '),
       );
     }
     return null;

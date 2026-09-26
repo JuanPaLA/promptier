@@ -12,6 +12,7 @@ export interface EditorHeaderProps extends ViewControlsProps {
   readonly blockCommands: readonly CommandItemVM[];
   readonly referenceCommands?: readonly CommandItemVM[];
   readonly variableCommands?: readonly CommandItemVM[];
+  readonly toolCommands?: readonly CommandItemVM[];
   readonly variableValidation: boolean;
   readonly variableContext: unknown;
   readonly onToggleOutline: () => void;
@@ -22,7 +23,7 @@ export interface EditorHeaderProps extends ViewControlsProps {
 }
 
 export function Header({
-  outlineOpen, formatCommands, blockCommands, referenceCommands = [], variableCommands = [], variableValidation,
+  outlineOpen, formatCommands, blockCommands, referenceCommands = [], variableCommands = [], toolCommands = [], variableValidation,
   variableContext, onToggleOutline, onCommand, copyStatus, onCopy, onVariableValidationChange, ...viewControls
 }: EditorHeaderProps) {
   return (
@@ -47,6 +48,7 @@ export function Header({
                 <ActionMenu label="References" glyph="↗" groups={[
                   { label: 'Sections', items: referenceCommands },
                   { label: 'Variables', items: variableCommands },
+                  { label: 'Tools', items: toolCommands },
                 ]} onAction={onCommand} />
               </div>
             </div>

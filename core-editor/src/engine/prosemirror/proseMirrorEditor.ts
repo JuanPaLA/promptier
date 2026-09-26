@@ -1,10 +1,11 @@
-import { sectionReferences } from '../../prompt/references/sectionReferences';
 import { ReferenceCommands } from './commands/ReferenceCommands';
-import { referenceDecorationsPlugin } from './plugins/referenceDecorationsPlugin';
+import { ReferenceDecorationsPlugin } from './plugins/ReferenceDecorationsPlugin';
+import { ToolCommands } from './commands/ToolCommands';
 import { VariableDecorationsPlugin } from './plugins/VariableDecorationsPlugin';
 import { VariableCommands } from './commands/VariableCommands';
 import { TemplateFormattingPlugin } from './plugins/TemplateFormattingPlugin';
 import type { VariableSchema } from '../../prompt/variables/VariableSchema';
+import type { ToolDefinition } from '../../prompt/tools/ToolDefinition';
 import { baseKeymap } from 'prosemirror-commands';
 import { history, redo, undo } from 'prosemirror-history';
 import { inputRules } from 'prosemirror-inputrules';
@@ -43,7 +44,9 @@ export function createProseMirrorEditor(
 ): PromptEditor {
   const formatCommands = new FormatCommands(markRegistry.all().map(({ format }) => format));
   const blockCommands = new BlockCommands(blockRegistry, documentMapper);
+  const references = new ReferenceDecorationsPlugin(documentMapper);
   const referenceCommands = new ReferenceCommands(documentMapper);
+  const toolCommands = new ToolCommands(() => references.tools);
   const variables = new VariableDecorationsPlugin();
   const variableCommands = new VariableCommands(() => variables.catalog);
   const commandRegistry = new EditorCommandRegistry([
@@ -51,9 +54,10 @@ export function createProseMirrorEditor(
     blockCommands,
     new NavigateCommands(),
     referenceCommands,
+    toolCommands,
     variableCommands,
   ]);
-  const stateReader = new EditorStateReader([formatCommands, blockCommands, referenceCommands, variableCommands]);
+  const stateReader = new EditorStateReader([formatCommands, blockCommands, referenceCommands, toolCommands, variableCommands]);
 
   return new ProseMirrorEditor(
     container,
@@ -64,6 +68,7 @@ export function createProseMirrorEditor(
     markRegistry,
     commandRegistry,
     stateReader,
+    references,
     variables,
   );
 }
@@ -82,6 +87,7 @@ class ProseMirrorEditor implements PromptEditor {
     private readonly marks: MarkRegistry,
     private readonly commands: EditorCommandRegistry,
     private readonly stateReader: EditorStateReader,
+    private readonly references: ReferenceDecorationsPlugin,
     private readonly variables: VariableDecorationsPlugin,
   ) {
     const state = ProseMirrorState.create({
@@ -98,7 +104,7 @@ class ProseMirrorEditor implements PromptEditor {
         }),
         inlineListPastePlugin(),
         appendTrailingParagraphPlugin(),
-        referenceDecorationsPlugin((doc) => [sectionReferences(this.documentMapper.fromDocument(doc))]),
+        this.references.plugin,
         this.variables.plugin,
         new TemplateFormattingPlugin().plugin,
       ],
@@ -173,5 +179,9 @@ class ProseMirrorEditor implements PromptEditor {
 
   setVariableValidation(enabled: boolean): void {
     this.variables.setValidation(this.view, enabled);
+  }
+
+  setTools(tools: readonly ToolDefinition[]): void {
+    this.references.setTools(this.view, tools);
   }
 }

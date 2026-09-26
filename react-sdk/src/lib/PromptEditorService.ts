@@ -4,6 +4,7 @@ import {
   type EditorState,
   type PromptContent,
   type PromptEditorElement,
+  type ToolDefinition,
   type VariableSchema,
 } from 'core-editor';
 
@@ -23,6 +24,7 @@ export class PromptEditorService {
   private variableSchema: VariableSchema | undefined;
   private variableValidation = false;
   private variableContext: unknown;
+  private tools: readonly ToolDefinition[] = [];
   private snapshot: PromptEditorSnapshot = EMPTY_SNAPSHOT;
   private readonly listeners = new Set<PromptEditorListener>();
 
@@ -43,6 +45,7 @@ export class PromptEditorService {
     element.variableSchema = this.variableSchema;
     element.variableValidation = this.variableValidation;
     element.variableContext = this.variableContext;
+    element.tools = this.tools;
     if (this.pendingPrompt !== null) {
       element.value = this.pendingPrompt;
       this.pendingPrompt = null;
@@ -76,6 +79,12 @@ export class PromptEditorService {
   setVariableContext(context: unknown): void {
     this.variableContext = context;
     if (this.element) this.element.variableContext = context;
+  }
+
+  setTools(tools: readonly ToolDefinition[]): void {
+    this.tools = tools;
+    if (this.element) this.element.tools = tools;
+    this.publishSnapshot();
   }
 
   getSnapshot(): PromptEditorSnapshot {

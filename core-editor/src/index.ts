@@ -52,4 +52,7 @@ export type { InsertBlockCommand } from './editor/commands/InsertBlockCommand';
 export type { NavigateCommand, NavigateTarget } from './editor/commands/NavigateCommand';
 export type { InsertReferenceCommand } from './editor/commands/InsertReferenceCommand';
 export type { InsertVariableCommand } from './editor/commands/InsertVariableCommand';
+export type { InsertToolCommand } from './editor/commands/InsertToolCommand';
+export type { JsonSchema, JsonSchemaType } from './prompt/schema/JsonSchema';
 export type { VariableSchema, VariableType, VariableDefinition } from './prompt/variables/VariableSchema';
+export type { ToolDefinition, ToolParameter } from './prompt/tools/ToolDefinition';

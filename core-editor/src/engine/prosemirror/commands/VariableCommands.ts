@@ -2,8 +2,8 @@ import { TextSelection, type EditorState } from 'prosemirror-state';
 import type { EditorView } from 'prosemirror-view';
 import type { CommandState } from '../../../editor/commands/CommandState';
 import type { InsertVariableCommand } from '../../../editor/commands/InsertVariableCommand';
-import { TemplateSyntax } from '../../../prompt/templates/TemplateSyntax';
 import type { VariableCatalog } from '../../../prompt/variables/VariableCatalog';
+import { selectionSplitsTemplateToken } from '../editing/mentionInsertion';
 import type { CommandHandler } from './CommandHandler';
 import type { CommandStateProvider } from './CommandStateProvider';
 
@@ -30,12 +30,7 @@ export class VariableCommands implements CommandHandler<InsertVariableCommand>, 
 
   private canInsert(state: EditorState): boolean {
     const { selection } = state;
-    if (!(selection instanceof TextSelection) || !selection.$from.sameParent(selection.$to)
-      || selection.$from.parent.type.name === 'sectionTitle') return false;
-    const start = selection.$from.parentOffset;
-    const end = selection.$to.parentOffset;
-    return !new TemplateSyntax().tokens(selection.$from.parent.textContent).some((token) =>
-      (token.start < start && (token.end > start || (!token.complete && token.end === start)))
-      || (token.start < end && token.end > end));
+    return selection instanceof TextSelection && selection.$from.sameParent(selection.$to)
+      && selection.$from.parent.type.name !== 'sectionTitle' && !selectionSplitsTemplateToken(selection);
   }
 }

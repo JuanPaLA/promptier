@@ -382,29 +382,50 @@ swaps in `dist` at publish time.
 
 References remain ordinary `TextSegment`s in storage; legacy code-formatted
 references are also supported.
-`prompt/references/` owns a pure resolver contract and its first implementation,
-section resolution. The parser does not consult reference targets or editor
+`prompt/references/` owns a pure resolver contract and its implementations,
+section and tool resolution. The parser does not consult reference targets or editor
 context. Complete opening and closing tags are literal inline tokens, protecting
 their underscores from markdown parsing. Ordinary text is scanned for tag
 mentions across formatting boundaries; legacy code spans must contain exactly
 one tag. Unknown plain mentions remain text, while legacy missing references
 retain their feedback. Duplicate tags are ambiguous, not interchangeable targets.
 
-The engine composes resolvers into a reference decoration plugin independently
-of the code mark descriptor. Decorations are recomputed after document changes,
-with navigation for resolved targets and feedback for missing/ambiguous targets.
+`ReferenceDecorationsPlugin` composes the resolvers independently of the code
+mark descriptor. Decorations are recomputed after document changes, with
+navigation for resolved targets and feedback for missing/ambiguous targets.
 They do not enter document serialization. `reference.insert` validates its target
 and inserts ordinary text; its command states provide the React section picker.
 A future slash menu can invoke the same command. Future reference kinds can add
-resolvers, target variants and picker entries without changing the text parser;
-tool context and syntax are intentionally not implemented yet.
+resolvers, target variants and picker entries without changing the text parser.
+
+### Tool references
+
+Tools are the first reference kind whose targets live outside the document.
+`prompt/tools/ToolCatalog` holds the host's `ToolDefinition`s and resolves the
+text of a whole code span to a tool (`name`, `name()`) or to declared parameters
+(`name.path`, or a bare `path` naming every tool that declares it).
+`toolReferences` adapts it to the resolver contract. It only ever reports
+resolved references: unconfirmed code is ordinary code, so tools have no missing
+or ambiguous state. Having no target in the document, a tool reference carries a
+`detail` for its tooltip instead of a navigation target.
+
+`ReferenceDecorationsPlugin` owns the per-session tool catalog, as
+`VariableDecorationsPlugin` owns the variable catalog, and a metadata-only
+transaction refreshes its decorations when `tools` are replaced. `tool.insert`
+writes a code span through `editing/mentionInsertion`, the same operation behind
+`reference.insert`. `tools` travels through the React presenter/service and the
+Custom Element to the editor session, like `variableSchema`, and never enters
+`PromptContent`, prompt text or undo history. See [tools.md](tools.md).
 
 ### Template variables
 
-`prompt/variables/VariableSchema` defines the supported JSON Schema vocabulary.
-`VariableCatalog` resolves paths and enumerates declared entries; `VariableAnalysis`
-combines that catalog with lexical template tokens to derive references. These
-classes are pure capabilities with no editor or browser dependencies.
+`prompt/schema/` defines the supported JSON Schema vocabulary (`JsonSchema`) and
+`SchemaCatalog`, which resolves and enumerates declared property paths. Variables
+and tool parameters share it; `VariableSchema` remains its public name for
+variables. `VariableCatalog` adds Pebble's literal names to that path grammar;
+`VariableAnalysis` combines the catalog with lexical template tokens to derive
+references. These classes are pure capabilities with no editor or browser
+dependencies.
 
 `prompt/templates/TemplateSyntax` recognizes opaque template regions, including
 quoted delimiters, comments and verbatim content. The format codec uses it to

@@ -1,15 +1,9 @@
-export type VariableType = 'string' | 'number' | 'integer' | 'boolean' | 'object' | 'array' | 'null';
+import type { JsonSchema, JsonSchemaType } from '../schema/JsonSchema';
 
-/** Supported JSON Schema vocabulary for the context exposed by a host. */
-export interface VariableSchema {
-  readonly type?: VariableType | readonly VariableType[];
-  readonly properties?: Readonly<Record<string, VariableSchema>>;
-  readonly required?: readonly string[];
-  readonly additionalProperties?: boolean | VariableSchema;
-  readonly items?: VariableSchema;
-  readonly title?: string;
-  readonly description?: string;
-}
+export type VariableType = JsonSchemaType;
+
+/** The shape of the context a host exposes to its template engine. */
+export type VariableSchema = JsonSchema;
 
 export interface VariableDefinition {
   readonly path: string;

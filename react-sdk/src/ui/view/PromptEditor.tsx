@@ -29,7 +29,7 @@ export function PromptEditor(props: PromptEditorProps) {
 
   const presenter = usePresenter(
     (onChange) => new PromptEditorPresenter(onChange, editor),
-    { value: props.value, onChange: props.onChange, variableSchema: props.variableSchema, variableContext: props.variableContext },
+    { value: props.value, onChange: props.onChange, variableSchema: props.variableSchema, variableContext: props.variableContext, tools: props.tools },
   );
 
   return (
@@ -53,6 +53,7 @@ export function PromptEditor(props: PromptEditorProps) {
           blockCommands={presenter.model.blockCommands}
           referenceCommands={presenter.model.referenceCommands}
           variableCommands={presenter.model.variableCommands}
+          toolCommands={presenter.model.toolCommands}
           variableValidation={variableValidation}
           variableContext={props.variableContext}
           onToggleOutline={toggleOutline}

@@ -115,3 +115,21 @@ describe('variable presentations', () => {
     expect(model.commandFor(model.variableCommands[0].id)).toEqual(command);
   });
 });
+
+describe('tool presentations', () => {
+  it('lists tools and their parameters in their own picker', () => {
+    const tool = { name: 'get_weather', description: 'Current weather' };
+    const parameter = { tool: 'get_weather', path: 'location', types: ['string'] as const, required: true, description: 'City name' };
+    const model = PromptEditorVM.from({ prompt: '', content: { blocks: [] }, state: { commands: [
+      { command: { type: 'tool.insert', tool: 'get_weather' }, enabled: true, tool },
+      { command: { type: 'tool.insert', tool: 'get_weather', parameter: 'location' }, enabled: false, tool, parameter },
+    ] } });
+    expect(model.toolCommands).toEqual([
+      expect.objectContaining({ id: 'tool.insert.get_weather', label: 'get_weather', description: 'Current weather', disabled: false }),
+      expect.objectContaining({ id: 'tool.insert.get_weather.location', label: 'get_weather.location (string)', description: 'City name — Required', disabled: true }),
+    ]);
+    expect(model.referenceCommands).toEqual([]);
+    expect(model.variableCommands).toEqual([]);
+    expect(model.commandFor('tool.insert.get_weather.location')).toEqual({ type: 'tool.insert', tool: 'get_weather', parameter: 'location' });
+  });
+});
