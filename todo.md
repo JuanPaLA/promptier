@@ -1,5 +1,6 @@
 # FEATURES
 [] Inyect tools references.
+[] Convert Heading into section.
 [] Move blocks through prompt.
 [] Navigate thorugh keyboard commands: 
 [] Show estimated token count.

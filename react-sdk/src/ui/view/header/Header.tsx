@@ -1,7 +1,8 @@
 import { ActionMenu } from './ActionMenu';
 import { EditorSettings } from './EditorSettings';
 import type { CommandItemVM } from '../PromptEditorVM';
-import { CommandsToolBar } from './CommandsToolBar';
+import { CommandGroup } from './CommandGroup';
+import { ToolbarGroup } from './ToolbarGroup';
 import { CopyButton } from '../../components/buttons/CopyButton';
 import { ViewControls, type ViewControlsProps } from './ViewControls';
 import { CopyStatus } from '../../components/hooks/useCopyPrompt'
@@ -28,39 +29,36 @@ export function Header({
 }: EditorHeaderProps) {
   return (
     <header className="promptier-header">
-      <div className="promptier-header-actions">
+      <div className="promptier-toolbar" role="toolbar" aria-label="Editor toolbar">
         {viewControls.viewMode === 'curated' && (
           <>
             {!outlineOpen && (
-              <div className="promptier-navigation" role="group" aria-label="Navigation">
+              <ToolbarGroup label="Outline">
                 <button className="promptier-outline-toggle" type="button"
                   aria-label="Show outline" aria-expanded={false} onClick={onToggleOutline}>
                   ▤
                 </button>
-              </div>
+              </ToolbarGroup>
             )}
-            <div className="promptier-editing-actions">
-              <CommandsToolBar groups={[
-                { label: 'Formatting', items: formatCommands },
-                { label: 'Blocks', items: blockCommands },
-              ]} onAction={onCommand} />
-              <div className="promptier-reference-actions">
-                <ActionMenu label="References" glyph="↗" groups={[
-                  { label: 'Sections', items: referenceCommands },
-                  { label: 'Variables', items: variableCommands },
-                  { label: 'Tools', items: toolCommands },
-                ]} onAction={onCommand} />
-              </div>
-            </div>
+            <CommandGroup label="Formatting" items={formatCommands} onAction={onCommand} />
+            <CommandGroup label="Blocks" items={blockCommands} onAction={onCommand} />
+            <ToolbarGroup label="References">
+              <ActionMenu label="Sections" glyph="↗" accent="section" items={referenceCommands}
+                emptyMessage="This prompt has no sections yet" onAction={onCommand} />
+              <ActionMenu label="Variables" glyph="{{ }}" accent="variable" items={variableCommands} onAction={onCommand} />
+              <ActionMenu label="Tools" glyph="ƒ" accent="tool" items={toolCommands} onAction={onCommand} />
+            </ToolbarGroup>
           </>
         )}
-        <div className="promptier-header-trailing">
-          <CopyButton status={copyStatus} onCopy={onCopy} />
+        <ToolbarGroup label="View" trailing>
           <ViewControls {...viewControls} />
-          <EditorSettings variableValidation={variableValidation} variableContext={variableContext}
-            onVariableValidationChange={onVariableValidationChange} />
-        </div>
+        </ToolbarGroup>
+        <ToolbarGroup label="Actions">
+          <CopyButton status={copyStatus} onCopy={onCopy} />
+        </ToolbarGroup>
       </div>
+      <EditorSettings variableValidation={variableValidation} variableContext={variableContext}
+        onVariableValidationChange={onVariableValidationChange} />
     </header>
   );
 }

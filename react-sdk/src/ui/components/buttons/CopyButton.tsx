@@ -13,7 +13,7 @@ export function CopyButton({ status, onCopy }: CopyButtonProps) {
       : '';
 
   return (
-    <div className="promptier-document-actions" role="group" aria-label="Document actions">
+    <div className="promptier-document-actions">
       <button
         className="promptier-copy-button"
         type="button"

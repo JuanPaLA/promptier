@@ -18,7 +18,7 @@ export function ViewControls({
   const fullViewLabel = fullViewActive ? 'Exit full view' : 'Open full view';
 
   return (
-    <div className="promptier-view-controls" role="group" aria-label="View controls">
+    <>
       <div className="promptier-mode-selector" role="group" aria-label="Prompt view">
         <button type="button" className="promptier-mode-button"
           title="Curated view" aria-label="Curated view"
@@ -44,7 +44,7 @@ export function ViewControls({
           <FullViewIcon contracted={fullViewActive} />
         </button>
       )}
-    </div>
+    </>
   );
 }
 

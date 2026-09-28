@@ -125,8 +125,8 @@ describe('tool presentations', () => {
       { command: { type: 'tool.insert', tool: 'get_weather', parameter: 'location' }, enabled: false, tool, parameter },
     ] } });
     expect(model.toolCommands).toEqual([
-      expect.objectContaining({ id: 'tool.insert.get_weather', label: 'get_weather', description: 'Current weather', disabled: false }),
-      expect.objectContaining({ id: 'tool.insert.get_weather.location', label: 'get_weather.location (string)', description: 'City name — Required', disabled: true }),
+      expect.objectContaining({ id: 'tool.insert.get_weather', label: 'get_weather', description: 'Current weather', disabled: false, depth: 0 }),
+      expect.objectContaining({ id: 'tool.insert.get_weather.location', label: 'location (string)', description: 'City name — Required', disabled: true, depth: 1 }),
     ]);
     expect(model.referenceCommands).toEqual([]);
     expect(model.variableCommands).toEqual([]);

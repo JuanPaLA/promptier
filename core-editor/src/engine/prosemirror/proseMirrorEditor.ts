@@ -112,6 +112,7 @@ class ProseMirrorEditor implements PromptEditor {
 
     this.view = new EditorView(container, {
       state,
+      attributes: { spellcheck: 'false' },
       nodeViews: this.blocks.nodeViews(),
       dispatchTransaction: (transaction: Transaction) => this.apply(transaction),
     });

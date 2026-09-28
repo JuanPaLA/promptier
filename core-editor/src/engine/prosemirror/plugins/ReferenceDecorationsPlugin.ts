@@ -110,11 +110,8 @@ export const referenceStyles = `
 .ProseMirror .promptier-reference[role="link"] { cursor: pointer; }
 .ProseMirror .promptier-reference[role="link"]::before { content: '↗ '; }
 .ProseMirror .promptier-reference:focus { outline: 2px solid #6366f1; }
-.ProseMirror .promptier-reference-tool,
-.ProseMirror .promptier-reference-parameter {
-  background: #f5f3ff; color: #6d28d9; border-bottom-color: #c4b5fd;
-}
-.ProseMirror .promptier-reference-parameter { border-bottom-style: dotted; }
+.ProseMirror .promptier-reference-tool { background: #fef2f2; color: #b91c1c; border-bottom-color: #fca5a5; }
+.ProseMirror .promptier-reference-parameter { background: #fff7f7; color: #dc2626; border-bottom: 1px dotted #fca5a5; }
 .ProseMirror .promptier-reference-missing,
 .ProseMirror .promptier-reference-ambiguous {
   background: #fffbeb; color: #92400e; border-bottom: 1px dashed #d97706;

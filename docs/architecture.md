@@ -330,8 +330,12 @@ moving the selection.
     element stays mounted while hidden so switching preserves its session.
     Formatting and outline controls are hidden in Raw; the prior outline
     preference returns in Curated. Neither switching nor copying writes the
-    document. Header composes navigation, editing, document, and view action
-    groups; clipboard operations and feedback state live in the React wrapper.
+    document. Header composes a horizontally scrollable toolbar of labelled
+    groups (Outline, Formatting, Blocks, References, View, Actions) and a
+    separate settings popover. References has one picker per kind — sections,
+    variables and tools — and a picker whose host input is absent is hidden.
+    Picker panels are fixed-positioned so the scrolling toolbar does not clip
+    them. Clipboard operations and feedback state live in the React wrapper.
   - It used to be a *controlled* binding (`content`/`onChange(content)`), which
     forced every React host to hold `PromptContent` — leaking the document model
     into the one place the SDK exists to keep it out of. It then swung to

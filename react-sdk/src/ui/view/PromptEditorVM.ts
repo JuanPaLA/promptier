@@ -91,6 +91,7 @@ export class CommandItemVM {
     readonly disabled: boolean,
     readonly active: boolean,
     readonly description: string = '',
+    readonly depth: number = 0,
   ) {}
 
   static from(state: CommandState): CommandItemVM | null {
@@ -137,10 +138,12 @@ export class CommandItemVM {
         return new CommandItemVM(`tool.insert.${tool}`, 'tool', tool, 'ƒ', !state.enabled, false, state.tool?.description);
       }
       const type = state.parameter?.types.join(' | ') || 'unspecified';
+      const path = parameter.split('.');
       return new CommandItemVM(
-        `tool.insert.${tool}.${parameter}`, 'tool', `${tool}.${parameter} (${type})`,
+        `tool.insert.${tool}.${parameter}`, 'tool', `${path[path.length - 1]} (${type})`,
         '·', !state.enabled, false,
         [state.parameter?.title, state.parameter?.description, state.parameter?.required ? 'Required' : 'Optional'].filter(Boolean).join(' — '),
+        path.length,
       );
     }
     return null;

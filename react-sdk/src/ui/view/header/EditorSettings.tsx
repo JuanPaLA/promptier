@@ -1,18 +1,18 @@
-import { useState } from 'react';
+import { usePopover } from '../../components/hooks/usePopover';
 
 export function EditorSettings({ variableValidation, variableContext, onVariableValidationChange }: {
   readonly variableValidation: boolean;
   readonly variableContext: unknown;
   readonly onVariableValidationChange: (enabled: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const popover = usePopover();
   return (
-    <details className="promptier-settings" open={open} onToggle={(event) => setOpen(event.currentTarget.open)}>
+    <details ref={popover.ref} className="promptier-settings" open={popover.open} onToggle={popover.onToggle}>
       <summary aria-label="Editor settings" title="Editor settings"><SettingsIcon /></summary>
       <aside className="promptier-settings-panel" aria-label="Editor settings">
         <header>
           <h2>Editor settings</h2>
-          <button type="button" aria-label="Close settings" title="Close settings" onClick={() => setOpen(false)}>×</button>
+          <button type="button" aria-label="Close settings" title="Close settings" onClick={popover.close}>×</button>
         </header>
         <section>
           <h3>Variables</h3>
