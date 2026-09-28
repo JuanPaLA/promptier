@@ -11,7 +11,6 @@ export interface PromptEditorPresenterProps {
   readonly value?: string;
   readonly onChange?: (value: string) => void;
   readonly variableSchema?: VariableSchema;
-  readonly variableContext?: unknown;
   readonly tools?: readonly ToolDefinition[];
 }
 
@@ -26,7 +25,6 @@ export class PromptEditorPresenter extends PresenterBase<
     super(onChange);
     this.propChanged('value', this.setPrompt);
     this.propChanged('variableSchema', this.setVariableSchema);
-    this.propChanged('variableContext', this.setVariableContext);
     this.propChanged('tools', this.setTools);
   }
 
@@ -38,7 +36,6 @@ export class PromptEditorPresenter extends PresenterBase<
     this.editorSubscription = this.editor.subscribe(this.handleEditorChange);
     this.setPrompt(this.props.value);
     this.setVariableSchema(this.props.variableSchema);
-    this.setVariableContext(this.props.variableContext);
     this.setTools(this.props.tools);
     this.refreshViewModel();
   }
@@ -67,10 +64,6 @@ export class PromptEditorPresenter extends PresenterBase<
 
   private setVariableSchema = (schema: VariableSchema | undefined): void => {
     this.editor.setVariableSchema(schema);
-  };
-
-  private setVariableContext = (context: unknown): void => {
-    this.editor.setVariableContext(context);
   };
 
   private setTools = (tools: readonly ToolDefinition[] | undefined): void => {

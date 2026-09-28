@@ -15,7 +15,6 @@ export interface EditorHeaderProps extends ViewControlsProps {
   readonly variableCommands?: readonly CommandItemVM[];
   readonly toolCommands?: readonly CommandItemVM[];
   readonly variableValidation: boolean;
-  readonly variableContext: unknown;
   readonly onToggleOutline: () => void;
   readonly onCommand: (id: string) => void;
   readonly copyStatus: CopyStatus;
@@ -25,7 +24,7 @@ export interface EditorHeaderProps extends ViewControlsProps {
 
 export function Header({
   outlineOpen, formatCommands, blockCommands, referenceCommands = [], variableCommands = [], toolCommands = [], variableValidation,
-  variableContext, onToggleOutline, onCommand, copyStatus, onCopy, onVariableValidationChange, ...viewControls
+  onToggleOutline, onCommand, copyStatus, onCopy, onVariableValidationChange, ...viewControls
 }: EditorHeaderProps) {
   return (
     <header className="promptier-header">
@@ -57,8 +56,7 @@ export function Header({
           <CopyButton status={copyStatus} onCopy={onCopy} />
         </ToolbarGroup>
       </div>
-      <EditorSettings variableValidation={variableValidation} variableContext={variableContext}
-        onVariableValidationChange={onVariableValidationChange} />
+      <EditorSettings variableValidation={variableValidation} onVariableValidationChange={onVariableValidationChange} />
     </header>
   );
 }

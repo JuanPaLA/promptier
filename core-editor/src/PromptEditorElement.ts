@@ -15,7 +15,6 @@ export interface PromptEditorElement extends HTMLElement {
   value: string;
   variableSchema: VariableSchema | undefined;
   variableValidation: boolean;
-  variableContext: unknown;
   tools: readonly ToolDefinition[];
   run(command: EditorCommand): boolean;
   getState(): EditorState | null;
@@ -44,7 +43,6 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     private pendingContent: PromptContent = { blocks: [] };
     private pendingVariableSchema: VariableSchema | undefined;
     private pendingVariableValidation = false;
-    private pendingVariableContext: unknown;
     private pendingTools: readonly ToolDefinition[] = [];
     private sessionSubscriptions: Array<() => void> = [];
 
@@ -92,14 +90,6 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       this.editor?.setVariableValidation(enabled);
     }
 
-    get variableContext(): unknown {
-      return this.pendingVariableContext;
-    }
-
-    set variableContext(context: unknown) {
-      this.pendingVariableContext = context;
-    }
-
     get tools(): readonly ToolDefinition[] {
       return this.pendingTools;
     }
@@ -115,7 +105,6 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
       this.upgradeProperty('content');
       this.upgradeProperty('variableSchema');
       this.upgradeProperty('variableValidation');
-      this.upgradeProperty('variableContext');
       this.upgradeProperty('tools');
       const session = createProseMirrorEditor(this.editorContainer, this.pendingContent);
       this.editor = session;
@@ -151,7 +140,7 @@ function createPromptEditorElementConstructor(): CustomElementConstructor {
     }
 
     /** Replays a property assigned before the browser upgraded this element. */
-    private upgradeProperty(name: 'value' | 'content' | 'variableSchema' | 'variableValidation' | 'variableContext' | 'tools'): void {
+    private upgradeProperty(name: 'value' | 'content' | 'variableSchema' | 'variableValidation' | 'tools'): void {
       if (!Object.prototype.hasOwnProperty.call(this, name)) return;
       const properties = this as unknown as Record<string, unknown>;
       const pending = properties[name];

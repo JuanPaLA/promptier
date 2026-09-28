@@ -48,28 +48,13 @@ The property can be assigned before connecting or upgrading the element and
 updated afterward. It is a JavaScript property, not a serialized HTML attribute.
 Each editor instance has its own schema. Persist the schema separately if needed.
 
-## Validation and shared context
+## Validation
 
 Variable validation is an editor setting, disabled by default. It is toggled in
 the Settings panel and only controls the visual feedback applied to simple
 variable references. The variable schema remains available to the insertion menu
-whether validation is enabled or disabled.
-
-The host may provide a shared context for inspection:
-
-```tsx
-<PromptEditor
-  value={prompt}
-  onChange={setPrompt}
-  variableSchema={schema}
-  variableContext={{ cliente: { nombre: 'Ada' } }}
-/>
-```
-
-The Settings panel renders that context as read-only JSON. It does not render
-the template, compare paths against values, alter the context, or send it to the
-prompt. The Custom Element exposes the equivalent `variableContext` and
-`variableValidation` properties.
+whether validation is enabled or disabled. The Custom Element exposes the
+equivalent `variableValidation` property.
 
 ## Supported schema vocabulary
 

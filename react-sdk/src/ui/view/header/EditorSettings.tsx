@@ -1,8 +1,7 @@
 import { usePopover } from '../../components/hooks/usePopover';
 
-export function EditorSettings({ variableValidation, variableContext, onVariableValidationChange }: {
+export function EditorSettings({ variableValidation, onVariableValidationChange }: {
   readonly variableValidation: boolean;
-  readonly variableContext: unknown;
   readonly onVariableValidationChange: (enabled: boolean) => void;
 }) {
   const popover = usePopover();
@@ -23,23 +22,9 @@ export function EditorSettings({ variableValidation, variableContext, onVariable
           </div>
           <p>When enabled, declared, unknown and unverified variables receive visual feedback in the prompt.</p>
         </section>
-        <section>
-          <h3>Shared context</h3>
-          <p>This is the read-only context supplied when the editor was mounted.</p>
-          <pre>{formatContext(variableContext)}</pre>
-        </section>
       </aside>
     </details>
   );
-}
-
-function formatContext(context: unknown): string {
-  if (context === undefined) return 'No shared context was supplied.';
-  try {
-    return JSON.stringify(context, null, 2) ?? 'undefined';
-  } catch {
-    return 'The shared context cannot be displayed as JSON.';
-  }
 }
 
 function SettingsIcon() {

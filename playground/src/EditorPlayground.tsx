@@ -236,11 +236,6 @@ const INITIAL_PROMPT = [
   'El pedido ya está hecho. Si el revendedor quiere cambiar algo, no lo resuelvas cargando otro pedido: decile que ese ya quedó registrado con su código y que el cambio lo tiene que gestionar con Aguas.'
 ].join('\n');
 
-const VARIABLE_CONTEXT = {
-  cliente: { nombre_completo: 'Ada Lovelace', vip: true },
-  empresa: 'Promptier',
-};
-
 /** A host page: it supplies prompt text, receives prompt text, and saves it. */
 export function EditorPlayground() {
   const [prompt, setPrompt] = useState(INITIAL_PROMPT);
@@ -264,7 +259,7 @@ export function EditorPlayground() {
       </header>
 
       <div style={{ height: '75vh', minHeight: '30rem' }}>
-        <PromptEditor value={prompt} onChange={setPrompt} variableSchema={VARIABLE_SCHEMA} variableContext={VARIABLE_CONTEXT} tools={TOOLS} />
+        <PromptEditor value={prompt} onChange={setPrompt} variableSchema={VARIABLE_SCHEMA} tools={TOOLS} />
       </div>
 
       <footer
