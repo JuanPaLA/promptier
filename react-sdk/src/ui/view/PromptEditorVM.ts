@@ -4,7 +4,7 @@ import {
   type NavigateTarget,
   outline,
   type OutlineEntry,
-} from 'core-editor'
+} from '@cachai/promptier-core-editor'
 
 import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
 import { blockPresentationRegistry } from '../blocks/blockPresentations';

@@ -6,7 +6,7 @@ import {
   type PromptEditorElement,
   type ToolDefinition,
   type VariableSchema,
-} from 'core-editor';
+} from '@cachai/promptier-core-editor';
 
 type PromptEditorListener = () => void;
 export type Unsubscribe = () => void;

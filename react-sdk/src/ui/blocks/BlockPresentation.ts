@@ -1,4 +1,4 @@
-import type { BlockType } from 'core-editor';
+import type { BlockType } from '@cachai/promptier-core-editor';
 
 export interface BlockPresentation<B extends BlockType = BlockType> {
   readonly blockType: B;

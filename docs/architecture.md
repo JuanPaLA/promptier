@@ -363,24 +363,24 @@ moving the selection.
 
 ## Distribution
 
-Three build outputs, because they answer three different questions
-(`yarn workspace core-editor build`):
+Two build outputs, because they answer two different questions
+(`yarn workspace @cachai/promptier-core-editor build`):
 
 | Entry | For | ProseMirror |
 | --- | --- | --- |
-| `core-editor/format` | a developer's **server**, rendering a stored prompt at LLM-call time | absent — asserted by `bundle.test.ts` |
-| `core-editor` | bundler consumers | external, so their bundler dedupes it |
-| `dist/promptier.js` | `<script src>` — see `examples/standalone.html` | inlined |
+| `@cachai/promptier-core-editor/format` | a developer's **server**, rendering a stored prompt at LLM-call time | absent — asserted by `bundle.test.ts` |
+| `@cachai/promptier-core-editor` | bundler consumers | external, so their bundler dedupes it |
 
-Two things this shape encodes. **ProseMirror is external for the library build**
-because two copies break the `instanceof` checks it makes between schema and
-state. And **the standalone bundle is its own entry** (`src/standalone.ts`), not
-a reformat of `index.ts`: it registers the tag and publishes `window.Promptier`,
-and the module entry has to stay free of side effects so bundlers can shake it
-and SSR can import it.
+**ProseMirror is external for the library build** because two copies break the
+`instanceof` checks it makes between schema and state. The module entry has to
+stay free of side effects so bundlers can shake it and SSR can import it.
 
 `exports` points at TS source so the dev loop stays buildless; `publishConfig`
-swaps in `dist` at publish time.
+swaps in `dist` at publish time. That swap is honored by Yarn and pnpm but not
+by `npm publish`, so publish with `yarn npm publish`.
+
+Both packages are published to npm under the `@cachai` scope:
+`@cachai/promptier-core-editor` and `@cachai/promptier-react-sdk`.
 
 ### Derived references
 

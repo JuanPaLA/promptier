@@ -1,5 +1,5 @@
 # FEATURES
-[] Inyect tools references.
+[X] Inyect tools references.
 [] Convert Heading into section.
 [] Move blocks through prompt.
 [] Navigate thorugh keyboard commands: 

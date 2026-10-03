@@ -1,16 +1,25 @@
 {
-  "name": "core-editor",
-  "version": "0.0.1",
+  "name": "@cachai/promptier-core-editor",
+  "version": "0.1.0",
+  "description": "Framework-agnostic editor for LLM prompts, exposed as a Custom Element.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanPaLA/promptier.git",
+    "directory": "core-editor"
+  },
   "files": [
     "dist"
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./format": "./src/prompt/serialization/index.ts",
-    "./standalone": "./src/standalone.ts"
+    "./format": "./src/prompt/serialization/index.ts"
   },
   "publishConfig": {
+    "access": "public",
+    "main": "./dist/editor.cjs",
+    "module": "./dist/editor.js",
+    "types": "./dist/types/index.d.ts",
     "exports": {
       ".": {
         "types": "./dist/types/index.d.ts",
@@ -21,13 +30,12 @@
         "types": "./dist/types/prompt/serialization/index.d.ts",
         "import": "./dist/format.js",
         "require": "./dist/format.cjs"
-      },
-      "./standalone": "./dist/promptier.js"
+      }
     }
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "vite build && vite build -c vite.standalone.config.ts && tsc -p tsconfig.build.json",
+    "build": "vite build && tsc -p tsconfig.build.json",
     "test": "vitest"
   },
   "dependencies": {

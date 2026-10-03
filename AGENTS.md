@@ -33,7 +33,7 @@ camelCase ⟺ it exports values or functions (`sectionDescriptor.ts`,
 yarn install                        # from repo root
 yarn workspace playground dev       # start the playground
 yarn test                           # vitest, from repo root
-yarn workspace core-editor build    # dist/ — needed by examples/standalone.html
+yarn workspace @cachai/promptier-core-editor build    # dist/ — what gets published
 ```
 
 This is intentionally minimal — avoid reading more architectural intent into it than what's written above; the domain model and editor capabilities are still evolving.

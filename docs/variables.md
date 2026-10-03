@@ -6,7 +6,7 @@ It does not render templates, inject values, or replace Pebble in the host.
 ## React
 
 ```tsx
-import { PromptEditor, type VariableSchema } from 'react-sdk';
+import { PromptEditor, type VariableSchema } from '@cachai/promptier-react-sdk';
 
 const schema: VariableSchema = {
   type: 'object',
@@ -35,7 +35,7 @@ Treat schema values as immutable and supply a new object when they change.
 ## Custom Element
 
 ```ts
-import { registerPromptEditor, type PromptEditorElement } from 'core-editor';
+import { registerPromptEditor, type PromptEditorElement } from '@cachai/promptier-core-editor';
 
 registerPromptEditor();
 const editor = document.createElement('prompt-editor') as PromptEditorElement;

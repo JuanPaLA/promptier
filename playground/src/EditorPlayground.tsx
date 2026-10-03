@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PromptEditor, type ToolDefinition, type VariableSchema } from 'react-sdk';
+import { PromptEditor, type ToolDefinition, type VariableSchema } from '@cachai/promptier-react-sdk';
 
 const INITIAL_PROMPT = [
   '# Quién eres\n' +

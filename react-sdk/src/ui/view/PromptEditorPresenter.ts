@@ -5,7 +5,7 @@ import {
   type Unsubscribe,
 } from '../../lib/PromptEditorService';
 import { PromptEditorVM } from './PromptEditorVM';
-import type { ToolDefinition, VariableSchema } from 'core-editor';
+import type { ToolDefinition, VariableSchema } from '@cachai/promptier-core-editor';
 
 export interface PromptEditorPresenterProps {
   readonly value?: string;

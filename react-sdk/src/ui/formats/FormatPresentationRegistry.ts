@@ -1,4 +1,4 @@
-import type { Format } from 'core-editor';
+import type { Format } from '@cachai/promptier-core-editor';
 import type {
   FormatPresentation,
   FormatPresentationMap,

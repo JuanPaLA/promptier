@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { ActionMenu } from './ActionMenu';
 import { EditorSettings } from './EditorSettings';
 import type { CommandItemVM } from '../PromptEditorVM';
@@ -6,6 +7,7 @@ import { ToolbarGroup } from './ToolbarGroup';
 import { CopyButton } from '../../components/buttons/CopyButton';
 import { ViewControls, type ViewControlsProps } from './ViewControls';
 import { CopyStatus } from '../../components/hooks/useCopyPrompt'
+import { useHorizontalWheelScroll } from '../../components/hooks/useHorizontalWheelScroll';
 
 export interface EditorHeaderProps extends ViewControlsProps {
   readonly outlineOpen: boolean;
@@ -26,9 +28,11 @@ export function Header({
   outlineOpen, formatCommands, blockCommands, referenceCommands = [], variableCommands = [], toolCommands = [], variableValidation,
   onToggleOutline, onCommand, copyStatus, onCopy, onVariableValidationChange, ...viewControls
 }: EditorHeaderProps) {
+  const toolbar = useRef<HTMLDivElement>(null);
+  useHorizontalWheelScroll(toolbar);
   return (
     <header className="promptier-header">
-      <div className="promptier-toolbar" role="toolbar" aria-label="Editor toolbar">
+      <div ref={toolbar} className="promptier-toolbar" role="toolbar" aria-label="Editor toolbar">
         {viewControls.viewMode === 'curated' && (
           <>
             {!outlineOpen && (

@@ -7,7 +7,7 @@ It does not call tools, validate arguments, or change how tools reach a model.
 ## React
 
 ```tsx
-import { PromptEditor, type ToolDefinition } from 'react-sdk';
+import { PromptEditor, type ToolDefinition } from '@cachai/promptier-react-sdk';
 
 const tools: ToolDefinition[] = [
   {
@@ -34,7 +34,7 @@ new array when they change.
 ## Custom Element
 
 ```ts
-import { registerPromptEditor, type PromptEditorElement } from 'core-editor';
+import { registerPromptEditor, type PromptEditorElement } from '@cachai/promptier-core-editor';
 
 registerPromptEditor();
 const editor = document.createElement('prompt-editor') as PromptEditorElement;

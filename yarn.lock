@@ -209,6 +209,38 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cachai/promptier-core-editor@workspace:^, @cachai/promptier-core-editor@workspace:core-editor":
+  version: 0.0.0-use.local
+  resolution: "@cachai/promptier-core-editor@workspace:core-editor"
+  dependencies:
+    "@types/node": "npm:^26.2.0"
+    prosemirror-commands: "npm:^1.6.0"
+    prosemirror-history: "npm:^1.4.1"
+    prosemirror-inputrules: "npm:^1.4.0"
+    prosemirror-keymap: "npm:^1.2.2"
+    prosemirror-model: "npm:^1.22.3"
+    prosemirror-state: "npm:^1.4.3"
+    prosemirror-view: "npm:^1.34.3"
+    typescript: "npm:^5.6.3"
+    vite: "npm:^5.4.10"
+  languageName: unknown
+  linkType: soft
+
+"@cachai/promptier-react-sdk@workspace:*, @cachai/promptier-react-sdk@workspace:react-sdk":
+  version: 0.0.0-use.local
+  resolution: "@cachai/promptier-react-sdk@workspace:react-sdk"
+  dependencies:
+    "@cachai/promptier-core-editor": "workspace:^"
+    "@nbottarini/react-presenter": "npm:^1.0.0-rc"
+    "@types/react": "npm:^18.3.12"
+    react: "npm:^18.3.1"
+    typescript: "npm:^5.6.3"
+    vite: "npm:^5.4.10"
+  peerDependencies:
+    react: ^18.3.1
+  languageName: unknown
+  linkType: soft
+
 "@esbuild/aix-ppc64@npm:0.21.5":
   version: 0.21.5
   resolution: "@esbuild/aix-ppc64@npm:0.21.5"
@@ -1038,23 +1070,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-editor@workspace:*, core-editor@workspace:core-editor":
-  version: 0.0.0-use.local
-  resolution: "core-editor@workspace:core-editor"
-  dependencies:
-    "@types/node": "npm:^26.2.0"
-    prosemirror-commands: "npm:^1.6.0"
-    prosemirror-history: "npm:^1.4.1"
-    prosemirror-inputrules: "npm:^1.4.0"
-    prosemirror-keymap: "npm:^1.2.2"
-    prosemirror-model: "npm:^1.22.3"
-    prosemirror-state: "npm:^1.4.3"
-    prosemirror-view: "npm:^1.34.3"
-    typescript: "npm:^5.6.3"
-    vite: "npm:^5.4.10"
-  languageName: unknown
-  linkType: soft
-
 "csstype@npm:^3.2.2":
   version: 3.2.3
   resolution: "csstype@npm:3.2.3"
@@ -1556,12 +1571,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "playground@workspace:playground"
   dependencies:
+    "@cachai/promptier-react-sdk": "workspace:*"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
     "@vitejs/plugin-react": "npm:^4.3.3"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
-    react-sdk: "workspace:*"
     typescript: "npm:^5.6.3"
     vite: "npm:^5.4.10"
   languageName: unknown
@@ -1705,20 +1720,6 @@ __metadata:
   checksum: 10c0/002cba940384c9930008c0bce26cac97a9d5682bc623112c2268ba0c155127d9c178a9a5cc2212d560088d60dfd503edd808669a25f9b377f316a32361d0b23c
   languageName: node
   linkType: hard
-
-"react-sdk@workspace:*, react-sdk@workspace:react-sdk":
-  version: 0.0.0-use.local
-  resolution: "react-sdk@workspace:react-sdk"
-  dependencies:
-    "@nbottarini/react-presenter": "npm:^1.0.0-rc"
-    "@types/react": "npm:^18.3.12"
-    core-editor: "workspace:*"
-    react: "npm:^18.3.1"
-    typescript: "npm:^5.6.3"
-  peerDependencies:
-    react: ^18.3.1
-  languageName: unknown
-  linkType: soft
 
 "react@npm:^18.3.1":
   version: 18.3.1

@@ -1,4 +1,4 @@
-import type { BlockType } from 'core-editor';
+import type { BlockType } from '@cachai/promptier-core-editor';
 import type {
   BlockPresentation,
   BlockPresentationMap,

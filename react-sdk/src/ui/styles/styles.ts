@@ -4,8 +4,8 @@ export const styles = `
   --promptier-muted: #57606a;
   --promptier-subtle: #f6f8fa;
   --promptier-active: #dbeafe;
-  /* Both top bars must align across the outline seam: group label + control height + room for a thin scrollbar + border. */
-  --promptier-bar-height: calc(3rem + 1px);
+  /* Both top bars must align across the outline seam: group label + control height + breathing room + border. */
+  --promptier-bar-height: calc(2.75rem + 1px);
   --promptier-footer-height: calc(1.4rem + 0.5px);
   display: flex;
   min-width: 0;
@@ -62,7 +62,10 @@ export const styles = `
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+}
+.promptier-toolbar::-webkit-scrollbar {
+  display: none;
 }
 .promptier-toolbar > * {
   flex-shrink: 0;

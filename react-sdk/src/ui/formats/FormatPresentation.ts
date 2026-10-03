@@ -1,4 +1,4 @@
-import type { Format } from 'core-editor';
+import type { Format } from '@cachai/promptier-core-editor';
 
 export interface FormatPresentation<F extends Format = Format> {
   readonly format: F;

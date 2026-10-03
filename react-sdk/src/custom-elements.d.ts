@@ -1,5 +1,5 @@
 import type { DetailedHTMLProps, HTMLAttributes } from 'react';
-import type { PromptEditorElement } from 'core-editor';
+import type { PromptEditorElement } from '@cachai/promptier-core-editor';
 
 declare global {
   namespace JSX {
