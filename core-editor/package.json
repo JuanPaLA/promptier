@@ -1,6 +1,6 @@
 {
   "name": "@cachai/promptier-core-editor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Framework-agnostic editor for LLM prompts, exposed as a Custom Element.",
   "type": "module",
   "repository": {

@@ -9,6 +9,7 @@ import type { ToolDefinition } from './prompt/tools/ToolDefinition';
 
 const DEFAULT_TAG_NAME = 'prompt-editor';
 const EDITOR_SURFACE_CLASS_NAME = 'prompt-editor-surface';
+const PROMPT_EDITOR_BRAND = Symbol.for('@cachai/promptier-core-editor/prompt-editor');
 
 export interface PromptEditorElement extends HTMLElement {
   content: PromptContent;
@@ -24,6 +25,7 @@ export function registerPromptEditor(tagName: string = DEFAULT_TAG_NAME): void {
   if (typeof customElements === 'undefined' || typeof HTMLElement === 'undefined') return;
   const existing = customElements.get(tagName);
   if (existing) {
+    if (isPromptEditorConstructor(existing)) return;
     throw new Error(
       `Cannot register <${tagName}>: that custom-element name is already in use.`,
     );
@@ -32,11 +34,20 @@ export function registerPromptEditor(tagName: string = DEFAULT_TAG_NAME): void {
   customElements.define(tagName, constructor);
 }
 
+/**
+ * Recognized by brand, not identity: a bundler can load this module twice, and
+ * each copy builds its own class.
+ */
+function isPromptEditorConstructor(constructor: CustomElementConstructor): boolean {
+  return (constructor as unknown as Record<symbol, unknown>)[PROMPT_EDITOR_BRAND] === true;
+}
+
 function createPromptEditorElementConstructor(): CustomElementConstructor {
   return class PromptEditorElementImplementation
     extends HTMLElement
     implements PromptEditorElement
   {
+    static readonly [PROMPT_EDITOR_BRAND] = true;
 
     private readonly editorContainer: HTMLElement;
     private editor: PromptEditor | null = null;

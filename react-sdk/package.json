@@ -1,6 +1,6 @@
 {
   "name": "@cachai/promptier-react-sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React component for editing LLM prompts, built on @cachai/promptier-core-editor.",
   "type": "module",
   "repository": {
@@ -35,7 +35,7 @@
     "@nbottarini/react-presenter": "^1.0.0-rc"
   },
   "peerDependencies": {
-    "react": "^18.3.1"
+    "react": "^18.3.1 || ^19.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
