@@ -30,6 +30,7 @@ import type { MarkRegistry } from './descriptors/marks/MarkRegistry';
 import type { PromptDocumentMapper } from './mapping/PromptDocumentMapper';
 import { appendTrailingParagraphPlugin } from './plugins/appendTrailingParagraphPlugin';
 import { inlineListPastePlugin } from './plugins/inlineListPastePlugin';
+import { PromptClipboardPlugin } from './plugins/PromptClipboardPlugin';
 import {
   blockRegistry,
   documentMapper,
@@ -102,6 +103,7 @@ class ProseMirrorEditor implements PromptEditor {
         inputRules({
           rules: [...this.blocks.inputRules(this.schema), ...this.marks.inputRules(this.schema)],
         }),
+        new PromptClipboardPlugin(this.documentMapper).plugin,
         inlineListPastePlugin(),
         appendTrailingParagraphPlugin(),
         this.references.plugin,

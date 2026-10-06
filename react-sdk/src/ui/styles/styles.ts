@@ -5,7 +5,7 @@ export const styles = `
   --promptier-subtle: #f6f8fa;
   --promptier-active: #dbeafe;
   /* Both top bars must align across the outline seam: group label + control height + breathing room + border. */
-  --promptier-bar-height: calc(2.75rem + 1px);
+  --promptier-bar-height: calc(3.25rem + 1px);
   --promptier-footer-height: calc(1.4rem + 0.5px);
   display: flex;
   min-width: 0;

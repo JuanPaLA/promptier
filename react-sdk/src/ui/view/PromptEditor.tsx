@@ -15,12 +15,14 @@ import { useFullscreen } from '../components/hooks/useFullscreen';
 import { RawPromptView } from './RawPromptView';
 import { useCopyPrompt } from '../components/hooks/useCopyPrompt';
 
-export type PromptEditorProps = PromptEditorPresenterProps;
+export interface PromptEditorProps extends PromptEditorPresenterProps {
+  readonly defaultOutlineOpen?: boolean;
+}
 
 export function PromptEditor(props: PromptEditorProps) {
   const editorRoot = useRef<HTMLDivElement>(null);
   const [editor] = useState(() => new PromptEditorService());
-  const [outlineOpen, setOutlineOpen] = useState(true);
+  const [outlineOpen, setOutlineOpen] = useState(props.defaultOutlineOpen ?? true);
   const [viewMode, setViewMode] = useState<EditorViewMode>('curated');
   const [variableValidation, setVariableValidation] = useState(false);
   const clipboard = useCopyPrompt(() => editor.getSnapshot().prompt);

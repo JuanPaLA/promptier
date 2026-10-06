@@ -92,6 +92,20 @@ loss would make "just give me a string" untrustworthy.
 The escape hatch for literal markup is a code fence: tags inside a fence never
 open a section.
 
+## Clipboard
+
+Plain text pasted into the editor is read with `parse`, so a prompt copied as
+text — with the copy button, or from any source that offers no HTML — arrives
+with its structure: `# Title` is a heading, `<tag>` … `</tag>` a section. The
+same rules apply as anywhere else, including the escapes above: `\# Title`
+pastes as a paragraph that reads `# Title`. Pasting therefore reflows
+hard-wrapped lines and drops blank blocks exactly as setting the prompt string
+does. Inside a code block the text stays verbatim, and in a section title it
+stays literal.
+
+Copying out of the editor does not yet write the prompt format: the `text/plain`
+flavor is the selection's text without markup.
+
 ## The two laws
 
 Both are enforced by `roundTrip.test.ts`.
