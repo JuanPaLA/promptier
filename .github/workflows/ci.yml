@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+      - run: yarn install --immutable
+      - run: yarn test
+      - run: yarn workspace @cachai/promptier-core-editor typecheck
+      - run: yarn workspace @cachai/promptier-react-sdk typecheck
+      - run: yarn workspace @cachai/promptier-core-editor build
+      - run: yarn workspace @cachai/promptier-react-sdk build
+      - run: yarn workspace playground build

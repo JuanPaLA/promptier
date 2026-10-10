@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write # npm trusted publishing authenticates with a short-lived OIDC token
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm-release # waits for a manual approval
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+      # No registry-url: the .npmrc it writes carries an empty token that gets in the way of OIDC.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Trusted publishing needs npm >= 11.5.1; the runner ships an older one.
+      - run: npm install -g "npm@^11.5.1"
+      - run: yarn install --immutable
+
+      - name: Tag matches both package versions
+        run: |
+          for package in core-editor react-sdk; do
+            version=$(node -p "require('./$package/package.json').version")
+            if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+              echo "$package is at $version but the tag is $GITHUB_REF_NAME"
+              exit 1
+            fi
+          done
+
+      - run: yarn test
+      - run: yarn workspace @cachai/promptier-core-editor typecheck
+      - run: yarn workspace @cachai/promptier-react-sdk typecheck
+      - run: yarn workspace @cachai/promptier-core-editor build
+      - run: yarn workspace @cachai/promptier-react-sdk build
+
+      # Yarn applies each package's publishConfig (the dist exports); npm publishes the result.
+      - name: Pack
+        run: |
+          mkdir out
+          yarn workspace @cachai/promptier-core-editor pack --out "$PWD/out/core-editor.tgz"
+          yarn workspace @cachai/promptier-react-sdk pack --out "$PWD/out/react-sdk.tgz"
+
+      # Skips a package already on npm, so a failed run can be re-run safely.
+      - name: Publish
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          publish() {
+            if npm view "$1@$version" version > /dev/null 2>&1; then
+              echo "$1@$version is already published"
+            else
+              npm publish "$2" --access public
+            fi
+          }
+          publish @cachai/promptier-core-editor ./out/core-editor.tgz
+          publish @cachai/promptier-react-sdk ./out/react-sdk.tgz

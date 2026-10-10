@@ -377,7 +377,8 @@ stay free of side effects so bundlers can shake it and SSR can import it.
 
 `exports` points at TS source so the dev loop stays buildless; `publishConfig`
 swaps in `dist` at publish time. That swap is honored by Yarn and pnpm but not
-by `npm publish`, so publish with `yarn npm publish`.
+by `npm publish` on a package folder, so releases pack with `yarn pack` and
+publish the tarball. See [releasing.md](releasing.md).
 
 Both packages are published to npm under the `@cachai` scope:
 `@cachai/promptier-core-editor` and `@cachai/promptier-react-sdk`.

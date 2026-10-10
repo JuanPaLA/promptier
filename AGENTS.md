@@ -2,7 +2,7 @@
 
 A business-domain editor for LLM prompts, built on ProseMirror.
 
-Architecture, the domain→ProseMirror descriptor seam, and the design decisions log live in [docs/architecture.md](docs/architecture.md). The prompt text format — the one serialization, and a permanent compatibility surface — is specified in [docs/format.md](docs/format.md).
+Architecture, the domain→ProseMirror descriptor seam, and the design decisions log live in [docs/architecture.md](docs/architecture.md). The prompt text format — the one serialization, and a permanent compatibility surface — is specified in [docs/format.md](docs/format.md). How a version reaches npm is in [docs/releasing.md](docs/releasing.md).
 
 ## Workspaces (yarn workspaces)
 
