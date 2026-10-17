@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "@cachai/promptier-core-editor": "workspace:^",
-    "@nbottarini/react-presenter": "^1.0.0-rc"
+    "@nbottarini/react-presenter": "^1.0.0-rc",
+    "tokenx": "^2.2.0"
   },
   "peerDependencies": {
     "react": "^18.3.1 || ^19.0.0"

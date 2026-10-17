@@ -3,6 +3,7 @@ import { usePresenter } from '@nbottarini/react-presenter';
 import { useRef, useState } from 'react';
 
 import { PromptEditorService } from '../../lib/PromptEditorService';
+import { TokenxEstimator } from '../../lib/TokenEstimator';
 import { styles } from '../styles/styles';
 import {
   PromptEditorPresenter,
@@ -22,6 +23,7 @@ export interface PromptEditorProps extends PromptEditorPresenterProps {
 export function PromptEditor(props: PromptEditorProps) {
   const editorRoot = useRef<HTMLDivElement>(null);
   const [editor] = useState(() => new PromptEditorService());
+  const [tokenEstimator] = useState(() => new TokenxEstimator());
   const [outlineOpen, setOutlineOpen] = useState(props.defaultOutlineOpen ?? true);
   const [viewMode, setViewMode] = useState<EditorViewMode>('curated');
   const [variableValidation, setVariableValidation] = useState(false);
@@ -30,7 +32,7 @@ export function PromptEditor(props: PromptEditorProps) {
   const toggleOutline = () => setOutlineOpen((open) => !open);
 
   const presenter = usePresenter(
-    (onChange) => new PromptEditorPresenter(onChange, editor),
+    (onChange) => new PromptEditorPresenter(onChange, editor, tokenEstimator),
     { value: props.value, onChange: props.onChange, variableSchema: props.variableSchema, tools: props.tools },
   );
 
@@ -74,6 +76,7 @@ export function PromptEditor(props: PromptEditorProps) {
         <Footer
           charsLength={presenter.model.charsCount}
           wordCount={presenter.model.wordCount}
+          tokenCount={presenter.model.tokenCount}
         />
       </div>
     </div>

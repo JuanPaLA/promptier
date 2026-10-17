@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
  * host's single copy, and the Custom Element in core-editor registers a tag
  * name once, so a second bundled copy of it would collide.
  */
-const isExternal = (id: string) => /^(react(\/|$)|@nbottarini\/|@cachai\/)/.test(id);
+const isExternal = (id: string) => /^(react(\/|$)|@nbottarini\/|@cachai\/|tokenx$)/.test(id);
 
 export default defineConfig({
   build: {

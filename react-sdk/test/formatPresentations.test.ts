@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import type { TokenEstimator } from '../src/lib/TokenEstimator';
 import { PromptEditorVM } from '../src/ui/view/PromptEditorVM';
+
+const estimator: TokenEstimator = { estimate: () => 0 };
 
 describe('format presentations', () => {
   it('projects italic command state without format-specific view-model logic', () => {
@@ -16,7 +19,7 @@ describe('format presentations', () => {
           },
         ],
       },
-    });
+    }, estimator);
 
     expect(viewModel.formatCommands).toEqual([
       expect.objectContaining({
@@ -44,7 +47,7 @@ describe('format presentations', () => {
           { command: { type: 'format', format: 'code' }, enabled: true },
         ],
       },
-    });
+    }, estimator);
 
     expect(viewModel.formatCommands.map(({ id }) => id)).toEqual([
       'format.bold',
@@ -70,7 +73,7 @@ describe('block presentations', () => {
           },
         ],
       },
-    });
+    }, estimator);
 
     expect(viewModel.blockCommands).toEqual([
       expect.objectContaining({
@@ -95,7 +98,7 @@ describe('reference presentations', () => {
     const model = PromptEditorVM.from({
       prompt: '', content: { blocks: [] },
       state: { commands: [{ command, enabled: false }] },
-    });
+    }, estimator);
     expect(model.blockCommands).toEqual([]);
     expect(model.formatCommands).toEqual([]);
     expect(model.referenceCommands).toEqual([expect.objectContaining({ label: '<rules>', disabled: true })]);
@@ -109,7 +112,7 @@ describe('variable presentations', () => {
     const model = PromptEditorVM.from({ prompt: '', content: { blocks: [] }, state: { commands: [{
       command, enabled: true,
       variable: { path: command.path, types: ['string'], required: false, insertable: true, description: 'Nombre del cliente' },
-    }] } });
+    }] } }, estimator);
     expect(model.variableCommands).toEqual([expect.objectContaining({ label: 'cliente.nombre (string)', description: 'Nombre del cliente — Optional', disabled: false })]);
     expect(model.referenceCommands).toEqual([]);
     expect(model.commandFor(model.variableCommands[0].id)).toEqual(command);
@@ -123,7 +126,7 @@ describe('tool presentations', () => {
     const model = PromptEditorVM.from({ prompt: '', content: { blocks: [] }, state: { commands: [
       { command: { type: 'tool.insert', tool: 'get_weather' }, enabled: true, tool },
       { command: { type: 'tool.insert', tool: 'get_weather', parameter: 'location' }, enabled: false, tool, parameter },
-    ] } });
+    ] } }, estimator);
     expect(model.toolCommands).toEqual([
       expect.objectContaining({ id: 'tool.insert.get_weather', label: 'get_weather', description: 'Current weather', disabled: false, depth: 0 }),
       expect.objectContaining({ id: 'tool.insert.get_weather.location', label: 'location (string)', description: 'City name — Required', disabled: true, depth: 1 }),

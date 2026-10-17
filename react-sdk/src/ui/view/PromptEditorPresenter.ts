@@ -2,8 +2,10 @@ import { PresenterBase, type ChangeFunc } from '@nbottarini/react-presenter';
 
 import {
   PromptEditorService,
+  type PromptEditorSnapshot,
   type Unsubscribe,
 } from '../../lib/PromptEditorService';
+import type { TokenEstimator } from '../../lib/TokenEstimator';
 import { PromptEditorVM } from './PromptEditorVM';
 import type { ToolDefinition, VariableSchema } from '@cachai/promptier-core-editor';
 
@@ -21,7 +23,11 @@ export class PromptEditorPresenter extends PresenterBase<
   private editorSubscription: Unsubscribe | null = null;
   private lastReportedPrompt = '';
 
-  constructor(onChange: ChangeFunc, private readonly editor: PromptEditorService) {
+  constructor(
+    onChange: ChangeFunc,
+    private readonly editor: PromptEditorService,
+    private readonly tokenEstimator: TokenEstimator,
+  ) {
     super(onChange);
     this.propChanged('value', this.setPrompt);
     this.propChanged('variableSchema', this.setVariableSchema);
@@ -29,7 +35,7 @@ export class PromptEditorPresenter extends PresenterBase<
   }
 
   protected initModel(): PromptEditorVM {
-    return PromptEditorVM.from(this.editor.getSnapshot());
+    return this.viewModelFor(this.editor.getSnapshot());
   }
 
   start(): void {
@@ -72,12 +78,16 @@ export class PromptEditorPresenter extends PresenterBase<
 
   private handleEditorChange = (): void => {
     const snapshot = this.editor.getSnapshot();
-    this.updateModel(PromptEditorVM.from(snapshot));
+    this.updateModel(this.viewModelFor(snapshot));
     this.reportPrompt(snapshot.prompt);
   };
 
+  private viewModelFor(snapshot: PromptEditorSnapshot): PromptEditorVM {
+    return PromptEditorVM.from(snapshot, this.tokenEstimator);
+  }
+
   private refreshViewModel(): void {
-    this.updateModel(PromptEditorVM.from(this.editor.getSnapshot()));
+    this.updateModel(this.viewModelFor(this.editor.getSnapshot()));
   }
 
   private reportPrompt(prompt: string): void {

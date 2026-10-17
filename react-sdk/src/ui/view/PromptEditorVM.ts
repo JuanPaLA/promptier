@@ -7,6 +7,7 @@ import {
 } from '@cachai/promptier-core-editor'
 
 import type { PromptEditorSnapshot } from '../../lib/PromptEditorService'
+import type { TokenEstimator } from '../../lib/TokenEstimator'
 import { blockPresentationRegistry } from '../blocks/blockPresentations';
 import { formatPresentationRegistry } from '../formats/formatPresentations';
 
@@ -21,11 +22,12 @@ export class PromptEditorVM {
     readonly outlineItems: readonly OutlineItemVM[],
     readonly charsCount: number,
     readonly wordCount: number,
+    readonly tokenCount: number,
     private readonly editorCommandsById: ReadonlyMap<string, EditorCommand>,
     private readonly outlineTargetsById: ReadonlyMap<string, NavigateTarget>,
   ) {}
 
-  static from(snapshot: PromptEditorSnapshot): PromptEditorVM {
+  static from(snapshot: PromptEditorSnapshot, tokenEstimator: TokenEstimator): PromptEditorVM {
     const [formatCommandItems, insertionCommandItems, editorCommandsById] =
         PromptEditorVM.buildCommandItems(snapshot.state?.commands ?? []);
     const [outlineItems, outlineTargetsById] =
@@ -39,10 +41,15 @@ export class PromptEditorVM {
         insertionCommandItems.filter((item) => item.group === 'tool'),
         outlineItems,
         snapshot.prompt.length,
-        snapshot.prompt.split(" ").length,
+        PromptEditorVM.countWords(snapshot.prompt),
+        tokenEstimator.estimate(snapshot.prompt),
         editorCommandsById,
         outlineTargetsById,
     );
+  }
+
+  private static countWords(text: string): number {
+    return text.split(/\s+/).filter(Boolean).length;
   }
 
   commandFor(id: string): EditorCommand | undefined {
