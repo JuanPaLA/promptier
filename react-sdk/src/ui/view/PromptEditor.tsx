@@ -15,6 +15,7 @@ import { OutlinePanel } from './outline/OutlinePanel';
 import { useFullscreen } from '../components/hooks/useFullscreen';
 import { RawPromptView } from './RawPromptView';
 import { useCopyPrompt } from '../components/hooks/useCopyPrompt';
+import { useInitialOutlineOpen } from '../components/hooks/useInitialOutlineOpen';
 
 export interface PromptEditorProps extends PromptEditorPresenterProps {
   readonly defaultOutlineOpen?: boolean;
@@ -24,12 +25,14 @@ export function PromptEditor(props: PromptEditorProps) {
   const editorRoot = useRef<HTMLDivElement>(null);
   const [editor] = useState(() => new PromptEditorService());
   const [tokenEstimator] = useState(() => new TokenxEstimator());
-  const [outlineOpen, setOutlineOpen] = useState(props.defaultOutlineOpen ?? true);
+  const initialOutlineOpen = useInitialOutlineOpen(editorRoot, props.defaultOutlineOpen);
+  const [userOutlineOpen, setUserOutlineOpen] = useState<boolean>();
+  const outlineOpen = userOutlineOpen ?? initialOutlineOpen;
   const [viewMode, setViewMode] = useState<EditorViewMode>('curated');
   const [variableValidation, setVariableValidation] = useState(false);
   const clipboard = useCopyPrompt(() => editor.getSnapshot().prompt);
   const fullView = useFullscreen(editorRoot);
-  const toggleOutline = () => setOutlineOpen((open) => !open);
+  const toggleOutline = () => setUserOutlineOpen(!outlineOpen);
 
   const presenter = usePresenter(
     (onChange) => new PromptEditorPresenter(onChange, editor, tokenEstimator),
@@ -39,7 +42,7 @@ export function PromptEditor(props: PromptEditorProps) {
   return (
     <div ref={editorRoot} className="promptier-editor">
       <style>{styles}</style>
-      {outlineOpen && viewMode === 'curated' && (
+      {outlineOpen === true && viewMode === 'curated' && (
         <OutlinePanel
           items={presenter.model.outlineItems}
           onSelect={presenter.selectOutlineItem}
@@ -52,7 +55,7 @@ export function PromptEditor(props: PromptEditorProps) {
           onViewModeChange={setViewMode}
           copyStatus={clipboard.status}
           onCopy={clipboard.copy}
-          outlineOpen={outlineOpen}
+          outlineOpen={outlineOpen !== false}
           formatCommands={presenter.model.formatCommands}
           blockCommands={presenter.model.blockCommands}
           referenceCommands={presenter.model.referenceCommands}
