@@ -41,7 +41,7 @@ All props are optional.
 | `onChange` | `(value: string) => void` | Called with the prompt source whenever it changes. |
 | `variableSchema` | `VariableSchema` | Describes the `{{ variables }}` your template engine will fill, so the editor can offer them and recognize them. |
 | `tools` | `readonly ToolDefinition[]` | Describes the tools your model can call, so the editor can recognize and insert references to them. |
-| `defaultOutlineOpen` | `boolean` | Whether the outline panel starts open. Defaults to `true`. Only read on mount; users toggle it from the editor afterwards. |
+| `defaultOutlineOpen` | `boolean` | Whether the outline panel starts open. When omitted, it starts open only if the editor's container is wide enough to hold it beside the editing area (about 43rem). Only read on mount; users toggle it from the editor afterwards. |
 
 `PromptEditorProps`, `VariableSchema`, `ToolDefinition`, `JsonSchema`, `JsonSchemaType` and `VariableType` are exported as types.
 

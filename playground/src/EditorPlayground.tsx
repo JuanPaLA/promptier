@@ -239,6 +239,8 @@ const INITIAL_PROMPT = [
 /** A host page: it supplies prompt text, receives prompt text, and saves it. */
 export function EditorPlayground() {
   const [prompt, setPrompt] = useState(INITIAL_PROMPT);
+  const [outlineChoice, setOutlineChoice] = useState<OutlineChoice>('auto');
+  const [hostWidth, setHostWidth] = useState('100%');
 
   return (
     <main
@@ -258,8 +260,34 @@ export function EditorPlayground() {
         </p>
       </header>
 
-      <div style={{ height: '75vh', minHeight: '30rem' }}>
-        <PromptEditor value={prompt} onChange={setPrompt} variableSchema={VARIABLE_SCHEMA} tools={TOOLS} />
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem' }}>
+        <label>
+          defaultOutlineOpen{' '}
+          <select value={outlineChoice} onChange={(e) => setOutlineChoice(e.target.value as OutlineChoice)}>
+            <option value="auto">not set (auto)</option>
+            <option value="open">true</option>
+            <option value="closed">false</option>
+          </select>
+        </label>
+        <label>
+          host width{' '}
+          <select value={hostWidth} onChange={(e) => setHostWidth(e.target.value)}>
+            <option value="100%">100%</option>
+            <option value="60rem">60rem</option>
+            <option value="30rem">30rem</option>
+          </select>
+        </label>
+      </div>
+
+      <div style={{ height: '75vh', minHeight: '30rem', width: hostWidth }}>
+        <PromptEditor
+          key={`${outlineChoice}-${hostWidth}`}
+          value={prompt}
+          onChange={setPrompt}
+          variableSchema={VARIABLE_SCHEMA}
+          tools={TOOLS}
+          defaultOutlineOpen={OUTLINE_CHOICES[outlineChoice]}
+        />
       </div>
 
       <footer
@@ -274,6 +302,9 @@ export function EditorPlayground() {
     </main>
   );
 }
+
+type OutlineChoice = 'auto' | 'open' | 'closed';
+const OUTLINE_CHOICES: Record<OutlineChoice, boolean | undefined> = { auto: undefined, open: true, closed: false };
 
 const VARIABLE_SCHEMA: VariableSchema = {
   type: 'object',

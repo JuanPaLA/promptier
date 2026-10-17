@@ -234,6 +234,7 @@ __metadata:
     "@nbottarini/react-presenter": "npm:^1.0.0-rc"
     "@types/react": "npm:^18.3.12"
     react: "npm:^18.3.1"
+    tokenx: "npm:^2.2.0"
     typescript: "npm:^5.6.3"
     vite: "npm:^5.4.10"
   peerDependencies:
@@ -1978,6 +1979,15 @@ __metadata:
   version: 3.1.1
   resolution: "tinyrainbow@npm:3.1.1"
   checksum: 10c0/f9d2743832c6191f753408f36224fe817620b8abcef572b2e570204c673a901d753ff84ca8e7b88f9c79e934295b3ffc6fcbc56a06f126e24e1ec6186dcad40d
+  languageName: node
+  linkType: hard
+
+"tokenx@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "tokenx@npm:2.2.0"
+  bin:
+    tokenx: bin/tokenx.mjs
+  checksum: 10c0/a3b4c4eee4f4f9a120cfb9496902acf42da144f0bf95248f3f9c9bd899174ba03c28b248ec38c899b01208f6bc0609bb23ca963b4d4fba08f7ccc685eb34c45d
   languageName: node
   linkType: hard
 
