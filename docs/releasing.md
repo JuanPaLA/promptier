@@ -2,7 +2,8 @@
 
 `@cachai/promptier-core-editor` and `@cachai/promptier-react-sdk` are published
 to npm together, from the **Release** workflow
-([release.yml](../.github/workflows/release.yml)). Nobody publishes from a laptop.
+([release.yml](../.github/workflows/release.yml)), which runs on every push to the
+`deployment` branch. Nobody publishes from a laptop.
 
 ## Versions
 
@@ -22,8 +23,12 @@ The workflow authenticates to npm with a short-lived token from GitHub (npm
    `release.yml` and environment `npm-release`. All four must match exactly;
    if the repository moves or the workflow file is renamed, update them.
 2. On GitHub: *Settings → Environments → New environment* named `npm-release`,
-   with a required reviewer. Every release waits for that approval.
-3. Optional, after the first successful release: in each package's npm settings,
+   with a required reviewer. Every release waits for that approval. Under
+   *Deployment branches*, restrict it to `deployment`.
+3. On GitHub: create the `deployment` branch from `main`, and protect it
+   (*Settings → Branches*): no force-pushes, no deletion, and only fast-forward
+   updates from `main`.
+4. Optional, after the first successful release: in each package's npm settings,
    set *Publishing access* to require two-factor authentication and disallow
    tokens.
 
@@ -36,16 +41,15 @@ The workflow authenticates to npm with a short-lived token from GitHub (npm
    ```
 
 2. Open a pull request with that change, wait for **CI** to pass, and merge it.
-3. Tag the merge commit and push the tag.
+3. Promote `main` to `deployment`.
 
    ```bash
    git checkout main && git pull
-   git tag vX.Y.Z
-   git push origin vX.Y.Z
+   git push origin main:deployment
    ```
 
 4. In GitHub, open the **Release** run and approve the `npm-release` deployment.
-5. Check the result.
+5. Check the result. The workflow also tags the release `vX.Y.Z`.
 
    ```bash
    npm view @cachai/promptier-core-editor version
@@ -54,11 +58,13 @@ The workflow authenticates to npm with a short-lived token from GitHub (npm
 
 ## What the workflow does
 
-It fails fast unless the tag matches both `package.json` versions, then runs the
-tests, typechecks and builds. It packs each package with Yarn, because only Yarn
+It fails fast unless the commit is on `main` and both `package.json` versions
+match, then runs the tests, typechecks and builds. It packs each package with Yarn, because only Yarn
 applies the `publishConfig` that points `exports` at `dist`, and publishes the
 resulting tarballs with npm, because trusted publishing is an npm CLI feature.
-A package whose version is already on npm is skipped.
+A package whose version is already on npm is skipped, so pushing to `deployment`
+without bumping the version publishes nothing. After publishing, it tags the
+commit `vX.Y.Z` as a record of the release; the tag does not trigger anything.
 
 ## When something goes wrong
 

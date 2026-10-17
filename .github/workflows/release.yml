@@ -2,10 +2,12 @@ name: Release
 
 on:
   push:
-    tags: ['v*']
+    branches: [deployment]
+
+concurrency: release
 
 permissions:
-  contents: read
+  contents: write # tags the released commit
   id-token: write # npm trusted publishing authenticates with a short-lived OIDC token
 
 jobs:
@@ -14,6 +16,8 @@ jobs:
     environment: npm-release # waits for a manual approval
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - run: corepack enable
       # No registry-url: the .npmrc it writes carries an empty token that gets in the way of OIDC.
       - uses: actions/setup-node@v4
@@ -23,15 +27,21 @@ jobs:
       - run: npm install -g "npm@^11.5.1"
       - run: yarn install --immutable
 
-      - name: Tag matches both package versions
+      # Only commits that went through main (and its CI) can be released.
+      - name: Commit is on main
         run: |
-          for package in core-editor react-sdk; do
-            version=$(node -p "require('./$package/package.json').version")
-            if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-              echo "$package is at $version but the tag is $GITHUB_REF_NAME"
-              exit 1
-            fi
-          done
+          git fetch origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+
+      - name: Both packages share a version
+        run: |
+          core=$(node -p "require('./core-editor/package.json').version")
+          react=$(node -p "require('./react-sdk/package.json').version")
+          if [ "$core" != "$react" ]; then
+            echo "core-editor is at $core but react-sdk is at $react"
+            exit 1
+          fi
+          echo "VERSION=$core" >> "$GITHUB_ENV"
 
       - run: yarn test
       - run: yarn workspace @cachai/promptier-core-editor typecheck
@@ -49,9 +59,8 @@ jobs:
       # Skips a package already on npm, so a failed run can be re-run safely.
       - name: Publish
         run: |
-          version="${GITHUB_REF_NAME#v}"
           publish() {
-            if npm view "$1@$version" version > /dev/null 2>&1; then
+            if npm view "$1@$VERSION" version > /dev/null 2>&1; then
               echo "$1@$version is already published"
             else
               npm publish "$2" --access public
@@ -59,3 +68,12 @@ jobs:
           }
           publish @cachai/promptier-core-editor ./out/core-editor.tgz
           publish @cachai/promptier-react-sdk ./out/react-sdk.tgz
+
+      - name: Tag
+        run: |
+          if git rev-parse "v$VERSION" > /dev/null 2>&1; then
+            echo "v$VERSION is already tagged"
+          else
+            git tag "v$VERSION"
+            git push origin "v$VERSION"
+          fi
