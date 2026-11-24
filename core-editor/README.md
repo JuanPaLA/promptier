@@ -64,3 +64,7 @@ The text format is the only thing you need to store, and it is a permanent compa
 - [Tool references](https://github.com/JuanPaLA/promptier/blob/main/docs/tools.md)
 - [Architecture](https://github.com/JuanPaLA/promptier/blob/main/docs/architecture.md)
 - [Source and issues](https://github.com/JuanPaLA/promptier)
+
+## License
+
+[MIT](LICENSE)
