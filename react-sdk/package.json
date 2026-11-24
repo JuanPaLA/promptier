@@ -1,6 +1,6 @@
 {
   "name": "@cachai/promptier-react-sdk",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "React component for editing LLM prompts, built on @cachai/promptier-core-editor.",
   "type": "module",
   "repository": {
@@ -43,5 +43,6 @@
     "react": "^18.3.1",
     "typescript": "^5.6.3",
     "vite": "^5.4.10"
-  }
+  },
+  "license": "MIT"
 }

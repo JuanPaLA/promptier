@@ -92,3 +92,7 @@ See [tool references](https://github.com/JuanPaLA/promptier/blob/main/docs/tools
 
 - [`@cachai/promptier-core-editor`](https://www.npmjs.com/package/@cachai/promptier-core-editor): the framework-agnostic editor underneath, and the text format codec for servers.
 - [Source and issues](https://github.com/JuanPaLA/promptier)
+
+## License
+
+[MIT](LICENSE)
